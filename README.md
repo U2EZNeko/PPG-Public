@@ -37,4 +37,14 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
 - Depending on your database size and processor power it may take a good chunk of time to fetch the unique genres. This is expected, not much you can do to speed it up.
 
+## Not working
 
+- Setting a playlist Poster through API. You can set it once manually and it'll keep it forever.
+- Older versions of PlexAPI do not have "existing_playlist.editSummary". To set a Summary on an old version change the previous to "existing_playlist.edit(summary=f"Genres used: {genre_description}")"
+
+## Planned
+
+- Use "moods" that plex provides like genres
+- Use user data to personalize playlists more. (prefer frequently played artists, do not include recently played songs etc.)
+- Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
+- Extend genre_groups even more
