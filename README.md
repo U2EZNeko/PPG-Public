@@ -10,8 +10,8 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
 ### Setup:
   1. Grab your Plex Token and IP and put it into the .env
-  2. Install requirements
-  3. Test run it once, check your Playlists.
+  2. Install plexapi through Python. (python -m pip install plexapi)
+  3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks
