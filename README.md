@@ -21,13 +21,17 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
 ## Information:
 
-I've created this script using a database of 300k+ songs. This left me with over 9000 unique genres which should cover quite a broad spectrum of songs.
+- I've created this script using a database of 300k+ songs. This left me with over 9000 unique genres which should cover quite a broad spectrum of songs.
 
-The script uses "Genre Groups" to combine multiple genres into a group and then randomly selects the set amount of songs to add. The json is formatted like this:
+
+- The script uses "Genre Groups" to combine multiple genres into a group and then randomly selects the set amount of songs to add. The json is formatted like this:
+
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
-You can easily add your own genre_groups, just make sure it's a unique name.
 
-Because sometimes the script cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% of the SONGS_PER_PLAYLIST. It will retry this 10 times.
+You can easily add your own genre_groups, just make sure it's a unique name. If you do, I'd appreciate if you share them.
+
+
+- Because sometimes the script cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
 
 
