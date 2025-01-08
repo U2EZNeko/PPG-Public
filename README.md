@@ -28,7 +28,7 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
 
-You can easily add your own genre_groups, just make sure it's a unique name. If you do, I'd appreciate if you share them.
+  You can easily add your own genre_groups, just make sure it's a unique name. If you do, I'd appreciate if you share them.
 
 
 - Because sometimes the script cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% of the SONGS_PER_PLAYLIST. It will retry this 10 times.
