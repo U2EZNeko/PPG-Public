@@ -20,11 +20,11 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
 
 
 ### Requirements:
-  - Plex server and Access Token
+  - Plex server and Access Token (Navigate to some item on your Plex -> click "view XML" -> Copy token from URL
   - Python3
 
 ### Setup:
-  1. Grab your Plex Token and IP and put it into the .env
+  1. Grab your Plex Token and IP and put it into the .env (remove the example from the file name)
   2. Install plexapi through Python. (python -m pip install plexapi)
   3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
