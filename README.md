@@ -12,7 +12,9 @@ This script is designed for rather big Plex instances, it will work with smaller
 I run this script once daily and once weekly to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
 
 I'm more than happy to extend this script myself and through your Pull Requests. 
+
 The file genre_groups.json can easily be extended, you can find a list of genres in the genres.txt -> genres.txt is a list of all unique genres on MY server. You may have a genre on your server that I do not have.
+
 I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting. Make sure the "name" of the genre_group is unique.
 
 
