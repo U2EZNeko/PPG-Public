@@ -54,7 +54,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 - The script is supposed to add used genres to the Playlist Description. This works on my PC but not on my VM for some reason, i had to change 2 lines of code there, check the "Not Working" section.
 
-- Depending on your database size and processor power it may take a good chunk of time to fetch the unique genres. This is expected, not much you can do to speed it up.
+- Depending on your database size and processor power it may take a good chunk of time to fetch the unique genres and songs. This is expected, not much you can do to speed it up.
 
 ## Not working
 
