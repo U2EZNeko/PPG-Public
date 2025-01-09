@@ -31,6 +31,10 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
+Cronjob example:
+
+![image](https://github.com/user-attachments/assets/bc0ef6f3-9965-40e8-9fe7-fb07b2f96869)
+
 
 
 
