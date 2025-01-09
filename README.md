@@ -36,7 +36,7 @@ Cronjob example:
 ![image](https://github.com/user-attachments/assets/bc0ef6f3-9965-40e8-9fe7-fb07b2f96869)
 
 
-
+Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your terminal window to stay open. I just like seeing that it ran through over night.
 
 ## Information:
 
