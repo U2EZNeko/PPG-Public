@@ -1,12 +1,14 @@
 # PPG - Plex Playlist Generator
+An automation script to generate daily/weekly music Playlists on your Plex Server. 
+
+Since Spotify disabled playlists through their API, I had to do it myself.
+
 
 ![wqeqwqeweweqw](https://github.com/user-attachments/assets/e8b22003-7b5a-4ee5-b445-518f276078b5)
 
 ![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
 
 
-An automation script to generate daily/weekly music Playlists on your Plex Server. 
-Since Spotify disabled playlists through their API, I had to do it myself.
 
 This script is designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 I run this script once daily and once weekly to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
