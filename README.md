@@ -52,7 +52,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 - Because sometimes the script cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
-- The script is supposed to add used genres to the Playlist Description. This works on my PC but not on my VM for some reason.
+- The script is supposed to add used genres to the Playlist Description. This works on my PC but not on my VM for some reason, i had to change 2 lines of code there, check the "Not Working" section.
 
 - Depending on your database size and processor power it may take a good chunk of time to fetch the unique genres. This is expected, not much you can do to speed it up.
 
