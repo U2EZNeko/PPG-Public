@@ -29,7 +29,7 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
   3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
      I've included a few obviously self-drawn examples. ;)
-  5. Create cronjobs/Windows Scheduled Tasks
+  5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
 
 
