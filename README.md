@@ -8,6 +8,7 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
 ![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
 
+![image](https://github.com/user-attachments/assets/7a37ab92-3662-4d1e-a64c-42ce229c3abe)
 
 
 This script is designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
@@ -33,7 +34,7 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
-Cronjob example:
+Cronjob examples:
 
 ![image](https://github.com/user-attachments/assets/bc0ef6f3-9965-40e8-9fe7-fb07b2f96869)
 
