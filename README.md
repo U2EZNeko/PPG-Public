@@ -66,7 +66,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Information:
 
-- I've created this script using a database of 300k+ songs. This left me with over 9000 unique genres which should cover quite a broad spectrum of songs.
+- I've created this script using a database of 300k+ songs. This left me with over 4000 unique genres and 300 moods which should cover quite a broad spectrum of songs.
 
 
 - The script uses json files to combine multiple genres/moods into a group and then randomly selects the set amount of songs to add. The jsons are formatted like this:
