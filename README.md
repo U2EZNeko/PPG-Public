@@ -1,5 +1,5 @@
 # PPG - Plex Playlist Generator
-An automation script to generate daily/weekly music Playlists on your Plex Server. 
+Automation scripts to generate music Playlists on your Plex Server. 
 
 Since Spotify disabled playlists through their API, I had to do it myself.
 
@@ -7,7 +7,6 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 ![wqeqwqeweweqw](https://github.com/user-attachments/assets/e8b22003-7b5a-4ee5-b445-518f276078b5)
 
 ![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
-
 
 
 This script is designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
@@ -33,26 +32,47 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
-Cronjob example:
+Cronjob examples:
 
 ![image](https://github.com/user-attachments/assets/bc0ef6f3-9965-40e8-9fe7-fb07b2f96869)
 
 
 Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your terminal window to stay open. I just like seeing that it ran through over night.
 
+
+
+## Usage description:
+
+- PPG-Daily and PPG-Weekly
+  These are there to replace Spotify's Daily Mixes and Weekly Mixes
+  They will randomly select from genre_groups.json to create playlists
+
+- PPG-Moods
+  Used to update "mood Mix", similar to Spotify.
+  You can set the moods to create mixes for in mood_groups. 
+
+- PPG-Genres
+  Creates or updates "genre Mix" playlists, similar to Spotify.
+  This will create or update playlists containing multiple genres, defined in genre_mixes.json
+  This allows you to select multiple similar genres and pick random songs from those. 
+
+
+![image](https://github.com/user-attachments/assets/7a37ab92-3662-4d1e-a64c-42ce229c3abe)
+
+
 ## Information:
 
 - I've created this script using a database of 300k+ songs. This left me with over 9000 unique genres which should cover quite a broad spectrum of songs.
 
 
-- The script uses "Genre Groups" to combine multiple genres into a group and then randomly selects the set amount of songs to add. The json is formatted like this:
+- The script uses json files to combine multiple genres/moods into a group and then randomly selects the set amount of songs to add. The jsons are formatted like this:
 
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
 
-  You can easily add your own genre_groups, just make sure it's a unique name. If you do, I'd appreciate if you share them.
+  You can easily add your own genre_groups or mood_groups just make sure it's a unique name. If you do, I'd appreciate if you share them.
 
 
-- Because sometimes the script cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% of the SONGS_PER_PLAYLIST. It will retry this 10 times.
+- Because sometimes the scripts cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% (can be defined in the script) of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
 - The script is supposed to add used genres to the Playlist Description. This works on my PC but not on my VM for some reason, i had to change 2 lines of code there, check the "Not Working" section.
 
@@ -65,7 +85,6 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Planned
 
-- Use "moods" that plex provides like genres
 - Use user data to personalize playlists more. (prefer frequently played artists, do not include recently played songs etc.)
 - Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
 - Extend genre_groups even more
