@@ -78,6 +78,13 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 - Depending on your database size and processor power it may take a good chunk of time to fetch the unique genres and songs. This is expected, not much you can do to speed it up.
 
+- Here's how you can get your own Spotify thumbnails: 
+
+  https://seed-mix-image.spotifycdn.com/v6/img/desc/Nevergonnagiveyouupnevergonnaletyoudown/en/default
+
+  change the URL to whatever you want and save the image. ezpz
+
+
 ## Not working
 
 - Setting a playlist Poster through API. You can set it once manually and it'll keep it forever.
