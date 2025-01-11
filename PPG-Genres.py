@@ -12,7 +12,7 @@ PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 SONGS_PER_PLAYLIST = 50
 GENRE_MIXES_FILE = "genre_mixes.json"  # Path to the genre mixes file
-MIN_SONGS_REQUIRED = 0.5 * SONGS_PER_PLAYLIST  # 80% of the required songs
+MIN_SONGS_REQUIRED = 0.5 * SONGS_PER_PLAYLIST  # 50% of the required songs
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -33,7 +33,7 @@ def load_genre_mixes():
         return {}
 
 # Generate playlists based on genre mixes
-def generate_daily_playlists():
+def generate_genre_playlists():
     print("Connecting to Plex server...")
     try:
         music_library = plex.library.section("Music")  # Adjust if your music library name differs
@@ -108,5 +108,5 @@ def generate_daily_playlists():
 # Run the script
 if __name__ == "__main__":
     print("Starting the Daily playlist generation process...")
-    generate_daily_playlists()
+    generate_genre_playlists()
     print("\nDaily playlists updated successfully.")

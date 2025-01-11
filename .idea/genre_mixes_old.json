@@ -1,0 +1,22 @@
+{
+  "Upbeat Country": ["Country", "Pop Country", "Bluegrass", "Southern Rock", "Americana", "Folk", "Alt-Country"],
+  "Sad Country": ["Country", "Americana", "Outlaw Country", "Alt-Country", "Traditional Country", "Bluegrass", "Folk"],
+  "Lo-Fi Jazzhop": ["Lo-Fi", "Jazzhop", "Chillhop", "Instrumental Hip-Hop", "Ambient", "Jazz", "Downtempo"],
+  "Mexican Rock": ["Rock", "Mexican Rock", "Alternative Rock", "Indie Rock", "Psychedelic Rock", "Latin Rock", "Folk Rock"],
+  "Power Metal": ["Power Metal", "Heavy Metal", "Symphonic Metal", "Speed Metal", "Progressive Metal", "Thrash Metal"],
+  "Camping": ["Acoustic", "Indie Folk", "Country", "Americana", "Singer-Songwriter", "Bluegrass", "Chill"],
+  "Pirate": ["Pirate Music", "Sea Shanties", "Folk", "Celtic", "Rock", "Classical", "Adventure Music"],
+  "Acoustic Emo": ["Emo", "Acoustic", "Indie Rock", "Alternative", "Post-Rock", "Indie Pop", "Singer-Songwriter"],
+  "Polka": ["Polka", "Traditional Folk", "European Folk", "Celtic", "Brass Band", "Eastern European Folk", "Ska","Polka / punk / punk rock / sea shanty"],
+  "90s Gangster Rap Mix": ["90s Hip-Hop", "Gangsta Rap", "West Coast Hip-Hop", "Rap", "Hip-Hop", "Old School Hip-Hop"],
+  "90s Rave Underground": ["90s Rave", "Underground Techno", "Hardcore Techno", "Trance", "Jungle", "Drum and Bass", "Breakbeat", "Acid House"],
+  "Chillwave": ["Chillwave", "Synthwave", "Indie Electronic", "Dream Pop", "Ambient", "Lo-Fi", "Electropop"],
+  "Lo-Fi Beats": ["Lo-Fi", "Lo-Fi Hip-Hop", "Chillhop", "Instrumental Hip-Hop", "Downtempo", "Ambient", "Jazzhop", "Chillwave"],
+  "Hindi Pop": ["Hindi Pop", "Bollywood", "Indian Pop", "Indie Pop", "Fusion", "Desi", "Punjabi Pop", "Bhangra"],
+  "Drum and Bass": ["Drum and Bass", "Drum & bass", "Drumstep", "Dubstep", "Hardcore Techno", "Trap", "Liquid DnB"],
+  "Hype High Energy": ["Energetic", "Exciting", "Epic", "Triumphant", "Exhilarating", "Fast-Paced", "Upbeat", "Explosive", "Anthemic", "Hardstyle", "Trap", "Dubstep"],
+  "Punjabi Hip Hop": ["Punjabi Hip Hop", "Hip-Hop", "Punjabi Pop", "Desi Hip-Hop", "Rap", "Trap", "Indian Hip-Hop", "Bhangra", "Fusion"],
+  "Australian Country": ["Australian Country", "Country", "Americana", "Alt-Country", "Folk", "Indie Country", "Southern Rock"],
+  "Detroit Rap": ["Detroit Rap", "Hip-Hop", "East Coast Hip-Hop", "West Coast Hip-Hop", "Gangsta Rap", "Old School Hip-Hop", "Rap", "Trap"]
+}
+
