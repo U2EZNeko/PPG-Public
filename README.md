@@ -85,7 +85,6 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Planned
 
-- Use "moods" that plex provides like genres
 - Use user data to personalize playlists more. (prefer frequently played artists, do not include recently played songs etc.)
 - Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
 - Extend genre_groups even more
