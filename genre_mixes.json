@@ -168,5 +168,51 @@
   "Emo Rap": [
     "Emo rap",
     "Emo rap / indie"
+  ],
+  "Hyperpop Upbeat": [
+    "Hyperpop",
+    "Hypertechno",
+    "Hyperpop italiano",
+    "Hyperpop francais",
+    "Hyperpop en espanol"
+  ],
+  "Sovietwave": [
+    "Sovietwave"
+  ],
+  "Binaural": [
+    "Binaural"
+  ],
+  "German Hip Hop": [
+    "Deutschrap",
+    "German hip hop",
+    "German hip-hop",
+    "German underground rap"
+  ],
+  "UK Rap": [
+    "Uk drill",
+    "Uk hip hop",
+    "Uk hip-hop",
+    "Uk alternative hip hop"
+  ],
+  "Rap Metal": [
+    "Rap metal",
+    "Rap metalcore",
+    "Rap rock",
+    "Metal / nu metal",
+    "Metal / nu metal / rock",
+    "Nu metal",
+    "Nu metal / rock",
+    "Nu metal/rock",
+    "Nu-metal",
+    "Nu-metalcore"
+  ],
+  "Detroit Rap": [
+    "Detroit hip hop",
+    "Detroit trap"
+  ],
+  "175 BPM": [
+    "Happy hardcore",
+    "Eurobeat",
+    "Uk hardcore"
   ]
 }
