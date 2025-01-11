@@ -44,14 +44,17 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ## Usage description:
 
 - PPG-Daily and PPG-Weekly
+  
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
   They will randomly select from genre_groups.json to create playlists
 
 - PPG-Moods
+  
   Used to update "mood Mix", similar to Spotify.
   You can set the moods to create mixes for in mood_groups. 
 
 - PPG-Genres
+  
   Creates or updates "genre Mix" playlists, similar to Spotify.
   This will create or update playlists containing multiple genres, defined in genre_mixes.json
   This allows you to select multiple similar genres and pick random songs from those. 
