@@ -34,7 +34,8 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
 
 Cronjob examples:
 
-![image](https://github.com/user-attachments/assets/bc0ef6f3-9965-40e8-9fe7-fb07b2f96869)
+![image](https://github.com/user-attachments/assets/d242cc6d-9810-434d-a3e9-fcdba3cc857a)
+
 
 
 Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your terminal window to stay open. I just like seeing that it ran through over night.
