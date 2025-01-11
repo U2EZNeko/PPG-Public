@@ -10,7 +10,7 @@ load_dotenv()
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
-PLAYLIST_COUNT = 5
+PLAYLIST_COUNT = 7
 SONGS_PER_PLAYLIST = 50
 MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the mood groups file
 MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
