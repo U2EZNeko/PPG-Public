@@ -8,8 +8,6 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 
 ![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
 
-![image](https://github.com/user-attachments/assets/7a37ab92-3662-4d1e-a64c-42ce229c3abe)
-
 
 This script is designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 I run this script once daily and once weekly to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
@@ -53,10 +51,13 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   Used to update "mood Mix", similar to Spotify.
   You can set the moods to create mixes for in mood_groups. 
 
-PPG-Genres
+- PPG-Genres
   Creates or updates "genre Mix" playlists, similar to Spotify.
   This will create or update playlists containing multiple genres, defined in genre_mixes.json
   This allows you to select multiple similar genres and pick random songs from those. 
+
+
+![image](https://github.com/user-attachments/assets/7a37ab92-3662-4d1e-a64c-42ce229c3abe)
 
 
 ## Information:
