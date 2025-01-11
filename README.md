@@ -57,7 +57,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   This allows you to select multiple similar genres and pick random songs from those. 
 
 
-![image](https://github.com/user-attachments/assets/7a37ab92-3662-4d1e-a64c-42ce229c3abe)
+![image](https://github.com/user-attachments/assets/4405219c-5678-4f2f-8df0-bccc5dacaa2c)
+
 
 
 ## Information:
