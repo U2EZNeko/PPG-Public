@@ -59,6 +59,13 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   This will create or update playlists containing multiple genres, defined in genre_mixes.json
   This allows you to select multiple similar genres and pick random songs from those. 
 
+- Copy-Playlist-To-Subuser
+
+  As the name suggests, lets you copy playlists to sub-users. 
+  You will have to set Posters manually.
+  To get sub-user plex token:
+  
+  Log into sub user -> Go to some item -> CTRL Shift I -> Go to network tab -> Find "x-Plex-Token" in the Header (might need to click on another item with the network tab open)
 
 ![image](https://github.com/user-attachments/assets/4405219c-5678-4f2f-8df0-bccc5dacaa2c)
 
