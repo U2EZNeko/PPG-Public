@@ -1,0 +1,11 @@
+{
+  "Melancholy": ["Melancholy", "Sad", "Wistful", "Lonely", "Nostalgic", "Poignant", "Somber"],
+  "Sad": ["Sad", "Gloomy", "Heartbroken", "Desperate", "Poignant", "Angst-Ridden"],
+  "Angry": ["Angry", "Aggressive", "Defiant", "Fiery", "Fierce", "Hostile", "Rebellious"],
+  "Chill Milk": ["Chill", "Calm/Peaceful", "Relaxed", "Soothing", "Gentle", "Meditative", "Soft/Quiet", "Languid", "Lazy"],
+  "Mellow Rainy Day": ["Chill", "Relaxed", "Gentle", "Meditative", "Soft/Quiet", "Languid", "Somber", "Wistful", "Reflective"],
+  "Chill": ["Chill", "Relaxed", "Gentle", "Calm/Peaceful", "Meditative", "Lush", "Soft/Quiet", "Laid-Back/Mellow"],
+  "Escapism": ["Dreamy", "Fantasy-like", "Mysterious", "Ethereal", "Spiritual", "Enigmatic", "Exploratory", "Wistful"],
+  "Rage Sad": ["Angry", "Sad", "Desperate", "Fiery", "Heartbroken", "Lonely", "Intense", "Fierce"],
+  "Hype High Energy": ["Energetic", "Exciting", "Epic", "Triumphant", "Exhilarating", "Fast-Paced", "Upbeat", "Explosive", "Anthemic"]
+}
