@@ -91,6 +91,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 
   change the URL to whatever you want and save the image. ezpz
+  (or add the link directly in Plex)
 
 
 ## Not working
