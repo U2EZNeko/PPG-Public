@@ -84,7 +84,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   https://seed-mix-image.spotifycdn.com/v6/img/desc/Nevergonnagiveyouupnevergonnaletyoudown/en/default
 
 
-![qweqwqwe](https://github.com/user-attachments/assets/a899cb5a-ad47-46c6-924d-3d3b7514e202)
+  ![qweqwqwe](https://github.com/user-attachments/assets/a899cb5a-ad47-46c6-924d-3d3b7514e202)
 
 
   change the URL to whatever you want and save the image. ezpz
