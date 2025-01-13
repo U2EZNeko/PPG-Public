@@ -47,23 +47,29 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 - PPG-Daily and PPG-Weekly
   
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
+
   They will randomly select from genre_groups.json to create playlists
 
 - PPG-Moods
   
   Used to update "mood Mix", similar to Spotify.
+
   You can set the moods to create mixes for in mood_groups. 
 
 - PPG-Genres
   
   Creates or updates "genre Mix" playlists, similar to Spotify.
+
   This will create or update playlists containing multiple genres, defined in genre_mixes.json
+
   This allows you to select multiple similar genres and pick random songs from those. 
 
 - Copy-Playlist-To-Subuser
 
   As the name suggests, lets you copy playlists to sub-users. 
+
   You will have to set Posters manually.
+
   To get sub-user plex token:
   
   Log into sub user -> Go to some item -> CTRL Shift I -> Go to network tab -> Find "x-Plex-Token" in the Header (might need to click on another item with the network tab open)
@@ -109,6 +115,5 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Planned
 
-- Use user data to personalize playlists more. (prefer frequently played artists, do not include recently played songs etc.)
 - Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
 - Extend genre_groups even more
