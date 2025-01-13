@@ -145,17 +145,6 @@
     "Drum and bass / electronic",
     "Drum and bass / dubstep / electro house"
   ],
-  "Hype High Energy": [
-    "Hyperpop francais",
-    "Hardstyle",
-    "Dubstep",
-    "Hyperpop italiano",
-    "Hypertechno",
-    "Hyperpop",
-    "Hyper-rock",
-    "Korean hyperpop",
-    "Proto-hyperpop"
-  ],
   "Punjabi Hip Hop": [
     "Punjabi hip hop",
     "Punjabi pop"
@@ -214,5 +203,14 @@
     "Happy hardcore",
     "Eurobeat",
     "Uk hardcore"
+  ],
+  "Rock Balladen": [
+    "Ballad / Pop",
+    "Ballad / Pop / Pop Rock / Synthpop",
+    "Ballad / Pop / Soft Rock",
+	"Ballad / Pop / Synthpop",
+	"Ballad / Soft Rock",
+	"Ballad / Synthpop",
+	"Soft Rock"
   ]
 }
