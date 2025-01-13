@@ -4,9 +4,9 @@ Automation scripts to generate music Playlists on your Plex Server.
 Since Spotify disabled playlists through their API, I had to do it myself.
 
 
-![wqeqwqeweweqw](https://github.com/user-attachments/assets/e8b22003-7b5a-4ee5-b445-518f276078b5)
+![Daily](https://github.com/user-attachments/assets/b8c2842a-84d9-433e-a5d1-0367af1799d6)
 
-![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
+![Weekly](https://github.com/user-attachments/assets/bbfd1053-b59e-4b52-b2e2-3958ff299e2a)
 
 
 These scripts are designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
@@ -35,7 +35,9 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
 
 Cronjob examples:
 
-![image](https://github.com/user-attachments/assets/d242cc6d-9810-434d-a3e9-fcdba3cc857a)
+![cron](https://github.com/user-attachments/assets/94063b48-99f4-42f7-b149-6034984218fe)
+
+
 
 
 
@@ -75,7 +77,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   Log into sub user -> Go to some item -> CTRL Shift I -> Go to network tab -> Find "x-Plex-Token" in the Header (might need to click on another item with the network tab open)
 
-![image](https://github.com/user-attachments/assets/4405219c-5678-4f2f-8df0-bccc5dacaa2c)
+
+![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
+
 
 
 
@@ -102,7 +106,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   https://seed-mix-image.spotifycdn.com/v6/img/desc/Nevergonnagiveyouupnevergonnaletyoudown/en/default
 
 
-  ![qweqwqwe](https://github.com/user-attachments/assets/a899cb5a-ad47-46c6-924d-3d3b7514e202)
+![example](https://github.com/user-attachments/assets/e7d246cb-2d09-4632-8778-c093415ccbf3)
+
 
 
   change the URL to whatever you want and save the image. ezpz
