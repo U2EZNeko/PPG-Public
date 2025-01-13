@@ -2,8 +2,6 @@ from plexapi.server import PlexServer
 from plexapi.playlist import Playlist
 from dotenv import load_dotenv
 import os
-import requests
-from io import BytesIO
 
 # Load environment variables
 load_dotenv()
@@ -24,7 +22,18 @@ PLAYLISTS_TO_COPY = [
     "All Out 90s",
     "All Out 2000s",
     "Classic Voices in Jazz",
-    "Oldies Mix"
+    "Oldies Mix",
+    "Greatest Rock Ballads",
+    "Zurück in die 00er",
+    "Zurück in die 10er",
+    "Zurück in die 60er",
+    "Zurück in die 70er",
+    "Zurück in die 80er",
+    "Zurück in die 90er",
+    "Polka Mix",
+    "Chill Mix",
+    "Best of Rock Balladen",
+    "Rock Balladen Mix"
 ]
 
 # Connect to Plex server
@@ -48,10 +57,9 @@ def copy_playlists_to_users(admin_plex, sub_tokens, playlists_to_copy):
 
             playlist = admin_playlists[playlist_title]
 
-            # Get media items, description, and poster from the admin playlist
+            # Get media items and description from the admin playlist
             items = playlist.items()
             description = playlist.summary
-            poster = playlist.thumb
 
             # Check if playlist already exists in sub-user's account
             existing_playlists = {pl.title: pl for pl in sub_plex.playlists()}
@@ -74,23 +82,6 @@ def copy_playlists_to_users(admin_plex, sub_tokens, playlists_to_copy):
                 # Update the description
                 if description:
                     new_playlist.edit(summary=description)
-
-                # Handle poster upload with additional checks
-                if poster:
-                    try:
-                        # Download poster image
-                        response = requests.get(poster)
-                        if response.status_code == 200:
-                            # Upload the poster as an image file
-                            poster_image = BytesIO(response.content)
-                            new_playlist.uploadPoster(poster_image)
-                            print(f"Successfully updated poster for '{playlist.title}'.")
-                        else:
-                            print(f"Failed to fetch poster for '{playlist.title}', status code: {response.status_code}.")
-                    except Exception as e:
-                        print(f"Error downloading/uploading poster for '{playlist.title}': {e}")
-                else:
-                    print(f"No poster found for playlist '{playlist.title}'.")
 
                 print(f"Successfully copied playlist '{playlist.title}' to sub-user.")
             except Exception as e:
