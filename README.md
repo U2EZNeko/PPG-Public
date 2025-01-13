@@ -9,12 +9,13 @@ Since Spotify disabled playlists through their API, I had to do it myself.
 ![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
 
 
-This script is designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
-I run this script once daily and once weekly to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
+These scripts are designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 
-I'm more than happy to extend this script myself and through your Pull Requests. 
+I run the scripts with cronjobs to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
 
-The file genre_groups.json can easily be extended, you can find a list of genres in the genres.txt -> genres.txt is a list of all unique genres on MY server. You may have a genre on your server that I do not have.
+I'm more than happy to extend the scripts myself and through your Pull Requests. 
+
+The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> genres.txt is a list of all unique genres on MY server. You may have a genre on your server that I do not have.
 
 I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting. Make sure the "name" of the genre_group is unique.
 
