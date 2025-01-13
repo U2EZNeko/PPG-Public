@@ -114,6 +114,6 @@ def generate_mood_playlists():
 
 # Run the script
 if __name__ == "__main__":
-    print("Starting the Daily playlist generation process...")
+    print("Starting the mood playlist generation process...")
     generate_mood_playlists()
-    print("\nDaily playlists updated successfully.")
+    print("\nMood playlists updated successfully.")

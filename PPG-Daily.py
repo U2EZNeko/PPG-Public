@@ -6,32 +6,31 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
-
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 PLAYLIST_COUNT = 7
 SONGS_PER_PLAYLIST = 50
-MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the mood groups file
+GENRE_GROUPS_FILE = "genre_groups.json"  # Path to the genre groups file
 MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
 
 
-# Load mood groups from JSON file
-def load_mood_groups():
-    print("Loading mood groups from file...")
-    if not os.path.exists(MOOD_GROUPS_FILE):
-        print(f"Error: {MOOD_GROUPS_FILE} not found.")
+# Load genre groups from JSON file
+def load_genre_groups():
+    print("Loading genre groups from file...")
+    if not os.path.exists(GENRE_GROUPS_FILE):
+        print(f"Error: {GENRE_GROUPS_FILE} not found.")
         return {}
     try:
-        with open(MOOD_GROUPS_FILE, "r") as file:
-            mood_groups = json.load(file)
-            print(f"Loaded mood groups: {mood_groups}")
-            return mood_groups
+        with open(GENRE_GROUPS_FILE, "r") as file:
+            genre_groups = json.load(file)
+            print(f"Loaded genre groups: {genre_groups}")
+            return genre_groups
     except Exception as e:
-        print(f"Error loading mood groups: {e}")
+        print(f"Error loading genre groups: {e}")
         return {}
 
 
@@ -45,11 +44,34 @@ def generate_daily_playlists():
         print(f"Error connecting to Plex server or accessing library: {e}")
         return
 
-    # Load mood groups
-    mood_groups = load_mood_groups()
-    if not mood_groups:
-        print("No mood groups available. Exiting.")
+    # Load genre groups
+    genre_groups = load_genre_groups()
+    if not genre_groups:
+        print("No genre groups available. Exiting.")
         return
+
+    # Fetch all genres from the server
+    print("Fetching genres from the music library...")
+    try:
+        genres = music_library.search(libtype="artist", limit=None)
+        # Extract genre names as strings
+        existing_genres = set(
+            genre.tag for artist in genres for genre in (artist.genres or [])
+        )
+        print(f"Found {len(existing_genres)} unique genres on the server: {existing_genres}")
+    except Exception as e:
+        print(f"Error fetching genres: {e}")
+        return
+
+    # Filter genre groups to only include genres available on the server
+    print("Filtering genre groups to match available genres on the server...")
+    filtered_genre_groups = {
+        group: [genre for genre in genres if genre in existing_genres]
+        for group, genres in genre_groups.items()
+    }
+    # Remove empty groups
+    filtered_genre_groups = {group: genres for group, genres in filtered_genre_groups.items() if genres}
+    print(f"Filtered genre groups: {filtered_genre_groups}")
 
     for i in range(PLAYLIST_COUNT):
         print(f"\nStarting generation for Playlist {i + 1}...")
@@ -57,21 +79,21 @@ def generate_daily_playlists():
             # Retry logic if not enough songs are found
             songs = []
             selected_group = None
-            selected_moods = None
+            selected_genres = None
 
             # Keep retrying until we find a genre group with enough songs
             for attempt in range(10):  # Retry up to 10 times for each playlist
-                selected_group = random.choice(list(mood_groups.keys()))
-                selected_moods = mood_groups[selected_group]
-                print(f"Attempt {attempt + 1}: Selected mood group: {selected_group}")
-                print(f"Moods in group: {selected_moods}")
+                selected_group = random.choice(list(filtered_genre_groups.keys()))
+                selected_genres = filtered_genre_groups[selected_group]
+                print(f"Attempt {attempt + 1}: Selected genre group: {selected_group}")
+                print(f"Genres in group: {selected_genres}")
 
-                # Collect all tracks for the selected moods
+                # Collect all tracks for the selected genres
                 songs = []
-                for mood in selected_moods:
-                    print(f"Fetching tracks for mood: {mood}")
-                    tracks = music_library.search(mood=mood, libtype="track", limit=None)
-                    print(f"Found {len(tracks)} tracks for mood: {mood}")
+                for genre in selected_genres:
+                    print(f"Fetching tracks for genre: {genre}")
+                    tracks = music_library.search(genre=genre, libtype="track", limit=None)
+                    print(f"Found {len(tracks)} tracks for genre: {genre}")
                     songs.extend(tracks)
 
                 total_songs = len(songs)
@@ -82,7 +104,7 @@ def generate_daily_playlists():
                     print(f"Found sufficient songs ({total_songs}) for Playlist {i + 1}. Creating playlist.")
                     break  # We found enough songs, break out of the retry loop
                 else:
-                    print(f"Not enough songs for Playlist {i + 1}. Retrying with a different mood group...")
+                    print(f"Not enough songs for Playlist {i + 1}. Retrying with a different genre group...")
 
             if total_songs < MIN_SONGS_REQUIRED:
                 print(f"Error: Could not find enough songs after 10 attempts. Skipping playlist {i + 1}.")
@@ -93,8 +115,9 @@ def generate_daily_playlists():
             print(f"Selected {len(playlist_songs)} random songs for Playlist {i + 1}.")
 
             # Create or update the playlist
-            playlist_name = f"{selected_group} Mix"
-            existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in plex.playlists()] else None
+            playlist_name = f"Weekly Playlist {i + 1}"
+            existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in
+                                                                                  plex.playlists()] else None
 
             if existing_playlist:
                 print(f"Updating existing playlist: {playlist_name}")
@@ -106,15 +129,15 @@ def generate_daily_playlists():
                 existing_playlist.addItems(playlist_songs)
 
                 # Update the description with the selected genres
-                mood_description = ", ".join(selected_moods)
-                existing_playlist.editSummary(f"Moods used: {mood_description}")  # Using editSummary instead of edit
+                genre_description = ", ".join(selected_genres)
+                existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
 
                 # Set the description with the selected genres
-                mood_description = ", ".join(selected_moods)
-                playlist.editSummary(f"Moods used: {mood_description}")  # Using editSummary instead of edit
+                genre_description = ", ".join(selected_genres)
+                playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
@@ -127,4 +150,3 @@ if __name__ == "__main__":
     print("Starting the Daily playlist generation process...")
     generate_daily_playlists()
     print("\nDaily playlists updated successfully.")
-
