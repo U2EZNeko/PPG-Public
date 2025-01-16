@@ -55,15 +55,13 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
 
 
 
-
-
 Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your terminal window to stay open. I just like seeing that it ran through over night.
 
 
 
-## Usage description:
+# Usage description:
 
-- PPG-Daily and PPG-Weekly
+### PPG-Daily and PPG-Weekly
   
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
 
@@ -76,7 +74,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
    "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
  
 ```
-- # PPG-Moods
+### PPG-Moods
   
   Used to update "mood Mix", similar to Spotify.
 
@@ -95,7 +93,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   ]
   ```
 
-- # PPG-Genres
+### PPG-Genres
   
   Creates or updates "genre Mix" playlists, similar to Spotify.
 
@@ -125,7 +123,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   },
   ```
 
-- # Copy-Playlist-To-Subuser
+### Copy-Playlist-To-Subuser
 
   As the name suggests, lets you copy playlists to sub-users. 
 
@@ -138,10 +136,10 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
 
-## Update log
+# Update log
 
 
-# 16.01.2025:
+### 16.01.2025:
 
   -   Added before, between and after time filters
     
@@ -150,17 +148,13 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   -   Added logging to reduce getting the same playlists
 
 
-## Information:
+# Information:
 
 - I've created this script using a database of 300k+ songs. This left me with over 4000 unique genres and 300 moods which should cover quite a broad spectrum of songs.
 
+- If you run the script through cronjobs, use full paths to the jsons and log files!
 
-- The script uses json files to combine multiple genres/moods into a group and then randomly selects the set amount of songs to add. The jsons are formatted like this:
-
-  "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
-
-  You can easily add your own genre_groups or mood_groups just make sure it's a unique name. If you do, I'd appreciate if you share them.
-
+- If you add genre_groups or mood_groups, make their name unique!
 
 - Because sometimes the scripts cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% (can be defined in the script) of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
@@ -181,11 +175,11 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   (or add the link directly in Plex)
 
 
-## Not working
+# Not working
 
 - Setting a playlist Poster through API. You can set it once manually and it'll keep it forever.
 - Older versions of PlexAPI do not have "existing_playlist.editSummary". To set a Summary on an old version change the previous to "existing_playlist.edit(summary=f"Genres used: {genre_description}")"
 
-## Planned
+# Planned
 
 - Extend genre_groups even more
