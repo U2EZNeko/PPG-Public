@@ -49,7 +49,7 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
-Cronjob examples:
+# Cronjob examples:
 
 ![cron](https://github.com/user-attachments/assets/94063b48-99f4-42f7-b149-6034984218fe)
 
@@ -74,7 +74,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
    "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
  
 ```
-- PPG-Moods
+- # PPG-Moods
   
   Used to update "mood Mix", similar to Spotify.
 
@@ -93,7 +93,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   ]
   ```
 
-- PPG-Genres
+- # PPG-Genres
   
   Creates or updates "genre Mix" playlists, similar to Spotify.
 
@@ -123,7 +123,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   },
   ```
 
-- Copy-Playlist-To-Subuser
+- # Copy-Playlist-To-Subuser
 
   As the name suggests, lets you copy playlists to sub-users. 
 
