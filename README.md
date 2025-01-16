@@ -120,7 +120,10 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
 
+## Update log
 
+  -   Added before, between and after time filters
+  -   Added logging to reduce  getting the same playlists
 
 
 ## Information:
@@ -161,5 +164,4 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Planned
 
-- Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
 - Extend genre_groups even more
