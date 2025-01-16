@@ -1,7 +1,8 @@
 # PPG - Plex Playlist Generator
-Automation scripts to generate music Playlists on your Plex Server. 
 
-Since Spotify disabled playlists through their API, I had to do it myself.
+**Automation scripts to generate music Playlists on your Plex Server.** 
+
+**Since Spotify disabled playlists through their API, I had to do it myself.**
 
 
 ![Daily](https://github.com/user-attachments/assets/b8c2842a-84d9-433e-a5d1-0367af1799d6)
@@ -54,10 +55,10 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   They will randomly select from genre_groups.json to create playlists
 
   JSON example
-
+```
    "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
  
-
+```
 - PPG-Moods
   
   Used to update "mood Mix", similar to Spotify.
@@ -65,7 +66,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   You can set the moods to create mixes for in mood_groups.
   
   JSON example
-
+```
     "Melancholy": [
     "Melancholy",
     "Sad",
@@ -75,7 +76,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
     "Poignant",
     "Somber"
   ]
-  
+  ```
 
 - PPG-Genres
   
@@ -88,7 +89,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   Since plex does not save the release date for each song, I have to use the Album's year to filter. This still does the same, the problem is Plex being unable to keep up with my database so I'm missing a bunch of metadata.
 
   JSON example
-
+```
   "90s Gangster Rap Underground": {
     "genres": [
       "Country rap",
@@ -105,7 +106,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
       "end_date": "1999"
     }
   }
-  
+  ```
 
 - Copy-Playlist-To-Subuser
 
