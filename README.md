@@ -174,7 +174,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Not working
 
-- Setting a playlist Poster through API. You can set it once manually and it'll keep it forever.
+- Setting a playlist Poster through API. You can set it once manually and it'll keep it forever. When you copy it to a sub-user the image will reset on their end, not sure why, you'd have to reset it everytime you copy the playlist over. 
 - Older versions of PlexAPI do not have "existing_playlist.editSummary". To set a Summary on an old version change the previous to "existing_playlist.edit(summary=f"Genres used: {genre_description}")"
 
 # Planned
