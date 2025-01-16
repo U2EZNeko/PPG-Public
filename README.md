@@ -53,6 +53,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
   They will randomly select from genre_groups.json to create playlists
 
+  JSON example
+
    "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
  
 
@@ -61,6 +63,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   Used to update "mood Mix", similar to Spotify.
 
   You can set the moods to create mixes for in mood_groups.
+  
+  JSON example
 
     "Melancholy": [
     "Melancholy",
@@ -82,6 +86,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   This allows you to select multiple similar genres and pick random songs from those. You can also extend the json entry with a date filter, you can chose before, after or between release years. 
 
   Since plex does not save the release date for each song, I have to use the Album's year to filter. This still does the same, the problem is Plex being unable to keep up with my database so I'm missing a bunch of metadata.
+
+  JSON example
 
   "90s Gangster Rap Underground": {
     "genres": [
