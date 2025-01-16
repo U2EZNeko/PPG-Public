@@ -9,6 +9,7 @@
 
 ![Weekly](https://github.com/user-attachments/assets/bbfd1053-b59e-4b52-b2e2-3958ff299e2a)
 
+### Introduction
 
 These scripts are designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 
@@ -20,7 +21,21 @@ The .json files can easily be extended, you can find a list of genres and moods 
 
 I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting. Make sure the "name" of the genre_group is unique.
 
+### Content table
 
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Setup](#setup)
+  - [Cronjob Examples](#cronjob-examples)
+- [Usage Description](#usage-description)
+  - [PPG-Daily and PPG-Weekly](#ppg-daily-and-ppg-weekly)
+  - [PPG-Moods](#ppg-moods)
+  - [PPG-Genres](#ppg-genres)
+  - [Copy-Playlist-To-Subuser](#copy-playlist-to-subuser)
+- [Update Log](#update-log)
+- [Information](#information)
+- [Not Working](#not-working)
+- [Planned](#planned)
 
 ### Requirements:
   - Plex server and Access Token (Navigate to some item on your Plex -> click "view XML" -> Copy token from URL
