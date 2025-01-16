@@ -1,216 +1,283 @@
 {
-  "Upbeat Country": [
-    "Country rap",
-    "Canadian country",
-    "Country rock",
-    "Country/country blues/country rock/rock",
-    "Country / pop",
-    "Alternative rock/country",
-    "Country/outlaw country",
-    "Americana/country/rockabilly/traditional country",
-    "Country/rockabilly/traditional country",
-    "Australian country"
-  ],
-  "Sad Country": [
-    "Country rap",
-    "Canadian country",
-    "Country rock",
-    "Country/country blues/country rock/rock",
-    "Country / pop",
-    "Alternative rock/country",
-    "Sad rap",
-    "Country/outlaw country",
-    "Americana/country/rockabilly/traditional country",
-    "Country/rockabilly/traditional country"
-  ],
-  "Lo-Fi Jazzhop": [
-    "Lo-fi / rock",
-    "Experimental / folk / folk punk / lo-fi",
-    "Lo-fi beats",
-    "Lo-fi emo",
-    "Emo / indie / indie rock / lo-fi",
-    "Folk / folk punk / lo-fi / rock",
-    "Emo / folk / folk punk / lo-fi",
-    "Lo-fi hip-hop",
-    "Indian lo-fi",
-    "Lo-fi indie"
-  ],
-  "Mexican Rock": [
-    "Alternative rock / nu metal",
-    "Experimental / hard rock / rock",
-    "Boogie rock",
-    "Indie rock / psychedelic rock / rock",
-    "Alternative rock / hard rock / heavy metal / rock",
-    "Alternative pop rock",
-    "Alternative punk / alternative rock",
-    "Alternative metal / hard rock / heavy metal / nu metal",
-    "Soft rock",
-    "Arena rock / classic rock / rock"
-  ],
-  "Power Metal": [
-    "Alternative rock / nu metal",
-    "Heavy metal / metal",
-    "Death metal / metal",
-    "Italian power metal",
-    "Alternative rock / hard rock / heavy metal / rock",
-    "Alternative metal/heavy metal",
-    "Hard rock / heavy metal / nu metal / pop",
-    "British power metal",
-    "Melodic death metal / viking metal",
-    "Chiptune / classical / metal / rock"
-  ],
-  "Camping": [
-    "Country",
-    "Bluegrass",
-    "Americana",
-    "Acoustic"
-  ],
-  "Pirate": [
-    "Pirate",
-    "Celtic",
-    "Sea shanties",
-    "Folk"
-  ],
-  "Acoustic Emo": [
-    "Acoustic blues",
-    "Emocore",
-    "Emoplugg",
-    "Cloud rap / emo / hip-hop",
-    "Acoustic punk",
-    "Alternative rock / emo / hardcore punk / pop punk",
-    "Emo / post-hardcore / screamo",
-    "Alternative rock / emo / indie rock / rock",
-    "Alternative rock / emo / pop / post-punk",
-    "Emo / indie / lo-fi / slowcore"
-  ],
-  "Polka": [
-    "Folk rock / polka / pop rock / rock",
-    "Polka / punk / punk rock / sea shanty",
-    "Celtic",
-    "Sea shanties",
-    "Polka"
-  ],
-  "90s Gangster Rap Underground": [
-    "Country rap",
-    "Rap/r&b",
-    "Cali rap",
-    "Pop rap / rock",
-    "Vapor trap",
-    "Gangsta rap",
-    "Mixtape"
-  ],
-  "90s Rave Underground": [
-    "Grave wave",
-    "Rave",
-    "Jungle",
-    "Deep underground hip hop",
-    "Underground boom bap",
-    "Underground hip hop",
-    "German underground rap",
-    "Hip-hop / underground hip hop",
-    "Hip-hop/rave",
-    "Breakbeat"
-  ],
-  "Chillwave": [
-    "Chillwave",
-    "Electropop",
-    "Synthwave",
-    "Ambient",
-    "Trance/progressive"
-  ],
-  "Lo-Fi Beats": [
-    "Lo-fi / rock",
-    "Experimental / folk / folk punk / lo-fi",
-    "Lo-fi beats",
-    "Azontobeats",
-    "Lo-fi emo",
-    "Focus beats",
-    "Beats",
-    "Afrobeats",
-    "Emo / indie / indie rock / lo-fi",
-    "Folk / folk punk / lo-fi / rock"
-  ],
-  "Hindi Pop": [
-    "Hindi indie",
-    "Hindustani classical"
-  ],
-  "Drum and Bass": [
-    "Drum and bass",
-    "Drum and bass / dubstep / electro house",
-    "Drum and bass / dubstep / electronic",
-    "Alternative rock/breakbeat/progressive house/dubstep/drum & bass",
-    "Breaks/drum & bass",
-    "Drum & bass",
-    "Drum and bass / dubstep / electronic rock / trap",
-    "Drum and bass / electronic",
-    "Drum and bass / dubstep / electro house"
-  ],
-  "Punjabi Hip Hop": [
-    "Punjabi hip hop",
-    "Punjabi pop"
-  ],
-  "Australian Country": [
-    "Australian post-hardcore",
-    "Australian alternative rock",
-    "Australian comedy"
-  ],
-  "Emo Rap": [
-    "Emo rap",
-    "Emo rap / indie"
-  ],
-  "Hyperpop Upbeat": [
-    "Hyperpop",
-    "Hypertechno",
-    "Hyperpop italiano",
-    "Hyperpop francais",
-    "Hyperpop en espanol"
-  ],
-  "Sovietwave": [
-    "Sovietwave"
-  ],
-  "Binaural": [
-    "Binaural"
-  ],
-  "German Hip Hop": [
-    "Deutschrap",
-    "German hip hop",
-    "German hip-hop",
-    "German underground rap"
-  ],
-  "UK Rap": [
-    "Uk drill",
-    "Uk hip hop",
-    "Uk hip-hop",
-    "Uk alternative hip hop"
-  ],
-  "Rap Metal": [
-    "Rap metal",
-    "Rap metalcore",
-    "Rap rock",
-    "Metal / nu metal",
-    "Metal / nu metal / rock",
-    "Nu metal",
-    "Nu metal / rock",
-    "Nu metal/rock",
-    "Nu-metal",
-    "Nu-metalcore"
-  ],
-  "Detroit Rap": [
-    "Detroit hip hop",
-    "Detroit trap"
-  ],
-  "175 BPM": [
-    "Happy hardcore",
-    "Eurobeat",
-    "Uk hardcore"
-  ],
-  "Rock Balladen": [
-    "Ballad / Pop",
-    "Ballad / Pop / Pop Rock / Synthpop",
-    "Ballad / Pop / Soft Rock",
-	"Ballad / Pop / Synthpop",
-	"Ballad / Soft Rock",
-	"Ballad / Synthpop",
-	"Soft Rock"
-  ]
+  "Upbeat Country": {
+    "genres": [
+      "Country rap",
+      "Canadian country",
+      "Country rock",
+      "Country/country blues/country rock/rock",
+      "Country / pop",
+      "Alternative rock/country",
+      "Country/outlaw country",
+      "Americana/country/rockabilly/traditional country",
+      "Country/rockabilly/traditional country",
+      "Australian country"
+    ]
+  },
+  "Sad Country": {
+    "genres": [
+      "Country rap",
+      "Canadian country",
+      "Country rock",
+      "Country/country blues/country rock/rock",
+      "Country / pop",
+      "Alternative rock/country",
+      "Sad rap",
+      "Country/outlaw country",
+      "Americana/country/rockabilly/traditional country",
+      "Country/rockabilly/traditional country"
+    ]
+  },
+  "90s Gangster Rap Underground": {
+    "genres": [
+      "Country rap",
+      "Rap/r&b",
+      "Cali rap",
+      "Pop rap / rock",
+      "Vapor trap",
+      "Gangsta rap",
+      "Mixtape"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Rave Underground": {
+    "genres": [
+      "Grave wave",
+      "Rave",
+      "Jungle",
+      "Deep underground hip hop",
+      "Underground boom bap",
+      "Underground hip hop",
+      "German underground rap",
+      "Hip-hop / underground hip hop",
+      "Hip-hop/rave",
+      "Breakbeat",
+      "Happy hardcore",
+      "Eurobeat",
+      "Uk hardcore"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "Lo-Fi Jazzhop": {
+    "genres": [
+      "Lo-fi / rock",
+      "Experimental / folk / folk punk / lo-fi",
+      "Lo-fi beats",
+      "Lo-fi emo",
+      "Emo / indie / indie rock / lo-fi",
+      "Folk / folk punk / lo-fi / rock",
+      "Emo / folk / folk punk / lo-fi",
+      "Lo-fi hip-hop",
+      "Indian lo-fi",
+      "Lo-fi indie"
+    ]
+  },
+  "Mexican Rock": {
+    "genres": [
+      "Alternative rock / nu metal",
+      "Experimental / hard rock / rock",
+      "Boogie rock",
+      "Indie rock / psychedelic rock / rock",
+      "Alternative rock / hard rock / heavy metal / rock",
+      "Alternative pop rock",
+      "Alternative punk / alternative rock",
+      "Alternative metal / hard rock / heavy metal / nu metal",
+      "Soft rock",
+      "Arena rock / classic rock / rock"
+    ]
+  },
+  "Power Metal": {
+    "genres": [
+      "Alternative rock / nu metal",
+      "Heavy metal / metal",
+      "Death metal / metal",
+      "Italian power metal",
+      "Alternative rock / hard rock / heavy metal / rock",
+      "Alternative metal/heavy metal",
+      "Hard rock / heavy metal / nu metal / pop",
+      "British power metal",
+      "Melodic death metal / viking metal",
+      "Chiptune / classical / metal / rock"
+    ]
+  },
+  "Camping": {
+    "genres": [
+      "Country",
+      "Bluegrass",
+      "Americana",
+      "Acoustic"
+    ]
+  },
+  "Pirate": {
+    "genres": [
+      "Pirate",
+      "Celtic",
+      "Sea shanties",
+      "Folk"
+    ]
+  },
+  "Acoustic Emo": {
+    "genres": [
+      "Acoustic blues",
+      "Emocore",
+      "Emoplugg",
+      "Cloud rap / emo / hip-hop",
+      "Acoustic punk",
+      "Alternative rock / emo / hardcore punk / pop punk",
+      "Emo / post-hardcore / screamo",
+      "Alternative rock / emo / indie rock / rock",
+      "Alternative rock / emo / pop / post-punk",
+      "Emo / indie / lo-fi / slowcore"
+    ]
+  },
+  "Polka": {
+    "genres": [
+      "Folk rock / polka / pop rock / rock",
+      "Polka / punk / punk rock / sea shanty",
+      "Celtic",
+      "Sea shanties",
+      "Polka"
+    ]
+  },
+  "Chillwave": {
+    "genres": [
+      "Chillwave",
+      "Electropop",
+      "Synthwave",
+      "Ambient",
+      "Trance/progressive"
+    ]
+  },
+  "Lo-Fi Beats": {
+    "genres": [
+      "Lo-fi / rock",
+      "Experimental / folk / folk punk / lo-fi",
+      "Lo-fi beats",
+      "Azontobeats",
+      "Lo-fi emo",
+      "Focus beats",
+      "Beats",
+      "Afrobeats",
+      "Emo / indie / indie rock / lo-fi",
+      "Folk / folk punk / lo-fi / rock"
+    ]
+  },
+  "Hindi Pop": {
+    "genres": [
+      "Hindi indie",
+      "Hindustani classical"
+    ]
+  },
+  "Drum and Bass": {
+    "genres": [
+      "Drum and bass",
+      "Drum and bass / dubstep / electro house",
+      "Drum and bass / dubstep / electronic",
+      "Alternative rock/breakbeat/progressive house/dubstep/drum & bass",
+      "Breaks/drum & bass",
+      "Drum & bass",
+      "Drum and bass / dubstep / electronic rock / trap",
+      "Drum and bass / electronic",
+      "Drum and bass / dubstep / electro house"
+    ]
+  },
+  "Punjabi Hip Hop": {
+    "genres": [
+      "Punjabi hip hop",
+      "Punjabi pop"
+    ]
+  },
+  "Australian Country": {
+    "genres": [
+      "Australian post-hardcore",
+      "Australian alternative rock",
+      "Australian comedy"
+    ]
+  },
+  "Emo Rap": {
+    "genres": [
+      "Emo rap",
+      "Emo rap / indie"
+    ]
+  },
+  "Hyperpop Upbeat": {
+    "genres": [
+      "Hyperpop",
+      "Hypertechno",
+      "Hyperpop italiano",
+      "Hyperpop francais",
+      "Hyperpop en espanol"
+    ]
+  },
+  "Sovietwave": {
+    "genres": [
+      "Sovietwave"
+    ]
+  },
+  "Binaural": {
+    "genres": [
+      "Binaural"
+    ]
+  },
+  "German Hip Hop": {
+    "genres": [
+      "Deutschrap",
+      "German hip hop",
+      "German hip-hop",
+      "German underground rap"
+    ]
+  },
+  "UK Rap": {
+    "genres": [
+      "Uk drill",
+      "Uk hip hop",
+      "Uk hip-hop",
+      "Uk alternative hip hop"
+    ]
+  },
+  "Rap Metal": {
+    "genres": [
+      "Rap metal",
+      "Rap metalcore",
+      "Rap rock",
+      "Metal / nu metal",
+      "Metal / nu metal / rock",
+      "Nu metal",
+      "Nu metal / rock",
+      "Nu metal/rock",
+      "Nu-metal",
+      "Nu-metalcore"
+    ]
+  },
+  "Detroit Rap": {
+    "genres": [
+      "Detroit hip hop",
+      "Detroit trap"
+    ]
+  },
+  "175 BPM": {
+    "genres": [
+      "Happy hardcore",
+      "Eurobeat",
+      "Uk hardcore"
+    ]
+  },
+  "Rock Balladen": {
+    "genres": [
+      "Ballad / Pop",
+      "Ballad / Pop / Pop Rock / Synthpop",
+      "Ballad / Pop / Soft Rock",
+      "Ballad / Pop / Synthpop",
+      "Ballad / Soft Rock",
+      "Ballad / Synthpop",
+      "Soft Rock"
+    ]
+  }
 }
