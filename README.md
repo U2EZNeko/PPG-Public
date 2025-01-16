@@ -123,6 +123,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ## Update log
 
   -   Added before, between and after time filters
+      Had to adjust JSON to accomodate 
   -   Added logging to reduce  getting the same playlists
 
 
