@@ -12,7 +12,7 @@ load_dotenv()
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 SONGS_PER_PLAYLIST = 50
-GENRE_MIXES_FILE = "genre_mixes.json"  # Path to the genre mixes file
+GENRE_MIXES_FILE = "newgenremix.json"  # Path to the genre mixes file
 MIN_SONGS_REQUIRED = 0.5 * SONGS_PER_PLAYLIST  # 50% of the required songs
 
 # Connect to the Plex server
@@ -32,6 +32,18 @@ def load_genre_mixes():
     except Exception as e:
         print(f"Error loading genre mixes: {e}")
         return {}
+
+# Get the release year, with fallback to parent album
+def get_release_year(track):
+    # Check if the track itself has a year
+    if track.year:
+        return track.year
+    # Fallback to the parent album's year
+    if hasattr(track, "parentRatingKey"):
+        album = plex.fetchItem(track.parentRatingKey)
+        if album and album.year:
+            return album.year
+    return None  # No year available
 
 # Generate playlists based on genre mixes
 def generate_genre_playlists():
@@ -67,27 +79,31 @@ def generate_genre_playlists():
             # Apply release date filter if specified
             if release_date_filter:
                 condition = release_date_filter.get("condition")
+                print(f"Applying release date filter with condition: {condition}")
+
                 if condition == "after":
-                    threshold_date = datetime.strptime(release_date_filter["date"], "%Y-%m-%d")
-                    print(f"Filtering songs released after {threshold_date}")
+                    threshold_year = int(release_date_filter["date"])
+                    print(f"Filtering songs released after {threshold_year}")
                     songs = [
                         track for track in songs
-                        if track.originallyAvailableAt and track.originallyAvailableAt >= threshold_date
+                        if (year := get_release_year(track)) and year >= threshold_year
                     ]
+
                 elif condition == "before":
-                    threshold_date = datetime.strptime(release_date_filter["date"], "%Y-%m-%d")
-                    print(f"Filtering songs released before {threshold_date}")
+                    threshold_year = int(release_date_filter["date"])
+                    print(f"Filtering songs released before {threshold_year}")
                     songs = [
                         track for track in songs
-                        if track.originallyAvailableAt and track.originallyAvailableAt < threshold_date
+                        if (year := get_release_year(track)) and year < threshold_year
                     ]
+
                 elif condition == "between":
-                    start_date = datetime.strptime(release_date_filter["start_date"], "%Y-%m-%d")
-                    end_date = datetime.strptime(release_date_filter["end_date"], "%Y-%m-%d")
-                    print(f"Filtering songs released between {start_date} and {end_date}")
+                    start_year = int(release_date_filter["start_date"])
+                    end_year = int(release_date_filter["end_date"])
+                    print(f"Filtering songs released between {start_year} and {end_year}")
                     songs = [
                         track for track in songs
-                        if track.originallyAvailableAt and start_date <= track.originallyAvailableAt <= end_date
+                        if (year := get_release_year(track)) and start_year <= year <= end_year
                     ]
 
             total_songs = len(songs)

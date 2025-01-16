@@ -27,6 +27,44 @@
       "Country/rockabilly/traditional country"
     ]
   },
+  "90s Gangster Rap Underground": {
+    "genres": [
+      "Country rap",
+      "Rap/r&b",
+      "Cali rap",
+      "Pop rap / rock",
+      "Vapor trap",
+      "Gangsta rap",
+      "Mixtape"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Rave Underground": {
+    "genres": [
+      "Grave wave",
+      "Rave",
+      "Jungle",
+      "Deep underground hip hop",
+      "Underground boom bap",
+      "Underground hip hop",
+      "German underground rap",
+      "Hip-hop / underground hip hop",
+      "Hip-hop/rave",
+      "Breakbeat",
+      "Happy hardcore",
+      "Eurobeat",
+      "Uk hardcore"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
   "Lo-Fi Jazzhop": {
     "genres": [
       "Lo-fi / rock",
@@ -107,41 +145,6 @@
       "Sea shanties",
       "Polka"
     ]
-  },
-  "90s Gangster Rap Underground": {
-    "genres": [
-      "Country rap",
-      "Rap/r&b",
-      "Cali rap",
-      "Pop rap / rock",
-      "Vapor trap",
-      "Gangsta rap",
-      "Mixtape"
-    ],
-    "release_date_filter": {
-      "condition": "between",
-      "start_date": "1990-01-01",
-      "end_date": "1999-12-31"
-    }
-  },
-  "90s Rave Underground": {
-    "genres": [
-      "Grave wave",
-      "Rave",
-      "Jungle",
-      "Deep underground hip hop",
-      "Underground boom bap",
-      "Underground hip hop",
-      "German underground rap",
-      "Hip-hop / underground hip hop",
-      "Hip-hop/rave",
-      "Breakbeat"
-    ],
-    "release_date_filter": {
-      "condition": "between",
-      "start_date": "1990-01-01",
-      "end_date": "1999-12-31"
-    }
   },
   "Chillwave": {
     "genres": [
