@@ -140,11 +140,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ### 16.01.2025:
 
-  -   Added before, between and after time filters
-    
-      Had to adjust JSON to accomodate
-    
-  -   Added logging to reduce getting the same playlists
+  -   Added before, between and after time filters.   
+  -   Added logging to reduce getting the same playlists.
+  -   Removed useless fetch of all available genres from Daily script.
 
 
 # Information:
@@ -182,3 +180,4 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 # Planned
 
 - Extend genre_groups even more
+- Come up with more useful filters
