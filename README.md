@@ -72,7 +72,6 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   JSON example
 ```
    "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
- 
 ```
 ### PPG-Moods
   
