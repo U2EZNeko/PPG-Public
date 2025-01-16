@@ -17,9 +17,9 @@ I run the scripts with cronjobs to generate playlists for me. My Plex has over 3
 
 I'm more than happy to extend the scripts myself and through your Pull Requests. 
 
-The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> genres.txt is a list of all unique genres on MY server. You may have a genre on your server that I do not have.
+The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> Usefulstuff Folder contains genres.txt it's a list of all unique genres on MY server. You may have a genre on your server that I do not have.
 
-I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting. Make sure the "name" of the genre_group is unique.
+I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting and genres. Make sure the "name" of the genre_group is unique and avoid creating groups that are too similar to each other. 
 
 ### Content table
 
