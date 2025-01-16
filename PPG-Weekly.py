@@ -6,12 +6,15 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 PLAYLIST_COUNT = 5
 SONGS_PER_PLAYLIST = 200
 GENRE_GROUPS_FILE = "genre_groups.json"  # Path to the genre groups file
+WEEKLY_LOG_FILE = "weeklylog.txt"  # File to store used genre groups
+MAX_LOG_ENTRIES = 50  # Maximum number of entries in the log
 MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
 
 # Connect to the Plex server
@@ -34,7 +37,34 @@ def load_genre_groups():
         return {}
 
 
-# Generate playlists
+# Read the weekly log file
+def read_weekly_log():
+    print("Reading weekly log...")
+    if not os.path.exists(WEEKLY_LOG_FILE):
+        print(f"{WEEKLY_LOG_FILE} does not exist. Starting with an empty log.")
+        return []
+    try:
+        with open(WEEKLY_LOG_FILE, "r") as file:
+            log = [line.strip() for line in file.readlines()]
+            print(f"Weekly log loaded: {log}")
+            return log
+    except Exception as e:
+        print(f"Error reading weekly log: {e}")
+        return []
+
+
+# Write to the weekly log file
+def write_weekly_log(log):
+    print("Writing to weekly log...")
+    try:
+        with open(WEEKLY_LOG_FILE, "w") as file:
+            file.writelines(f"{entry}\n" for entry in log)
+        print("Weekly log updated successfully.")
+    except Exception as e:
+        print(f"Error writing to weekly log: {e}")
+
+
+# Generate weekly playlists
 def generate_weekly_playlists():
     print("Connecting to Plex server...")
     try:
@@ -50,28 +80,20 @@ def generate_weekly_playlists():
         print("No genre groups available. Exiting.")
         return
 
-    # Fetch all genres from the server
-    print("Fetching genres from the music library...")
-    try:
-        genres = music_library.search(libtype="artist", limit=None)
-        # Extract genre names as strings
-        existing_genres = set(
-            genre.tag for artist in genres for genre in (artist.genres or [])
-        )
-        print(f"Found {len(existing_genres)} unique genres on the server: {existing_genres}")
-    except Exception as e:
-        print(f"Error fetching genres: {e}")
-        return
+    # Read the weekly log to avoid previously used genre groups
+    weekly_log = read_weekly_log()
 
-    # Filter genre groups to only include genres available on the server
-    print("Filtering genre groups to match available genres on the server...")
-    filtered_genre_groups = {
-        group: [genre for genre in genres if genre in existing_genres]
+    # Filter out previously used genre groups
+    available_genre_groups = {
+        group: genres
         for group, genres in genre_groups.items()
+        if group not in weekly_log
     }
-    # Remove empty groups
-    filtered_genre_groups = {group: genres for group, genres in filtered_genre_groups.items() if genres}
-    print(f"Filtered genre groups: {filtered_genre_groups}")
+
+    if not available_genre_groups:
+        print("All genre groups have been used recently. Resetting the log.")
+        weekly_log = []
+        available_genre_groups = genre_groups.copy()
 
     for i in range(PLAYLIST_COUNT):
         print(f"\nStarting generation for Playlist {i + 1}...")
@@ -83,8 +105,8 @@ def generate_weekly_playlists():
 
             # Keep retrying until we find a genre group with enough songs
             for attempt in range(10):  # Retry up to 10 times for each playlist
-                selected_group = random.choice(list(filtered_genre_groups.keys()))
-                selected_genres = filtered_genre_groups[selected_group]
+                selected_group = random.choice(list(available_genre_groups.keys()))
+                selected_genres = available_genre_groups[selected_group]
                 print(f"Attempt {attempt + 1}: Selected genre group: {selected_group}")
                 print(f"Genres in group: {selected_genres}")
 
@@ -141,8 +163,18 @@ def generate_weekly_playlists():
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
+            # Add the selected genre group to the log
+            weekly_log.append(selected_group)
+
+            # Keep the log size to a maximum of MAX_LOG_ENTRIES
+            if len(weekly_log) > MAX_LOG_ENTRIES:
+                weekly_log = weekly_log[-MAX_LOG_ENTRIES:]
+
         except Exception as e:
             print(f"Error during playlist generation for Playlist {i + 1}: {e}")
+
+    # Write the updated log back to the file
+    write_weekly_log(weekly_log)
 
 
 # Run the script
