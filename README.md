@@ -67,7 +67,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
 
-  They will randomly select from genre_groups.json to create playlists
+  They will randomly select from genre_groups.json to create playlists.
+
+  It will write the used genre's to a log file to avoid duplicates.
 
   JSON example
 ```
@@ -138,11 +140,14 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ## Update log
 
+
+# 16.01.2025:
+
   -   Added before, between and after time filters
     
       Had to adjust JSON to accomodate
     
-  -   Added logging to reduce  getting the same playlists
+  -   Added logging to reduce getting the same playlists
 
 
 ## Information:
