@@ -105,7 +105,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
       "start_date": "1990",
       "end_date": "1999"
     }
-  }
+  },
   ```
 
 - Copy-Playlist-To-Subuser
