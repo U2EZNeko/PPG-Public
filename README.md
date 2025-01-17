@@ -180,4 +180,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 # Planned
 
 - Extend genre_groups even more
+
+      A lot of genre_groups are rather wide spread or have too many genres in them. Gonna need some manual fine tuning eventually.
+
 - Come up with more useful filters
