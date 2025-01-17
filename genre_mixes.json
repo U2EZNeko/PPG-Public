@@ -282,5 +282,85 @@
       "Ballad / Synthpop",
       "Soft Rock"
     ]
+  },
+  "2010's Hip-Hop": {
+    "genres": [
+      "Trap",
+      "Cloud rap",
+      "Vapor trap",
+      "Conscious hip hop",
+      "Hip-hop / underground hip hop",
+      "West coast hip hop"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2012"
+    }
+  },
+  "90s Underground House": {
+    "genres": [
+      "Deep house",
+      "Acid house",
+      "Chicago house",
+      "Garage house",
+      "Classic house",
+      "Underground boom bap"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2000s Techno": {
+    "genres": [
+      "Minimal techno",
+      "Detroit techno",
+      "Techno/house",
+      "Dub techno",
+      "Berlin minimal techno"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2015"
+    }
+  },
+  "Japanese Emo": {
+    "genres": [
+      "Japanese emo",
+      "Emo / indie / lo-fi / slowcore",
+      "Japanese screamo",
+      "Japanese post-hardcore",
+      "Japanese alternative rock"
+    ]
+  },
+  "Synth Rock": {
+    "genres": [
+      "Synth rock",
+      "Synthpop",
+      "Electronic / rock",
+      "Synth punk",
+      "Alternative rock / electronic / synthwave"
+    ]
+  },
+  "Cali Rap": {
+    "genres": [
+      "Cali rap",
+      "G-funk",
+      "West coast hip hop",
+      "Gangsta rap",
+      "Bay area hip hop"
+    ]
+  },
+  "Bagpipes Techno": {
+    "genres": [
+      "Bagpipe",
+      "Techno",
+      "Electro / electronic",
+      "Dub techno",
+      "Folk punk / bagpipes"
+    ]
   }
 }
