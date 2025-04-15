@@ -159,8 +159,10 @@ def generate_weekly_playlists():
 
                 # Update the description with the selected genres
                 genre_description = ", ".join(selected_genres)
+
                 if (SHOW_UPDATED):
                     genre_description += "\nLast updated: ".curr_date
+
                 existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
             else:
                 print(f"Creating new playlist: {playlist_name}")
@@ -168,8 +170,10 @@ def generate_weekly_playlists():
 
                 # Set the description with the selected genres
                 genre_description = ", ".join(selected_genres)
+
                 if (SHOW_UPDATED):
                     genre_description += "\nLast updated: ".curr_date
+
                 playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
