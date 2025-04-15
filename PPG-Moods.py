@@ -104,9 +104,8 @@ def generate_mood_playlists():
 
                 # Update the description with the selected moods
                 mood_description = ", ".join(moods)
-                if (SHOW_UPDATED) {
-                    mood_description = "\nLast updated: ".curr_date
-                }
+                if (SHOW_UPDATED):
+                    mood_description += "\nLast updated: ".curr_date
                 existing_playlist.editSummary(f"Moods used: {mood_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
@@ -114,9 +113,8 @@ def generate_mood_playlists():
 
                 # Set the description with the selected moods
                 mood_description = ", ".join(moods)
-                if (SHOW_UPDATED) {
-                    mood_description = "\nLast updated: ".curr_date
-                }
+                if (SHOW_UPDATED):
+                    mood_description += "\nLast updated: ".curr_date
                 playlist.editSummary(f"Moods used: {mood_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
