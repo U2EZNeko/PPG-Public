@@ -10,9 +10,16 @@ load_dotenv()
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
+SHOW_UPDATED = os.getenv("SHOW_LAST_UPDATED")
+
 SONGS_PER_PLAYLIST = 50
 GENRE_MIXES_FILE = "genre_mixes.json"  # Path to the genre mixes file
 MIN_SONGS_REQUIRED = 0.5 * SONGS_PER_PLAYLIST  # 50% of the required songs
+
+# Get the current date
+from datetime import date
+today = date.today()
+curr_date = today
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -127,11 +134,17 @@ def generate_genre_playlists():
                 existing_playlist.removeItems(existing_playlist.items())
                 existing_playlist.addItems(playlist_songs)
                 genre_description = ", ".join(genres)
+                if (SHOW_UPDATED) {
+                    genre_description = "\nLast updated: ".curr_date
+                }
                 existing_playlist.editSummary(f"Genres used: {genre_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
                 genre_description = ", ".join(genres)
+                if (SHOW_UPDATED) {
+                    genre_description = "\nLast updated: ".curr_date
+                }
                 playlist.editSummary(f"Genres used: {genre_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
