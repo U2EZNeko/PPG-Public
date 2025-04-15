@@ -159,7 +159,7 @@ def generate_daily_playlists():
 
                 # Update the description with the selected genres
                 genre_description = ", ".join(selected_genres)
-                if (SHOW_UPDATED)
+                if (SHOW_UPDATED):
                     genre_description += "\nLast updated: ".curr_date
                 existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
             else:
