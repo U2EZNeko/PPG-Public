@@ -12,7 +12,7 @@ MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the JSON file containing mood g
 # Get the current date
 from datetime import date
 today = date.today()
-curr_date = today
+curr_date = today.strftime('%a %d %b %Y')
 
 
 # Load environment variables from .env file
@@ -105,7 +105,7 @@ def generate_mood_playlists():
                 # Update the description with the selected moods
                 mood_description = ", ".join(moods)
                 if (SHOW_UPDATED):
-                    mood_description += "\nLast updated: ".curr_date
+                    mood_description += "\nLast updated: " + curr_date
                 existing_playlist.editSummary(f"Moods used: {mood_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
@@ -115,7 +115,7 @@ def generate_mood_playlists():
                 mood_description = ", ".join(moods)
 
                 if (SHOW_UPDATED):
-                    mood_description += "\nLast updated: ".curr_date
+                    mood_description += "\nLast updated: " + curr_date
 
                 playlist.editSummary(f"Moods used: {mood_description}")
 

@@ -22,7 +22,7 @@ MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
 # Get the current date
 from datetime import date
 today = date.today()
-curr_date = today
+curr_date = today.strftime('%a %d %b %Y')
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -161,7 +161,7 @@ def generate_weekly_playlists():
                 genre_description = ", ".join(selected_genres)
 
                 if (SHOW_UPDATED):
-                    genre_description += "\nLast updated: ".curr_date
+                    genre_description += "\nLast updated: " + curr_date
 
                 existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
             else:
@@ -172,7 +172,7 @@ def generate_weekly_playlists():
                 genre_description = ", ".join(selected_genres)
 
                 if (SHOW_UPDATED):
-                    genre_description += "\nLast updated: ".curr_date
+                    genre_description += "\nLast updated: " + curr_date
 
                 playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
 
