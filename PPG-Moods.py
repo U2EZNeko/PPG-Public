@@ -9,6 +9,11 @@ PLAYLIST_SIZE = 50  # Number of tracks in each playlist
 MIN_TRACK_PERCENT = 0.8  # Minimum percentage of tracks required to create a playlist (80%)
 MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the JSON file containing mood groups
 
+# Get the current date
+from datetime import date
+today = date.today()
+curr_date = today.strftime('%a %d %b %Y')
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,6 +21,7 @@ load_dotenv()
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
+SHOW_UPDATED = os.getenv("SHOW_LAST_UPDATED")
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -98,6 +104,8 @@ def generate_mood_playlists():
 
                 # Update the description with the selected moods
                 mood_description = ", ".join(moods)
+                if (SHOW_UPDATED):
+                    mood_description += "\nLast updated: " + curr_date
                 existing_playlist.editSummary(f"Moods used: {mood_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
@@ -105,6 +113,10 @@ def generate_mood_playlists():
 
                 # Set the description with the selected moods
                 mood_description = ", ".join(moods)
+
+                if (SHOW_UPDATED):
+                    mood_description += "\nLast updated: " + curr_date
+
                 playlist.editSummary(f"Moods used: {mood_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")

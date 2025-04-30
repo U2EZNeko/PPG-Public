@@ -10,12 +10,19 @@ load_dotenv()
 # Fetch sensitive data from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
+SHOW_UPDATED = os.getenv("SHOW_LAST_UPDATED")
+
 PLAYLIST_COUNT = 5
 SONGS_PER_PLAYLIST = 200
 GENRE_GROUPS_FILE = "genre_groups.json"  # Path to the genre groups file
 WEEKLY_LOG_FILE = "weeklylog.txt"  # File to store used genre groups
 MAX_LOG_ENTRIES = 50  # Maximum number of entries in the log
 MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
+
+# Get the current date
+from datetime import date
+today = date.today()
+curr_date = today.strftime('%a %d %b %Y')
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -152,6 +159,10 @@ def generate_weekly_playlists():
 
                 # Update the description with the selected genres
                 genre_description = ", ".join(selected_genres)
+
+                if (SHOW_UPDATED):
+                    genre_description += "\nLast updated: " + curr_date
+
                 existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
             else:
                 print(f"Creating new playlist: {playlist_name}")
@@ -159,6 +170,10 @@ def generate_weekly_playlists():
 
                 # Set the description with the selected genres
                 genre_description = ", ".join(selected_genres)
+
+                if (SHOW_UPDATED):
+                    genre_description += "\nLast updated: " + curr_date
+
                 playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
