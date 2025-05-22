@@ -3,6 +3,7 @@ import random
 import json
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
+from datetime import date
 
 # Static configuration
 PLAYLIST_SIZE = 50  # Number of tracks in each playlist
@@ -10,7 +11,6 @@ MIN_TRACK_PERCENT = 0.8  # Minimum percentage of tracks required to create a pla
 MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the JSON file containing mood groups
 
 # Get the current date
-from datetime import date
 today = date.today()
 curr_date = today.strftime('%a %d %b %Y')
 

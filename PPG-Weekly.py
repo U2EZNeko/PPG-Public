@@ -3,6 +3,7 @@ import random
 import json
 import os
 from dotenv import load_dotenv
+from datetime import date
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,7 +21,6 @@ MAX_LOG_ENTRIES = 50  # Maximum number of entries in the log
 MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
 
 # Get the current date
-from datetime import date
 today = date.today()
 curr_date = today.strftime('%a %d %b %Y')
 

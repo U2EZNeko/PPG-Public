@@ -3,6 +3,7 @@ import random
 import json
 import os
 from dotenv import load_dotenv
+from datetime import date
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,7 +18,6 @@ GENRE_MIXES_FILE = "genre_mixes.json"  # Path to the genre mixes file
 MIN_SONGS_REQUIRED = 0.5 * SONGS_PER_PLAYLIST  # 50% of the required songs
 
 # Get the current date
-from datetime import date
 today = date.today()
 curr_date = today.strftime('%a %d %b %Y')
 
