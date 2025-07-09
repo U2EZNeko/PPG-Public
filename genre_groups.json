@@ -49,8 +49,7 @@
         "Lo-fi Hip Hop",
         "UK Drill",
         "G-Funk",
-        "Chicago Drill",
-        "Jamaican Dancehall"
+        "Chicago Drill"
     ],
     "Metal": [
         "Psychedelic Metal",
@@ -64,13 +63,11 @@
         "Hard Rock / Metal",
         "Deathcore",
         "Hard Alternative",
-        "Hard Bass",
         "Death Metal",
         "Hardcore Metal",
         "Alternative Metal",
         "Doom Metal",
-        "Nu-Metalcore",
-        "German Hardcore"
+        "Nu-Metalcore"
     ],
     "Jazz": [
         "Contemporary Jazz",
@@ -86,7 +83,6 @@
         "Blues Mexicano",
         "Bossa Nova",
         "Jazz Metal",
-        "Rhythm and Blues",
         "Bebop",
         "Jazz Fusion",
         "Folk Jazz",
@@ -100,7 +96,78 @@
         "Australian Indie",
         "Seattle Indie",
         "Cali Indie",
-        "Texas Indie"
+        "Texas Indie",
+        "Adelaide Indie",
+        "Alaska Indie",
+        "Albany NY Indie",
+        "Albuquerque Indie",
+        "Asbury Park Indie",
+        "Athens Indie",
+        "Austin Americana",
+        "Austindie",
+        "Bay Area Indie",
+        "Bergen Indie",
+        "Boston Indie",
+        "Brighton Indie",
+        "Brooklyn Indie",
+        "Buffalo NY Indie",
+        "Calgary Indie",
+        "Channel Islands Indie",
+        "Chicago Indie",
+        "Cincinnati Indie",
+        "Connecticut Indie",
+        "Derby Indie",
+        "Denton TX Indie",
+        "Dayton Indie",
+        "Dallas Indie",
+        "Eau Claire Indie",
+        "Gainesville Indie",
+        "Glasgow Indie",
+        "Gothenburg Indie",
+        "Graz Indie",
+        "Halifax Indie",
+        "Hokkaido Indie",
+        "Houston Indie",
+        "Icelandic Indie",
+        "LA Indie",
+        "Liverpool Indie",
+        "Miami Indie",
+        "Minneapolis Punk",
+        "Montreal Indie",
+        "Nashville Indie",
+        "New Jersey Indie",
+        "North Carolina Indie",
+        "Nottingham Hip Hop",
+        "Oakland Indie",
+        "Oc Indie",
+        "Ok Indie",
+        "Phoenix Indie",
+        "Pittsburgh Indie Rock",
+        "Portland Hip Hop",
+        "Portland Metal",
+        "Quebec Indie",
+        "Quebec Punk",
+        "Rhode Island Indie",
+        "Sacramento Hip Hop",
+        "San Antonio Rap",
+        "San Diego Rap",
+        "San Marcos TX Indie",
+        "Seattle Indie",
+        "Sheffield Indie",
+        "Singaporean Indie",
+        "Socal Indie",
+        "Socal Pop Punk",
+        "South Carolina Indie",
+        "Stl Indie",
+        "Stockholm Indie",
+        "Suomirap",
+        "Toronto Rap",
+        "Vermont Indie",
+        "Windsor On Indie",
+        "Winnipeg Indie",
+        "Wolverhampton Indie",
+        "Wrexham Indie",
+        "Zxc"
     ],
     "Folk": [
         "Irish Folk",
@@ -114,7 +181,13 @@
         "Folk Metal",
         "Americana",
         "Celtic",
-        "Psychedelic Folk Rock"
+        "Psychedelic Folk Rock",
+        "Accordion",
+        "Acoustic Cover",
+        "Acoustic Pop",
+        "Acoustic Punk",
+        "Acoustic Rock",
+        "Acoustic Rock / Alternative Rock"
     ],
     "Punk": [
         "Screamo",
@@ -135,7 +208,7 @@
         "Punk Cover",
         "Post Punk"
     ],
-    "Pop-Rock Fusion": [
+    "Pop-Rock Fusion": [ #fix this
         "Synthpop",
         "Alternative Emo",
         "Post-Punk"
@@ -151,16 +224,13 @@
     "Alternative": [
         "Indie Anthem-Folk",
         "Indie Pop / Dreampop / Electronic",
-        "Experimental",
         "New Wave",
         "Alternative Pop",
         "Indie Game Soundtrack",
         "Post-Grunge",
-        "Nu-Metal",
         "Indie Pop Rap",
         "Pop Punk / Indie",
-        "Indie / Alternative / Emo",
-        "Alternative R&B"
+        "Indie / Alternative / Emo"
     ],
     "Experimental": [
         "Ambient",
@@ -177,7 +247,6 @@
     ],
     "Soul": [
         "Classic Soul",
-        "R&B",
         "Neo-Soul",
         "Funk Soul",
         "Afrobeat Soul",
@@ -347,7 +416,8 @@
         "Singer-Songwriter Pop",
         "Folk / Pop",
         "Indie / Folk Pop",
-        "Folk Punk / Indie"
+        "Folk Punk / Indie",
+        "Acoustic Pop"
     ],
     "Heavy Metal": [
         "Thrash Metal",
@@ -871,73 +941,184 @@
         "Bubblegum Bass",
         "Neon Pop Punk"
     ],
-    "Global Indie": [
-        "Scottish Indie",
-        "Finnish Indie",
-        "Brighton Indie",
-        "Colombian Indie",
-        "Quebec Indie",
-        "Norwegian Indie"
-    ],
-    "Darkwave & Goth": [
-        "Dark Synthpop",
-        "Neo-Goth",
-        "Gothic Americana"
-    ],
-    "Experimental Pop": [
-        "Indie Electropop",
-        "Art Pop",
-        "Baroque Pop"
-    ],
-    "Dancefloor Essentials": [
-        "Funky Tech House",
-        "Melbourne Bounce",
-        "Trancecore"
-    ],
-    "Folk Crossovers": [
-        "Neo-Folk",
-        "Icelandic Folk",
-        "Celtic Punk",
-        "Canadian Celtic",
-        "Folktronica"
-    ],
-    "Regional Hip-Hop": [
-        "Ohio Hip-Hop",
-        "Houston Rap",
-        "Detroit Hip-Hop",
-        "Argentine Hip-Hop",
-        "Gambian Hip-Hop",
-        "Russian Drill",
-        "Ukrainian Hip-Hop"
-    ],
-    "Metal Evolutions": [
-        "Deathgrass",
-        "Post-Black Metal",
-        "Gothenburg Metal",
-        "Finnish Melodeath",
-        "Melodic Doom",
-        "Slamming Deathcore"
-    ],
-    "Island Sounds": [
-        "Pacific Islands Pop",
-        "Jawaiian",
-        "Caribbean Reggae",
+    "Africa": [
         "Afro Dancehall",
-        "Barbadian Pop"
+        "Afro House",
+        "Afro R&B",
+        "Afro Soul",
+        "Afro-Funk",
+        "Afrobeat",
+        "Afrobeats",
+        "Afrofuturism",
+        "Afrofuturismo Brasileiro",
+        "Afropop",
+        "Afroswing",
+        "Aggressive Phonk",
+        "Amapiano",
+        "Bongo Flava",
+        "Gqom",
+        "Highlife",
+        "Kwaito",
+        "Maghrebi Fusion",
+        "Nigerian Pop",
+        "Rai",
+        "Soukous",
+        "Zouk"
     ],
-    "Lo-fi & Chill": [
-        "Lo-Fi Beats",
-        "Bedroom Pop",
-        "Chillsynth",
-        "Lo-Fi Sad",
-        "Chill Phonk",
-        "Sad Lo-Fi"
+    "Asia": [
+        "Afghan Pop",
+        "Afghan Rap",
+        "Amharic Pop",
+        "Arab Pop",
+        "Arabic Hip Hop",
+        "Arabic Jazz",
+        "Arab Trap",
+        "Armenian Hip Hop",
+        "Azeri Pop",
+        "Bangladeshi Pop",
+        "Bhangra",
+        "Bollywood Fusion",
+        "Bollywood Jazz",
+        "Bollywood Pop",
+        "Bollywood Rock",
+        "Bollywood Soundtrack",
+        "Cambodian Pop",
+        "Cantonese Pop",
+        "Chinese Hip Hop",
+        "Chinese Pop",
+        "Chinese Rock",
+        "Desi Hip Hop",
+        "Desi Pop",
+        "Filipino Indie",
+        "Filipino Pop",
+        "Hindi Indie",
+        "Indian Hip Hop",
+        "Indian Pop",
+        "Indonesian Hip Hop",
+        "Indonesian Pop",
+        "Iranian Pop",
+        "Israeli Pop",
+        "Japanese Hip Hop",
+        "Japanese Jazz",
+        "Japanese Pop",
+        "Japanese Rock",
+        "J-Pop",
+        "J-Rap",
+        "J-Rock",
+        "K-Pop",
+        "Korean Hip Hop",
+        "Korean Pop",
+        "Lao Pop",
+        "Lebanese Indie",
+        "Malaysian Pop",
+        "Mandopop",
+        "Nepali Pop",
+        "Pakistani Pop",
+        "Persian Electronic",
+        "Persian Pop",
+        "Pinoy Hip Hop",
+        "Punjabi Hip Hop",
+        "Punjabi Pop",
+        "Q-Pop",
+        "Singaporean Indie",
+        "Sinhala Pop",
+        "Taiwanese Pop",
+        "Thai Hip Hop",
+        "Thai Pop",
+        "Turkish Hip Hop",
+        "Turkish Pop",
+        "Urdu Pop",
+        "Vietnamese Hip Hop",
+        "Vietnamese Pop"
     ],
-    "Instrumental Atmospheres": [
-        "Ambient Fusion",
-        "Jazz Blues",
-        "Neo-Classical",
-        "Instrumental DJent"
+    "Europe": [
+        "Baltic Beats",
+        "Belarusian Indie",
+        "Belgian Dance",
+        "Britpop",
+        "Czech Rock",
+        "Danish Electronic",
+        "Dutch Trance",
+        "Finnish Punk",
+        "French House",
+        "French Pop",
+        "German Techno",
+        "Hungarian Hip-Hop",
+        "Icelandic Shoegaze",
+        "Irish Folk",
+        "Italian Disco",
+        "Norwegian Black Metal",
+        "Polish Jazz",
+        "Russian Hip-Hop",
+        "Scottish Indie",
+        "Swedish Pop",
+        "Ukrainian Metal",
+        "UK Drill",
+        "UK Garage",
+        "Welsh Indie"
+    ],
+    "Americas": [
+        "Argentine Tango",
+        "Brazilian Funk",
+        "Brazilian Samba",
+        "Canadian Indie",
+        "Chilean Hardcore",
+        "Colombian Cumbia",
+        "Cuban Salsa",
+        "Dembow",
+        "Jamaican Ska",
+        "Latin Pop",
+        "Mexican Rock",
+        "Peruvian Punk",
+        "Puerto Rican Pop",
+        "Reggaeton",
+        "Soca",
+        "Trinidad Soca",
+        "Venezuelan Pop"
+    ],
+    "Middle East & Mediterranean": [
+        "Arabic Trap",
+        "Greek Pop",
+        "Israeli Pop",
+        "Kurdish EDM",
+        "Lebanese Indie",
+        "Maltese Trap",
+        "Mediterranean Jazz",
+        "Oriental House",
+        "Persian Electronic",
+        "Portuguese Fado",
+        "Spanish Indie Rock",
+        "Turkish Rock"
+    ],
+    "Oceania": [
+        "Australian Metalcore",
+        "Australian Psych",
+        "New Zealand DnB",
+        "Pacific Islands Pop",
+        "Samoan Folk"
+    ],
+    "Indie Pop Spectrum": [
+        "Canadian Indie Pop",
+        "Japanese Indie Pop"
+    ],
+    "Drum & Bass / Bass Music": [
+        "Drum & Bass",
+        "Liquid DnB",
+        "Neurofunk",
+        "Filthstep",
+        "Drumstep",
+        "Bass Trap",
+        "Bassline",
+        "Jungle"
+    ],
+    "Kawaii & J-Genres": [
+        "Kawaii EDM",
+        "Kawaii Metal"
+    ],
+    "Shoegaze": [
+        "Shoegaze",
+        "Neo-Psychedelic Shoegaze",
+        "Ambient Shoegaze"
     ],
     "Jazz Explorations": [
         "Contemporary Vocal Jazz"
@@ -990,13 +1171,6 @@
         "Merseybeat",
         "Brill Building Pop",
         "British Invasion"
-    ],
-    "Global Electronica": [
-        "Canadian Electronic",
-        "Croatian Electronic",
-        "Colombian Electronic",
-        "Austropop Electronica",
-        "NZ DNB"
     ],
     "Dreamy Indie": [
         "Indie Fuzzpop",
@@ -1118,9 +1292,6 @@
     ],
     "Soulful Melodies": [],
     "Island Beats": [],
-    "Regional Folk Sounds": [
-        "Scandinavian Folk"
-    ],
     "Progressive Trance Variants": [
         "Psytrance",
         "Progressive Psy-Trance",
@@ -1280,7 +1451,37 @@
         "NZ DnB",
         "Persian EDM"
     ],
-    "Vintage Pop": [],
+    "Vintage Pop": [
+        "Adult Standards",
+        "Classic Pop",
+        "Classic Country Pop",
+        "Classic Disco Polo",
+        "Classic Soul",
+        "Classic Soundtrack",
+        "Easy Listening",
+        "Lounge",
+        "Lounge House",
+        "Lounge Music",
+        "Lounge Downtempo",
+        "Merseybeat",
+        "Motown",
+        "Nashville Sound",
+        "Neo Mellow",
+        "New Romantic",
+        "Old School Atlanta Hip Hop",
+        "Old School Dancehall",
+        "Old School Hard Trance",
+        "Old School UK Hip Hop",
+        "Retro Pop",
+        "Retro Soul",
+        "Soft Rock",
+        "Sophisti-Pop",
+        "Sunshine Pop",
+        "Torch Song",
+        "Vintage Pop",
+        "Vintage Revival",
+        "Yacht Rock"
+    ],
     "Modern Americana": [
         "Southern Folk",
         "Indie Americana",
@@ -1672,10 +1873,9 @@
     "Australian Influence": [
         "Australian Metalcore",
         "Australian Psych",
-        "Australian House",
-        "Australian Country",
-        "Australian Pop Punk",
-        "Australian Ska"
+        "New Zealand DnB",
+        "Pacific Islands Pop",
+        "Samoan Folk"
     ],
     "Latin Fusions 2": [
         "Panamanian Pop",
@@ -1841,5 +2041,466 @@
         "Danish Alt Rock",
         "Scandinavian Grunge",
         "Nordic Post-Rock"
+    ],
+    "Drill": [
+        "UK Drill",
+        "Chicago Drill",
+        "Brooklyn Drill",
+        "Bronx Drill",
+        "Russian Drill",
+        "German Drill",
+        "French Drill",
+        "Afro Drill"
+    ],
+    "Phonk": [
+        "Phonk",
+        "Drift Phonk",
+        "Phonk Brasileiro",
+        "Ukrainian Phonk",
+        "Trap Phonk"
+    ],
+    "Hyperpop": [
+        "Hyperpop",
+        "Hyperpop en Espa\u00f1ol",
+        "Hyperpop Francais",
+        "Neon Pop Punk"
+    ],
+    "Bedroom Pop & Soul": [
+        "Bedroom Pop",
+        "Bedroom Soul",
+        "Bedroom R&B"
+    ],
+    "Vaporwave & Retrowave": [
+        "Vaporwave",
+        "Retrowave",
+        "Darksynth",
+        "Synthwave",
+        "Cyberpunk"
+    ],
+    "Trap Variants": [
+        "Trap Metal",
+        "Trap Soul",
+        "Trap Latino",
+        "Trap Queen",
+        "Traprun",
+        "Trap EDM",
+        "Trap Boricua"
+    ],
+    "Math & Djent": [
+        "Math Rock",
+        "Mathcore",
+        "Djent",
+        "Instrumental Djent"
+    ],
+    "Post-Genres": [
+        "Post-Rock",
+        "Post-Metal",
+        "Post-Hardcore",
+        "Post-Punk",
+        "Post-Screamo"
+    ],
+    "Chill & Lo-Fi": [
+        "Lo-Fi Hip-Hop",
+        "Lo-Fi Jazzhop",
+        "Lo-Fi Beats",
+        "Chillhop",
+        "Chillwave",
+        "Chillsynth",
+        "Lo-Fi Sad"
+    ],
+    "Regional Rap/Hip-Hop": [
+        "French Hip Hop",
+        "German Hip Hop",
+        "Russian Hip Hop",
+        "African-American Classical",
+        "Argentine Hip-Hop",
+        "Houston Rap",
+        "Memphis Rap",
+        "New Orleans Rap"
+    ],
+    "Pluggnb & Plugg": [
+        "Pluggnb",
+        "Plugg",
+        "Emoplugg"
+    ],
+    "Screamo & Emocore": [
+        "Screamo",
+        "Emocore",
+        "Emoviolence"
+    ],
+    "Kawaii & J-Genres": [
+        "Kawaii EDM",
+        "Kawaii Metal"
+    ],
+    "Visual Kei": [
+        "Visual Kei"
+    ],
+    "Gqom & Afro House": [
+        "Gqom",
+        "Afro House",
+        "Afrobeat",
+        "Afro-Funk"
+    ],
+    "Grime": [
+        "Grime",
+        "UK Garage",
+        "UK Funky"
+    ],
+    "Bossa Nova & Latin Jazz": [
+        "Bossa Nova",
+        "Latin Jazz"
+    ],
+    "Cumbia & Bachata": [
+        "Cumbia",
+        "Bachata",
+        "Dembow"
+    ],
+    "Soca & Dancehall": [
+        "Soca",
+        "Dancehall"
+    ],
+    "Gabber & Hard Dance": [
+        "Gabber",
+        "Hardstyle",
+        "Hardvapour"
+    ],
+    "Folk Punk": [
+        "Folk Punk",
+        "Anti-Folk"
+    ],
+    "Chiptune & 8-bit": [
+        "Chiptune",
+        "8-bit"
+    ],
+    "Shoegaze": [
+        "Shoegaze",
+        "Neo-Psychedelic Shoegaze",
+        "Ambient Shoegaze"
+    ],
+    "UK": [
+        "UK Hip Hop",
+        "UK DnB",
+        "UK Garage",
+        "UK Drill",
+        "UK Funky",
+        "UK Pop",
+        "UK House",
+        "UK Tech House",
+        "UK Hardcore",
+        "UK Metalcore",
+        "UK Grime",
+        "UK Pop Punk"
+    ],
+    "France": [
+        "French Pop",
+        "French House",
+        "French Techno",
+        "French Hip Hop",
+        "French Jazz",
+        "French Indie Pop",
+        "French Chanson",
+        "French Classical"
+    ],
+    "Germany": [
+        "German Hip Hop",
+        "German Techno",
+        "German Trance",
+        "German House",
+        "German Pop",
+        "German Metal",
+        "German Punk",
+        "German Jazz Rap",
+        "German Reggae"
+    ],
+    "Japan": [
+        "J-Pop",
+        "J-Rock",
+        "Japanese Hip Hop",
+        "Japanese Jazz",
+        "Japanese EDM",
+        "Japanese Shoegaze",
+        "Japanese Idol Pop",
+        "Japanese Metalcore"
+    ],
+    "Brazil": [
+        "Brazilian Funk",
+        "Brazilian Pop",
+        "Brazilian EDM",
+        "Brazilian Jazz",
+        "Brazilian Trap",
+        "Brazilian Phonk"
+    ],
+    "Russia": [
+        "Russian Hip Hop",
+        "Russian Drill",
+        "Russian EDM",
+        "Russian Metal",
+        "Russian Ska",
+        "Russian Post-Punk",
+        "Russian Alt Pop"
+    ],
+    "USA": [
+        "Memphis Rap",
+        "New Orleans Jazz",
+        "Chicago Drill",
+        "Brooklyn Indie",
+        "Seattle Grunge",
+        "Atlanta Trap",
+        "Detroit Hip-Hop",
+        "Houston Rap",
+        "Bay Area Hip-Hop"
+    ],
+    "Italy": [
+        "Italian Pop",
+        "Italian Disco",
+        "Italian Jazz",
+        "Italian EDM",
+        "Italian Metal",
+        "Italian Trap"
+    ],
+    "India": [
+        "Bollywood Pop",
+        "Indian Hip-Hop",
+        "Punjabi Trap",
+        "Indian EDM",
+        "Bhangra",
+        "Desi Pop"
+    ],
+    "Australia": [
+        "Australian Metalcore",
+        "Australian Psych",
+        "Australian House",
+        "Australian Country",
+        "Australian Pop Punk",
+        "Australian Ska"
+    ],
+    "Canada": [
+        "Canadian Indie",
+        "Canadian Hip-Hop",
+        "Canadian Jazz",
+        "Canadian Punk",
+        "Canadian Country",
+        "Canadian Metal",
+        "Canadian Pop"
+    ],
+    "China": [
+        "Chinese Pop",
+        "Mandopop",
+        "Chinese Hip-Hop",
+        "Chinese EDM",
+        "Chinese Rock"
+    ],
+    "South Korea": [
+        "K-Pop",
+        "Korean Indie",
+        "Korean Trap",
+        "Korean Jazz",
+        "Korean Folk Pop"
+    ],
+    "Netherlands": [
+        "Dutch Techno",
+        "Dutch Pop",
+        "Dutch Hip-Hop",
+        "Dutch House",
+        "Dutch Drill",
+        "Dutch Metal",
+        "Dutch Trance"
+    ],
+    "Spain": [
+        "Spanish Indie Rock",
+        "Spanish Pop",
+        "Spanish Flamenco Fusion"
+    ],
+    "Turkey": [
+        "Turkish Rock",
+        "Turkish Trap Pop",
+        "Turkish Psytrance"
+    ],
+    "Poland": [
+        "Polish Alternative Rap",
+        "Polish Pop",
+        "Polish Trance",
+        "Polish Jazz",
+        "Polish Metal",
+        "Polish Folk"
+    ],
+    "Albania": [
+        "Albanian Hip Hop"
+    ],
+    "Armenia": [
+        "Armenian Hip Hop"
+    ],
+    "Bulgaria": [
+        "Bulgarian Pop",
+        "Bulgarian Electronic"
+    ],
+    "Cape Verde": [
+        "Musica Cabo-Verdiana"
+    ],
+    "Colombia": [
+        "Colombian Electronic",
+        "Colombian Hip Hop"
+    ],
+    "Estonia": [
+        "Estonian Hip Hop",
+        "Estonian Indie"
+    ],
+    "Finland": [
+        "Finnish Melodeath",
+        "Suomirap"
+    ],
+    "Gambia": [
+        "Gambian Hip Hop"
+    ],
+    "India": [
+        "Indian Lo-Fi",
+        "Indian Instrumental"
+    ],
+    "Japan": [
+        "Japanese Chillhop",
+        "Japanese Screamo"
+    ],
+    "Kenya": [
+        "Kenyan Drill"
+    ],
+    "Mongolia": [
+        "Mongolian Alternative"
+    ],
+    "Philippines": [
+        "Pinoy Hip Hop"
+    ],
+    "Poland": [
+        "Polish Trap"
+    ],
+    "Singapore": [
+        "Singaporean Indie"
+    ],
+    "South Africa": [
+        "South African Gospel",
+        "South African Deep House"
+    ],
+    "Sweden": [
+        "Swedish Drill",
+        "Swedish Emo"
+    ],
+    "Switzerland": [
+        "Swiss Techno",
+        "Swiss Hip Hop"
+    ],
+    "Taiwan": [
+        "Taiwan Metal"
+    ],
+    "Tatarstan": [
+        "Tatar Pop"
+    ],
+    "Thailand": [
+        "Thai Hip Hop"
+    ],
+    "Turkey": [
+        "Turkish Hip Hop"
+    ],
+    "Vietnam": [
+        "Vietnamese Hip Hop"
+    ],
+    "Zimbabwe": [
+        "Zim Hip Hop"
+    ],
+    "Afro-Fusion": [
+        "Afroswing",
+        "Afropop",
+        "Afro Soul",
+        "Afro R&B"
+    ],
+    "Balearic": [
+        "Balearic",
+        "Balearic Beat"
+    ],
+    "Internet Rap": [
+        "Meme Rap",
+        "Aesthetic Rap",
+        "Scam Rap"
+    ],
+    "Experimental Club": [
+        "Deconstructed Club",
+        "Drain",
+        "Dariacore"
+    ],
+    "Darkwave & Witch House": [
+        "Witch House",
+        "Vapor Soul",
+        "Visual Kei"
+    ],
+    "Modern House": [
+        "Slap House",
+        "Filter House",
+        "Future Funk"
+    ],
+    "Drum & Bass / Bass Music": [
+        "Drill and Bass",
+        "Halftime DnB",
+        "Stateside DnB"
+    ],
+    "Bounce": [
+        "Melbourne Bounce"
+    ],
+    "Country Subgenres": [
+        "Bakersfield Sound"
+    ],
+    "Balkan": [
+        "Balkan EDM",
+        "Balkan Fusion"
+    ],
+    "Internet-Born Genres": [
+        "Meme Rap", 
+        "Scam Rap", 
+        "Aesthetic Rap", 
+        "Vapor Soul", 
+        "Drain", 
+        "Dariacore", 
+        "Hyperpop", 
+        "Sigilkore", 
+        "Weirdcore",
+        "Witch House", 
+        "Nightcore", 
+        "Sped Up", 
+        "Slowed + Reverb"
+    ],
+    "Bedroom & DIY": [
+        "Bedroom Pop", 
+        "Bedroom R&B", 
+        "Bedroom Soul", 
+        "DIY Emo", 
+        "Lo-Fi Indie", 
+        "Lo-Fi Beats", 
+        "Indie Fuzzpop"
+    ],
+    "Fusion Mashups": [
+        "Jazz Metal", 
+        "Country Rap", 
+        "Folk Punk", 
+        "Reggae Metal", 
+        "Trap Metal", 
+        "Electro Swing", 
+        "Punk Rap"
+    ],
+    "Game & Anime": [
+        "Chiptune", 
+        "VGM Remix", 
+        "Video Game Music", 
+        "Doujin", 
+        "Bemani", 
+        "Anime Rock", 
+        "Anime Rap", 
+        "Anime Lo-Fi", 
+        "J-Pop", 
+        "J-Rock", 
+        "Vocaloid"
+    ],
+    "Spiritual & Healing": [
+        "Reiki", 
+        "Yoga Soundtracks", 
+        "Spiritual Hip Hop", 
+        "Gospel Soul", 
+        "Devotional"
     ]
 }
