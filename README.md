@@ -182,7 +182,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
     
     Once a week, the scripts will fetch all liked tracks and extract the artists from it.
     It will cache this data. Limited to Weekly as it can take forever to do on large libraries. Mine takes a solid 10 minutes. lol
-    
+
+    This should ensure more relevant playlists as a whole, I've tested it a bunch and I like it. 
+
     You can set a percentage of how many liked artist tracks to use in the script.
     Enabled by default, can be disabled for playlists in the json's like this.
 ```
