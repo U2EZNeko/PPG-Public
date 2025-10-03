@@ -13,6 +13,7 @@ SUB_USER_TOKENS = os.getenv('SUB_USER_TOKENS').split(',')  # Sub-user tokens fro
 # Define the playlists to copy
 PLAYLISTS_TO_COPY = [
     "Rock Ballads",
+    "Rock Ballads 2",
     "Rock Classics",
     "Rock Balladen 80-90",
     "All Out 50s",
@@ -33,7 +34,8 @@ PLAYLISTS_TO_COPY = [
     "Polka Mix",
     "Chill Mix",
     "Best of Rock Balladen",
-    "Rock Balladen Mix"
+    "Rock Balladen Mix",
+    "Rock Ballads 80s-90s"
 ]
 
 # Connect to Plex server
