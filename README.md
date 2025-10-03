@@ -176,7 +176,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
 
-  # 03.10.2025 Update:
+  03.10.2025 Update:
 
   - Liked Artist Preference:
     
