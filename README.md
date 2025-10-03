@@ -137,6 +137,11 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Update log
 
+### 03.10.2025:
+
+  - Added Preference for liked artists
+  - Added logic to avoid artists filling whole playlists
+  - Clearer debug output
 
 ### 16.01.2025:
 
@@ -170,6 +175,30 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
+
+  # 03.10.2025 Update:
+
+  - Liked Artist Preference:
+    
+    Once a week, the scripts will fetch all liked tracks and extract the artists from it.
+    It will cache this data. Limited to Weekly as it can take forever to do on large libraries. Mine takes a solid 10 minutes. lol
+    
+    You can set a percentage of how many liked artist tracks to use in the script.
+    Enabled by default, can be disabled for playlists in the json's like this.
+```
+  "Rock": {
+    "genres": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
+    "prefer_liked_artists": true
+  },
+  "Classical": {
+    "genres": ["Classical Music", "Baroque", "Opera", "Romantic Classical", "Classical Crossover", "Symphonic", "Chamber Music"],
+    "prefer_liked_artists": false
+  }
+```
+
+  - The scripts will now check a playlist once created and re-fetch tracks if an artist takes too many slots.
+    
+    Can be configured in the script.
 
 
 # Not working
