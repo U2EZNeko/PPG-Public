@@ -542,16 +542,20 @@ def generate_weekly_playlists():
                 # Add the new songs
                 existing_playlist.addItems(playlist_songs)
 
-                # Update the description with the selected genres
+                # Update the description with the selected genres and timestamp
                 genre_description = ", ".join(selected_genres)
-                existing_playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                existing_playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
 
-                # Set the description with the selected genres
+                # Set the description with the selected genres and timestamp
                 genre_description = ", ".join(selected_genres)
-                playlist.editSummary(f"Genres used: {genre_description}")  # Using editSummary instead of edit
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
