@@ -527,12 +527,16 @@ def generate_genre_playlists():
                 existing_playlist.removeItems(existing_playlist.items())
                 existing_playlist.addItems(playlist_songs)
                 genre_description = ", ".join(genres)
-                existing_playlist.editSummary(f"Genres used: {genre_description}")
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                existing_playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
                 genre_description = ", ".join(genres)
-                playlist.editSummary(f"Genres used: {genre_description}")
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
