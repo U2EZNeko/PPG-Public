@@ -1,3 +1,4 @@
+
 from plexapi.server import PlexServer
 import random
 import json
@@ -546,7 +547,7 @@ def generate_daily_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                existing_playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                existing_playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -555,7 +556,7 @@ def generate_daily_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
@@ -578,3 +579,4 @@ if __name__ == "__main__":
     print("Starting the Daily playlist generation process...")
     generate_daily_playlists()
     print("\nDaily playlists updated successfully.")
+
