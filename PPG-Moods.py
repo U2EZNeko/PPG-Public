@@ -438,7 +438,7 @@ def generate_mood_playlists():
         save_liked_artists_cache(liked_artists, track_count)
 
     for group_name, moods in mood_groups.items():
-        playlist_name = f"{group_name} Mood"
+        playlist_name = f"{group_name} Mix"
         print(f"\nStarting generation for Playlist '{playlist_name}'...")
 
         try:
