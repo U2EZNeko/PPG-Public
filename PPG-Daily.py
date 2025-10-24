@@ -1,3 +1,4 @@
+
 from plexapi.server import PlexServer
 import random
 import json
@@ -7,21 +8,23 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Fetch sensitive data from environment variables
+# Fetch all configuration from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
-PLAYLIST_COUNT = 7
-SONGS_PER_PLAYLIST = 50
-GENRE_GROUPS_FILE = "genre_groups.json"  # Path to the genre groups file
-DAILY_LOG_FILE = "dailylog.txt"  # File to store used genre groups
-LIKED_ARTISTS_CACHE_FILE = "liked_artists_cache.json"  # File to cache liked artists
-MAX_LOG_ENTRIES = 50  # Maximum number of entries in the log
-MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
-MAX_ARTIST_PERCENTAGE = 0.3  # Maximum percentage of songs per artist (30%)
 
-# Liked artists and variety configuration
-MAX_LIKED_ARTISTS_PERCENTAGE = 0.8  # Maximum percentage of songs from liked artists (90%)
-MIN_VARIETY_PERCENTAGE = 0.1  # Minimum percentage of songs from other artists for variety (10%)
+# Shared configuration
+SONGS_PER_PLAYLIST = int(os.getenv("SONGS_PER_PLAYLIST", "50"))
+MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE", "0.3"))
+MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE", "0.8"))
+MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE", "0.1"))
+LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE", "liked_artists_cache.json")
+
+# Daily-specific configuration
+PLAYLIST_COUNT = int(os.getenv("DAILY_PLAYLIST_COUNT", "7"))
+GENRE_GROUPS_FILE = os.getenv("DAILY_GENRE_GROUPS_FILE", "genre_groups.json")
+DAILY_LOG_FILE = os.getenv("DAILY_LOG_FILE", "dailylog.txt")
+MAX_LOG_ENTRIES = int(os.getenv("DAILY_MAX_LOG_ENTRIES", "50"))
+MIN_SONGS_REQUIRED = float(os.getenv("DAILY_MIN_SONGS_REQUIRED", "0.8")) * SONGS_PER_PLAYLIST
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -412,9 +415,9 @@ def save_liked_artists_cache(liked_artists, track_count):
         print(f"❌ Error saving liked artists cache: {e}")
 
 
-# Check if cache is older than 7 days
+# Check if cache is older than configured days
 def is_cache_old(cache_timestamp):
-    """Check if cache is older than 7 days."""
+    """Check if cache is older than configured days."""
     if not cache_timestamp:
         return True
     
@@ -422,7 +425,8 @@ def is_cache_old(cache_timestamp):
         from datetime import datetime, timedelta
         cache_date = datetime.fromisoformat(cache_timestamp)
         days_old = (datetime.now() - cache_date).days
-        return days_old >= 7
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        return days_old >= cache_days
     except Exception as e:
         print(f"Error checking cache age: {e}")
         return True
@@ -449,13 +453,15 @@ def generate_daily_playlists():
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
     
     if cached_artists is not None and not is_cache_old(cache_timestamp):
-        # We have fresh cached data (less than 7 days old)
-        print(f"✅ Using cached liked artists (cache is fresh)")
+        # We have fresh cached data (less than configured days old)
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        print(f"✅ Using cached liked artists (cache is fresh, less than {cache_days} days old)")
         liked_artists = cached_artists
     else:
         # Cache is old or doesn't exist, refresh it
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
         if cached_artists is not None:
-            print(f"🔄 Cache is older than 7 days. Refreshing liked artists data...")
+            print(f"🔄 Cache is older than {cache_days} days. Refreshing liked artists data...")
         else:
             print("🆕 No cache available. Fetching fresh liked artists data...")
         
@@ -546,7 +552,7 @@ def generate_daily_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                existing_playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                existing_playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -555,7 +561,7 @@ def generate_daily_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 

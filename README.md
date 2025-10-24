@@ -137,6 +137,15 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Update log
 
+### 24.10.2025:
+
+  - Moved most config values to .env, alternatively you can still define them in the scripts.
+  - Hopefully final adjustment to Description
+  - Updated the groups a bit
+  - Prettied up output
+  - Used AI to comment out code because im lazy
+  - Fixed playlist shuffler, only works on regular playlists (Useful for smart home automations that cannot use the shuffle function)
+
 ### 03.10.2025:
 
   - Added Preference for liked artists
@@ -145,9 +154,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ### 16.01.2025:
 
-  -   Added before, between and after time filters.   
-  -   Added logging to reduce getting the same playlists.
-  -   Removed useless fetch of all available genres from Daily script.
+  - Added before, between and after time filters.   
+  - Added logging to reduce getting the same playlists.
+  - Removed useless fetch of all available genres from Daily script.
 
 
 # Information:
@@ -175,6 +184,12 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
+
+  24.10.2025 Update:
+  - Config values were moved to .env, check example.env to see whats available. 
+    Make sure you use full paths for log files just to be sure.
+    Alternatively you can always have a value after the .env reference, i kept them in the scripts so everyone sees how. 
+
 
   03.10.2025 Update:
 

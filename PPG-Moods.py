@@ -1,27 +1,26 @@
-import os
+from plexapi.server import PlexServer
 import random
 import json
-from plexapi.server import PlexServer
+import os
 from dotenv import load_dotenv
-
-# Static configuration
-PLAYLIST_SIZE = 50  # Number of tracks in each playlist
-MIN_TRACK_PERCENT = 0.8  # Minimum percentage of tracks required to create a playlist (80%)
-MOOD_GROUPS_FILE = "mood_groups.json"  # Path to the JSON file containing mood groups
-LIKED_ARTISTS_CACHE_FILE = "liked_artists_cache.json"  # File to cache liked artists
-MAX_ARTIST_PERCENTAGE = 0.3  # Maximum percentage of songs per artist (30%)
-
-# Liked artists and variety configuration
-MAX_LIKED_ARTISTS_PERCENTAGE = 0.9  # Maximum percentage of songs from liked artists (90%)
-MIN_VARIETY_PERCENTAGE = 0.1  # Minimum percentage of songs from other artists for variety (10%)
-
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Fetch sensitive data from environment variables
+# Fetch all configuration from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
+
+# Shared configuration
+SONGS_PER_PLAYLIST = int(os.getenv("SONGS_PER_PLAYLIST", "50"))
+MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE", "0.3"))
+MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE", "0.8"))
+MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE", "0.1"))
+LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE", "liked_artists_cache.json")
+
+# Moods-specific configuration
+MIN_TRACK_PERCENT = float(os.getenv("MOODS_MIN_TRACK_PERCENT", "0.8"))
+MOOD_GROUPS_FILE = os.getenv("MOOD_GROUPS_FILE", "mood_groups.json")
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -39,7 +38,7 @@ def get_artist_name(track):
 def count_liked_tracks():
     """Count liked tracks without extracting artists (for cache validation)."""
     try:
-        print("Quickly counting liked tracks to check cache validity...")
+        print("⚡ Quickly counting liked tracks to check cache validity...")
         
         # Get music library
         music_library = plex.library.section("Music")
@@ -51,9 +50,9 @@ def count_liked_tracks():
         try:
             liked_items = music_library.searchTracks(userRating__gte=1)
             liked_count = len(liked_items)
-            print(f"Method 1 (searchTracks): Found {liked_count:,} liked tracks")
+            print(f"✅ Method 1 (searchTracks): Found {liked_count:,} liked tracks")
         except Exception as e1:
-            print(f"Method 1 failed: {e1}")
+            print(f"❌ Method 1 failed: {e1}")
             liked_count = 0
         
         # Method 2: Try search with different filter syntax
@@ -61,9 +60,9 @@ def count_liked_tracks():
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
                 liked_count = len(liked_items)
-                print(f"Method 2 (search with userRating>=): Found {liked_count:,} liked tracks")
+                print(f"✅ Method 2 (search with userRating>=): Found {liked_count:,} liked tracks")
             except Exception as e2:
-                print(f"Method 2 failed: {e2}")
+                print(f"❌ Method 2 failed: {e2}")
                 liked_count = 0
         
         # Method 3: Try search with userRating__gte in filters
@@ -71,15 +70,15 @@ def count_liked_tracks():
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
                 liked_count = len(liked_items)
-                print(f"Method 3 (search with userRating__gte): Found {liked_count:,} liked tracks")
+                print(f"✅ Method 3 (search with userRating__gte): Found {liked_count:,} liked tracks")
             except Exception as e3:
-                print(f"Method 3 failed: {e3}")
+                print(f"❌ Method 3 failed: {e3}")
                 liked_count = 0
         
         return liked_count
         
     except Exception as e:
-        print(f"Error counting liked tracks: {e}")
+        print(f"❌ Error counting liked tracks: {e}")
         return 0
 
 
@@ -87,50 +86,50 @@ def count_liked_tracks():
 def get_liked_artists():
     """Get a set of artist names from all liked tracks (1+ stars) in Plex."""
     try:
-        print("Fetching liked artists from Plex by querying liked tracks directly...")
+        print("🎵 Fetching liked artists from Plex by querying liked tracks directly...")
         liked_artists = set()
         
         # Get music library
         music_library = plex.library.section("Music")
         
         # Try different approaches to find liked tracks
-        print("Attempting to query Plex for tracks with 1+ star rating...")
+        print("🔍 Attempting to query Plex for tracks with 1+ star rating...")
         
         # Method 1: Try searchTracks with userRating__gte
         try:
             liked_items = music_library.searchTracks(userRating__gte=1)
-            print(f"Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
+            print(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
         except Exception as e1:
-            print(f"Method 1 failed: {e1}")
+            print(f"❌ Method 1 failed: {e1}")
             liked_items = []
         
         # Method 2: Try search with different filter syntax
         if not liked_items:
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                print(f"Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
+                print(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
             except Exception as e2:
-                print(f"Method 2 failed: {e2}")
+                print(f"❌ Method 2 failed: {e2}")
                 liked_items = []
         
         # Method 3: Try search with userRating__gte in filters
         if not liked_items:
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                print(f"Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
+                print(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
             except Exception as e3:
-                print(f"Method 3 failed: {e3}")
+                print(f"❌ Method 3 failed: {e3}")
                 liked_items = []
         
         # Method 4: Fallback - get all tracks and filter manually (for debugging)
         if not liked_items:
-            print("All direct filtering methods failed. Falling back to manual filtering for debugging...")
-            print("This will be slower but will help us debug the issue.")
+            print("⚠️ All direct filtering methods failed. Falling back to manual filtering for debugging...")
+            print("🐌 This will be slower but will help us debug the issue.")
             all_tracks = music_library.search(libtype="track", limit=None)
-            print(f"Loaded {len(all_tracks):,} total tracks for manual filtering...")
+            print(f"📊 Loaded {len(all_tracks):,} total tracks for manual filtering...")
             
             # Debug: Check a few tracks for their userRating
-            print("Checking first 10 tracks for userRating values:")
+            print("🔍 Checking first 10 tracks for userRating values:")
             for i, track in enumerate(all_tracks[:10]):
                 rating = getattr(track, 'userRating', 'No userRating attribute')
                 print(f"  Track {i+1}: {track.title} - userRating: {rating}")
@@ -145,7 +144,7 @@ def get_liked_artists():
                 if i % 5000 == 0 and i > 0:
                     print(f"Manual filtering progress: {i:,}/{len(all_tracks):,} tracks - Found {len(liked_items):,} liked tracks so far", end='\r')
             
-            print(f"\nManual filtering complete: Found {len(liked_items):,} liked tracks")
+            print(f"\n✅ Manual filtering complete: Found {len(liked_items):,} liked tracks")
         
         if not liked_items:
             print("❌ No liked tracks found with any method. Please check:")
@@ -154,7 +153,7 @@ def get_liked_artists():
             print("3. Is your Plex server up to date?")
             return set(), 0
         
-        print(f"Found {len(liked_items):,} liked tracks, extracting artists...")
+        print(f"🎯 Found {len(liked_items):,} liked tracks, extracting artists...")
         
         # Extract artists with progress display
         for i, track in enumerate(liked_items, 1):
@@ -167,11 +166,11 @@ def get_liked_artists():
                 progress_percent = (i / len(liked_items)) * 100
                 print(f"Artist extraction: {i:,}/{len(liked_items):,} tracks ({progress_percent:.1f}%) - Found {len(liked_artists):,} unique artists so far", end='\r')
         
-        print(f"\n✅ Found {len(liked_artists):,} unique liked artists from {len(liked_items):,} liked tracks")
+        print(f"\n🎉 Found {len(liked_artists):,} unique liked artists from {len(liked_items):,} liked tracks")
         return liked_artists, len(liked_items)
         
     except Exception as e:
-        print(f"Error fetching liked artists: {e}")
+        print(f"❌ Error fetching liked artists: {e}")
         return set(), 0
 
 # Analyze artist distribution in a playlist
@@ -322,7 +321,7 @@ def prefer_liked_artists(songs, liked_artists, target_count, max_liked_percentag
 # Load liked artists from cache file
 def load_liked_artists_cache():
     """Load liked artists and track count from cache file."""
-    print("Checking liked artists cache...")
+    print("🔍 Checking liked artists cache...")
     if not os.path.exists(LIKED_ARTISTS_CACHE_FILE):
         print("❌ No liked artists cache found.")
         return None, 0, None
@@ -369,9 +368,9 @@ def save_liked_artists_cache(liked_artists, track_count):
         print(f"❌ Error saving liked artists cache: {e}")
 
 
-# Check if cache is older than 7 days
+# Check if cache is older than configured days
 def is_cache_old(cache_timestamp):
-    """Check if cache is older than 7 days."""
+    """Check if cache is older than configured days."""
     if not cache_timestamp:
         return True
     
@@ -379,7 +378,8 @@ def is_cache_old(cache_timestamp):
         from datetime import datetime, timedelta
         cache_date = datetime.fromisoformat(cache_timestamp)
         days_old = (datetime.now() - cache_date).days
-        return days_old >= 7
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        return days_old >= cache_days
     except Exception as e:
         print(f"Error checking cache age: {e}")
         return True
@@ -387,7 +387,6 @@ def is_cache_old(cache_timestamp):
 
 # Load mood groups from JSON file
 def load_mood_groups():
-    """Load mood groups from a JSON file."""
     print("Loading mood groups from file...")
     if not os.path.exists(MOOD_GROUPS_FILE):
         print(f"Error: {MOOD_GROUPS_FILE} not found.")
@@ -395,14 +394,12 @@ def load_mood_groups():
     try:
         with open(MOOD_GROUPS_FILE, "r") as file:
             mood_groups = json.load(file)
-            print(f"Loaded mood groups: {mood_groups}")
+            print(f"Loaded mood groups successfully!")
             return mood_groups
     except Exception as e:
         print(f"Error loading mood groups: {e}")
         return {}
 
-
-# Generate playlists based on mood groups
 def generate_mood_playlists():
     """Generate playlists based on mood groups."""
     print("🔌 Connecting to Plex server...")
@@ -410,67 +407,67 @@ def generate_mood_playlists():
         music_library = plex.library.section("Music")  # Adjust if your music library name differs
         print("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
-        print(f"Error connecting to Plex server or accessing library: {e}")
+        print(f"❌ Error connecting to Plex server or accessing library: {e}")
         return
 
     # Load mood groups
     mood_groups = load_mood_groups()
     if not mood_groups:
-        print("No mood groups available. Exiting.")
+        print("❌ No mood groups available. Exiting.")
         return
 
     # Get liked artists with weekly caching logic
-    print("Loading liked artists...")
+    print("🎵 Loading liked artists...")
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
     
     if cached_artists is not None and not is_cache_old(cache_timestamp):
-        # We have fresh cached data (less than 7 days old)
-        print(f"✅ Using cached liked artists (cache is fresh)")
+        # We have fresh cached data (less than configured days old)
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        print(f"✅ Using cached liked artists (cache is fresh, less than {cache_days} days old)")
         liked_artists = cached_artists
     else:
         # Cache is old or doesn't exist, refresh it
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
         if cached_artists is not None:
-            print(f"🔄 Cache is older than 7 days. Refreshing liked artists data...")
+            print(f"🔄 Cache is older than {cache_days} days. Refreshing liked artists data...")
         else:
-            print("No cache available. Fetching fresh liked artists data...")
+            print("🆕 No cache available. Fetching fresh liked artists data...")
         
-        print("Fetching liked artists with progress display...")
+        print("🔄 Fetching liked artists with progress display...")
         liked_artists, track_count = get_liked_artists()
         save_liked_artists_cache(liked_artists, track_count)
 
     for group_name, moods in mood_groups.items():
-        # Create playlist name in the format "<Mood Group> Mix"
         playlist_name = f"{group_name} Mix"
         print(f"\nStarting generation for Playlist '{playlist_name}'...")
 
         try:
-            # Retry logic if not enough songs are found
-            songs = []
-
             # Collect all tracks for the selected moods
+            songs = []
             for mood in moods:
                 print(f"Fetching tracks for mood: {mood}")
-                tracks = music_library.search(libtype="track", mood=mood, limit=None)
+                tracks = music_library.search(mood=mood, libtype="track", limit=None)
                 print(f"Found {len(tracks)} tracks for mood: {mood}")
                 songs.extend(tracks)
 
             total_songs = len(songs)
-            print(f"Total songs found for playlist '{playlist_name}': {total_songs}")
+            print(f"Total songs after filtering: {total_songs}")
 
-            # Check if the number of songs is >= 50% of PLAYLIST_SIZE
-            if total_songs >= (MIN_TRACK_PERCENT * PLAYLIST_SIZE):
+            # Check if the number of songs is >= MIN_TRACK_PERCENT of SONGS_PER_PLAYLIST
+            min_tracks_required = int(SONGS_PER_PLAYLIST * MIN_TRACK_PERCENT)
+            if total_songs >= min_tracks_required:
                 print(f"Found sufficient songs ({total_songs}) for Playlist '{playlist_name}'. Creating playlist.")
             else:
                 print(f"Not enough songs for Playlist '{playlist_name}', skipping.")
-                continue  # Skip this playlist if we couldn't find enough songs
+                continue
 
-            # Select the required number of songs (up to PLAYLIST_SIZE)
+            # Select the required number of songs (up to SONGS_PER_PLAYLIST)
             if liked_artists:
-                playlist_songs = prefer_liked_artists(songs, liked_artists, min(len(songs), PLAYLIST_SIZE), 
+                playlist_songs = prefer_liked_artists(songs, liked_artists, min(len(songs), SONGS_PER_PLAYLIST), 
                                                     MAX_LIKED_ARTISTS_PERCENTAGE, MIN_VARIETY_PERCENTAGE)
                 print(f"Selected {len(playlist_songs)} songs (preferring liked artists) for Playlist '{playlist_name}'.")
             else:
-                playlist_songs = random.sample(songs, min(len(songs), PLAYLIST_SIZE))
+                playlist_songs = random.sample(songs, min(len(songs), SONGS_PER_PLAYLIST))
                 print(f"Selected {len(playlist_songs)} random songs for Playlist '{playlist_name}'.")
 
             # Balance artist representation to ensure no single artist exceeds the configured limit
@@ -482,27 +479,23 @@ def generate_mood_playlists():
 
             if existing_playlist:
                 print(f"Updating existing playlist: {playlist_name}")
-
-                # Remove all items from the existing playlist before adding new ones
-                existing_playlist.removeItems(existing_playlist.items())  # This empties the current playlist
-
-                # Add the new songs
+                existing_playlist.removeItems(existing_playlist.items())
                 existing_playlist.addItems(playlist_songs)
-
+                
                 # Update the description with the selected moods and timestamp
                 mood_description = ", ".join(moods)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                existing_playlist.editSummary(f"Moods used: {mood_description}\nLast updated on: {timestamp}")
+                existing_playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
-
+                
                 # Set the description with the selected moods and timestamp
                 mood_description = ", ".join(moods)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                playlist.editSummary(f"Moods used: {mood_description}\nLast updated on: {timestamp}")
+                playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
@@ -511,6 +504,6 @@ def generate_mood_playlists():
 
 # Run the script
 if __name__ == "__main__":
-    print("Starting the mood playlist generation process...")
+    print("Starting the Mood playlist generation process...")
     generate_mood_playlists()
     print("\nMood playlists updated successfully.")

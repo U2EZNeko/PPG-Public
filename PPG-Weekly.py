@@ -4,24 +4,26 @@ import json
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file test
 load_dotenv()
 
-# Fetch sensitive data from environment variables
+# Fetch all configuration from environment variables
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
-PLAYLIST_COUNT = 5
-SONGS_PER_PLAYLIST = 200
-GENRE_GROUPS_FILE = "genre_groups.json"  # Path to the genre groups file
-WEEKLY_LOG_FILE = "weeklylog.txt"  # File to store used genre groups
-LIKED_ARTISTS_CACHE_FILE = "liked_artists_cache.json"  # File to cache liked artists
-MAX_LOG_ENTRIES = 50  # Maximum number of entries in the log
-MIN_SONGS_REQUIRED = 0.8 * SONGS_PER_PLAYLIST  # 80% of the required songs
-MAX_ARTIST_PERCENTAGE = 0.3  # Maximum percentage of songs per artist (30%)
 
-# Liked artists and variety configuration
-MAX_LIKED_ARTISTS_PERCENTAGE = 0.9  # Maximum percentage of songs from liked artists (90%)
-MIN_VARIETY_PERCENTAGE = 0.1  # Minimum percentage of songs from other artists for variety (10%)
+# Shared configuration
+SONGS_PER_PLAYLIST = int(os.getenv("SONGS_PER_PLAYLIST", "50"))
+MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE", "0.3"))
+MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE", "0.8"))
+MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE", "0.1"))
+LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE", "liked_artists_cache.json")
+
+# Weekly-specific configuration
+PLAYLIST_COUNT = int(os.getenv("WEEKLY_PLAYLIST_COUNT", "7"))
+GENRE_GROUPS_FILE = os.getenv("WEEKLY_GENRE_GROUPS_FILE", "genre_groups.json")
+WEEKLY_LOG_FILE = os.getenv("WEEKLY_LOG_FILE", "weeklylog.txt")
+MAX_LOG_ENTRIES = int(os.getenv("WEEKLY_MAX_LOG_ENTRIES", "50"))
+MIN_SONGS_REQUIRED = float(os.getenv("WEEKLY_MIN_SONGS_REQUIRED", "0.8")) * SONGS_PER_PLAYLIST
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -51,9 +53,9 @@ def count_liked_tracks():
         try:
             liked_items = music_library.searchTracks(userRating__gte=1)
             liked_count = len(liked_items)
-            print(f"Method 1 (searchTracks): Found {liked_count:,} liked tracks")
+            print(f"✅ Method 1 (searchTracks): Found {liked_count:,} liked tracks")
         except Exception as e1:
-            print(f"Method 1 failed: {e1}")
+            print(f"❌ Method 1 failed: {e1}")
             liked_count = 0
         
         # Method 2: Try search with different filter syntax
@@ -61,9 +63,9 @@ def count_liked_tracks():
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
                 liked_count = len(liked_items)
-                print(f"Method 2 (search with userRating>=): Found {liked_count:,} liked tracks")
+                print(f"✅ Method 2 (search with userRating>=): Found {liked_count:,} liked tracks")
             except Exception as e2:
-                print(f"Method 2 failed: {e2}")
+                print(f"❌ Method 2 failed: {e2}")
                 liked_count = 0
         
         # Method 3: Try search with userRating__gte in filters
@@ -71,15 +73,15 @@ def count_liked_tracks():
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
                 liked_count = len(liked_items)
-                print(f"Method 3 (search with userRating__gte): Found {liked_count:,} liked tracks")
+                print(f"✅ Method 3 (search with userRating__gte): Found {liked_count:,} liked tracks")
             except Exception as e3:
-                print(f"Method 3 failed: {e3}")
+                print(f"❌ Method 3 failed: {e3}")
                 liked_count = 0
         
         return liked_count
         
     except Exception as e:
-        print(f"Error counting liked tracks: {e}")
+        print(f"❌ Error counting liked tracks: {e}")
         return 0
 
 
@@ -99,38 +101,38 @@ def get_liked_artists():
         # Method 1: Try searchTracks with userRating__gte
         try:
             liked_items = music_library.searchTracks(userRating__gte=1)
-            print(f"Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
+            print(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
         except Exception as e1:
-            print(f"Method 1 failed: {e1}")
+            print(f"❌ Method 1 failed: {e1}")
             liked_items = []
         
         # Method 2: Try search with different filter syntax
         if not liked_items:
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                print(f"Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
+                print(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
             except Exception as e2:
-                print(f"Method 2 failed: {e2}")
+                print(f"❌ Method 2 failed: {e2}")
                 liked_items = []
         
         # Method 3: Try search with userRating__gte in filters
         if not liked_items:
             try:
                 liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                print(f"Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
+                print(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
             except Exception as e3:
-                print(f"Method 3 failed: {e3}")
+                print(f"❌ Method 3 failed: {e3}")
                 liked_items = []
         
         # Method 4: Fallback - get all tracks and filter manually (for debugging)
         if not liked_items:
-            print("All direct filtering methods failed. Falling back to manual filtering for debugging...")
-            print("This will be slower but will help us debug the issue.")
+            print("⚠️ All direct filtering methods failed. Falling back to manual filtering for debugging...")
+            print("🐌 This will be slower but will help us debug the issue.")
             all_tracks = music_library.search(libtype="track", limit=None)
-            print(f"Loaded {len(all_tracks):,} total tracks for manual filtering...")
+            print(f"📊 Loaded {len(all_tracks):,} total tracks for manual filtering...")
             
             # Debug: Check a few tracks for their userRating
-            print("Checking first 10 tracks for userRating values:")
+            print("🔍 Checking first 10 tracks for userRating values:")
             for i, track in enumerate(all_tracks[:10]):
                 rating = getattr(track, 'userRating', 'No userRating attribute')
                 print(f"  Track {i+1}: {track.title} - userRating: {rating}")
@@ -145,16 +147,16 @@ def get_liked_artists():
                 if i % 5000 == 0 and i > 0:
                     print(f"Manual filtering progress: {i:,}/{len(all_tracks):,} tracks - Found {len(liked_items):,} liked tracks so far", end='\r')
             
-            print(f"\nManual filtering complete: Found {len(liked_items):,} liked tracks")
+            print(f"\n✅ Manual filtering complete: Found {len(liked_items):,} liked tracks")
         
         if not liked_items:
-            print("No liked tracks found with any method. Please check:")
+            print("❌ No liked tracks found with any method. Please check:")
             print("1. Do you have tracks rated 1+ stars in Plex?")
             print("2. Are you logged in as the correct user?")
             print("3. Is your Plex server up to date?")
             return set(), 0
         
-        print(f"Found {len(liked_items):,} liked tracks, extracting artists...")
+        print(f"🎯 Found {len(liked_items):,} liked tracks, extracting artists...")
         
         # Extract artists with progress display
         for i, track in enumerate(liked_items, 1):
@@ -167,11 +169,11 @@ def get_liked_artists():
                 progress_percent = (i / len(liked_items)) * 100
                 print(f"Artist extraction: {i:,}/{len(liked_items):,} tracks ({progress_percent:.1f}%) - Found {len(liked_artists):,} unique artists so far", end='\r')
         
-        print(f"\n✅ Found {len(liked_artists):,} unique liked artists from {len(liked_items):,} liked tracks")
+        print(f"\n🎉 Found {len(liked_artists):,} unique liked artists from {len(liked_items):,} liked tracks")
         return liked_artists, len(liked_items)
         
     except Exception as e:
-        print(f"Error fetching liked artists: {e}")
+        print(f"❌ Error fetching liked artists: {e}")
         return set(), 0
 
 # Analyze artist distribution in a playlist
@@ -328,7 +330,7 @@ def load_genre_groups():
     try:
         with open(GENRE_GROUPS_FILE, "r") as file:
             genre_groups = json.load(file)
-            print(f"Loaded genre groups: {genre_groups}")
+            print(f"Loaded genre groups successfully!")
             return genre_groups
     except Exception as e:
         print(f"Error loading genre groups: {e}")
@@ -367,7 +369,7 @@ def load_liked_artists_cache():
     """Load liked artists and track count from cache file."""
     print("🔍 Checking liked artists cache...")
     if not os.path.exists(LIKED_ARTISTS_CACHE_FILE):
-        print("No liked artists cache found.")
+        print("❌ No liked artists cache found.")
         return None, 0, None
     
     try:
@@ -381,15 +383,15 @@ def load_liked_artists_cache():
                 from datetime import datetime, timedelta
                 cache_date = datetime.fromisoformat(cache_timestamp)
                 days_old = (datetime.now() - cache_date).days
-                print(f"Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
-                print(f"Cache is {days_old} days old")
+                print(f"✅ Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
+                print(f"📅 Cache is {days_old} days old")
                 return liked_artists, cached_track_count, cache_timestamp
             else:
-                print(f"Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
-                print("Cache has no timestamp - will refresh to add timestamp")
+                print(f"✅ Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
+                print("⚠️ Cache has no timestamp - will refresh to add timestamp")
                 return liked_artists, cached_track_count, None
     except Exception as e:
-        print(f"Error loading liked artists cache: {e}")
+        print(f"❌ Error loading liked artists cache: {e}")
         return None, 0, None
 
 
@@ -406,15 +408,15 @@ def save_liked_artists_cache(liked_artists, track_count):
         }
         with open(LIKED_ARTISTS_CACHE_FILE, "w") as file:
             json.dump(cache_data, file, indent=2)
-        print(f"Saved {len(liked_artists):,} liked artists to cache (from {track_count:,} tracks)")
-        print(f"Cache timestamp: {cache_data['cache_timestamp']}")
+        print(f"✅ Saved {len(liked_artists):,} liked artists to cache (from {track_count:,} tracks)")
+        print(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
     except Exception as e:
-        print(f"Error saving liked artists cache: {e}")
+        print(f"❌ Error saving liked artists cache: {e}")
 
 
-# Check if cache is older than 7 days
+# Check if cache is older than configured days
 def is_cache_old(cache_timestamp):
-    """Check if cache is older than 7 days."""
+    """Check if cache is older than configured days."""
     if not cache_timestamp:
         return True
     
@@ -422,7 +424,8 @@ def is_cache_old(cache_timestamp):
         from datetime import datetime, timedelta
         cache_date = datetime.fromisoformat(cache_timestamp)
         days_old = (datetime.now() - cache_date).days
-        return days_old >= 7
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        return days_old >= cache_days
     except Exception as e:
         print(f"Error checking cache age: {e}")
         return True
@@ -435,7 +438,7 @@ def generate_weekly_playlists():
         music_library = plex.library.section("Music")  # Adjust if your music library name differs
         print("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
-        print(f"Error connecting to Plex server or accessing library: {e}")
+        print(f"❌ Error connecting to Plex server or accessing library: {e}")
         return
 
     # Load genre groups
@@ -449,17 +452,19 @@ def generate_weekly_playlists():
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
     
     if cached_artists is not None and not is_cache_old(cache_timestamp):
-        # We have fresh cached data (less than 7 days old)
-        print(f"✅ Using cached liked artists (cache is fresh)")
+        # We have fresh cached data (less than configured days old)
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
+        print(f"✅ Using cached liked artists (cache is fresh, less than {cache_days} days old)")
         liked_artists = cached_artists
     else:
         # Cache is old or doesn't exist, refresh it
+        cache_days = int(os.getenv("CACHE_DAYS", "7"))
         if cached_artists is not None:
-            print(f"🔄 Cache is older than 7 days. Refreshing liked artists data...")
+            print(f"🔄 Cache is older than {cache_days} days. Refreshing liked artists data...")
         else:
-            print("No cache available. Fetching fresh liked artists data...")
+            print("🆕 No cache available. Fetching fresh liked artists data...")
         
-        print("Fetching liked artists with progress display...")
+        print("🔄 Fetching liked artists with progress display...")
         liked_artists, track_count = get_liked_artists()
         save_liked_artists_cache(liked_artists, track_count)
 
@@ -546,7 +551,7 @@ def generate_weekly_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                existing_playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                existing_playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -555,7 +560,7 @@ def generate_weekly_playlists():
                 genre_description = ", ".join(selected_genres)
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                playlist.editSummary(f"Genres used: {genre_description}\nLast updated on: {timestamp}")
+                playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
