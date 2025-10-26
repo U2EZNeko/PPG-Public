@@ -4,6 +4,7 @@ import os
 import random
 import traceback
 import datetime
+import re
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
 
@@ -17,7 +18,7 @@ PLAYLIST_NAMES = ['Newton']  # Replace with your playlists
 def shuffle_playlist(plex, playlist_name):
     print(f'\n🔄 Attempting to shuffle: "{playlist_name}"')
 
-    # Safer playlist lookup
+    # Find the playlist
     playlist = next((p for p in plex.playlists() if p.title.strip().lower() == playlist_name.strip().lower()), None)
     if not playlist:
         print(f'⚠️ Playlist not found: "{playlist_name}" — skipping.')
@@ -28,33 +29,45 @@ def shuffle_playlist(plex, playlist_name):
         return
 
     try:
-        raw_items = playlist.items()
-        # Filter: valid, music-type items with a ratingKey
-        items = [item for item in raw_items if item is not None and hasattr(item, 'ratingKey') and item.TYPE == 'track']
-
-        print(f'ℹ️ "{playlist.title}" contains {len(items)} valid music tracks.')
+        # Get all items from the playlist
+        items = playlist.items()
+        print(f'ℹ️ "{playlist.title}" contains {len(items)} tracks.')
 
         if not items:
-            print(f'⚠️ Playlist "{playlist.title}" has no valid tracks to shuffle. Skipping.')
+            print(f'⚠️ Playlist "{playlist.title}" has no tracks to shuffle. Skipping.')
             return
 
+        # Shuffle the items
         random.shuffle(items)
-        shuffled_name = f"{playlist.title} (Shuffled)"
+        print(f'🔀 Shuffled {len(items)} tracks.')
 
-        # Remove old shuffled version if it exists
-        existing = next((p for p in plex.playlists() if p.title == shuffled_name), None)
-        if existing:
-            print(f'🗑 Removing old playlist: "{shuffled_name}"')
-            existing.delete()
+        # Clear the existing playlist and add shuffled items
+        print(f'🔄 Replacing playlist contents...')
+        playlist.removeItems(items)  # Remove all items
+        playlist.addItems(items)      # Add them back in shuffled order
+        
+        print(f'✅ Successfully shuffled playlist: "{playlist.title}"')
 
-        # Create shuffled playlist
-        new_playlist = plex.createPlaylist(shuffled_name, items)
-        print(f'✅ Created shuffled playlist: "{shuffled_name}" with {len(items)} tracks.')
-
-        # Add current date to description
+        # Update description with shuffle timestamp
         current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        new_playlist.edit(description=f"Shuffled on {current_date}")
-        print(f'✅ Added description to playlist: "{shuffled_name}" - "Shuffled on {current_date}"')
+        current_description = playlist.summary or ""
+        
+        # Look for existing shuffle timestamp pattern
+        shuffle_pattern = r'Shuffled on \d{4}-\d{2}-\d{2}'
+        
+        if re.search(shuffle_pattern, current_description):
+            # Replace existing shuffle timestamp
+            new_description = re.sub(shuffle_pattern, f"Shuffled on {current_date}", current_description)
+            playlist.editSummary(new_description)
+            print(f'✅ Updated shuffle timestamp: "Shuffled on {current_date}"')
+        else:
+            # Add new shuffle timestamp to existing description
+            if current_description.strip():
+                new_description = f"{current_description}\n\nShuffled on {current_date}"
+            else:
+                new_description = f"Shuffled on {current_date}"
+            playlist.editSummary(new_description)
+            print(f'✅ Added shuffle timestamp: "Shuffled on {current_date}"')
 
     except Exception as e:
         print(f'❌ Unexpected error while processing "{playlist_name}": {e}')

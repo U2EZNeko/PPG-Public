@@ -11,6 +11,10 @@ load_dotenv()
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 
+# Paths for playlist posters
+PLAYLIST_POSTERS_DIR = os.path.join("playlist_posters", "Weekly")
+SUPPORTED_IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.bmp')
+
 # Shared configuration
 SONGS_PER_PLAYLIST = int(os.getenv("SONGS_PER_PLAYLIST", "50"))
 MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE", "0.3"))
@@ -27,6 +31,49 @@ MIN_SONGS_REQUIRED = float(os.getenv("WEEKLY_MIN_SONGS_REQUIRED", "0.8")) * SONG
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
+
+# Get available images from a directory
+def get_available_images(directory):
+    """Get a list of all available image files in the specified directory."""
+    if not os.path.exists(directory):
+        print(f"⚠️  Directory '{directory}' does not exist. No posters will be used.")
+        return []
+    
+    try:
+        all_files = os.listdir(directory)
+        image_files = [f for f in all_files if f.lower().endswith(SUPPORTED_IMAGE_EXTENSIONS)]
+        return image_files
+    except Exception as e:
+        print(f"⚠️  Error reading directory '{directory}': {e}")
+        return []
+
+# Get a random unused image from the available pool
+def get_random_unused_image(available_images, used_images):
+    """Select a random image that hasn't been used yet in this run."""
+    unused_images = [img for img in available_images if img not in used_images]
+    
+    if not unused_images:
+        print(f"⚠️  No unused images available. Reusing images from the pool.")
+        unused_images = available_images
+    
+    if not unused_images:
+        print(f"❌ No images available in the poster directory.")
+        return None
+    
+    selected = random.choice(unused_images)
+    return selected
+
+# Upload poster to a playlist
+def upload_playlist_poster(playlist, image_path):
+    """Upload a poster image to a Plex playlist."""
+    try:
+        if image_path and os.path.exists(image_path):
+            playlist.uploadPoster(filepath=image_path)
+            print(f"✅ Uploaded poster: {os.path.basename(image_path)}")
+        else:
+            print(f"⚠️  Poster file not found: {image_path}")
+    except Exception as e:
+        print(f"⚠️  Could not upload poster: {e}")
 
 # Get artist name from a track
 def get_artist_name(track):
@@ -447,6 +494,16 @@ def generate_weekly_playlists():
         print("❌ No genre groups available. Exiting.")
         return
 
+    # Get available poster images
+    print("🖼️  Loading poster images...")
+    available_images = get_available_images(PLAYLIST_POSTERS_DIR)
+    used_images = set()
+    
+    if available_images:
+        print(f"✅ Found {len(available_images)} poster images in '{PLAYLIST_POSTERS_DIR}'")
+    else:
+        print(f"⚠️  No poster images found in '{PLAYLIST_POSTERS_DIR}'. Playlists will be created without posters.")
+
     # Get liked artists with weekly caching logic
     print("🎵 Loading liked artists...")
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
@@ -533,6 +590,15 @@ def generate_weekly_playlists():
             print(f"Checking artist distribution for Playlist {i + 1}...")
             playlist_songs = balance_artist_representation(playlist_songs, songs, MAX_ARTIST_PERCENTAGE)
 
+            # Get a random unused poster image
+            poster_image = None
+            if available_images:
+                selected_image_name = get_random_unused_image(available_images, used_images)
+                if selected_image_name:
+                    poster_image = os.path.join(PLAYLIST_POSTERS_DIR, selected_image_name)
+                    used_images.add(selected_image_name)
+                    print(f"📸 Selected poster: {selected_image_name}")
+
             # Create or update the playlist
             playlist_name = f"Weekly Playlist {i + 1}"
             existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in
@@ -552,6 +618,11 @@ def generate_weekly_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 existing_playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
+                
+                # Upload poster if available
+                if poster_image:
+                    upload_playlist_poster(existing_playlist, poster_image)
+                playlist = existing_playlist
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -561,6 +632,10 @@ def generate_weekly_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 playlist.editSummary(f"{selected_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
+                
+                # Upload poster if available
+                if poster_image:
+                    upload_playlist_poster(playlist, poster_image)
 
             print(f"Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
