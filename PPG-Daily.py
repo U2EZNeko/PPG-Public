@@ -22,6 +22,7 @@ MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE", "0.3"))
 MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE", "0.8"))
 MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE", "0.1"))
 LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE", "liked_artists_cache.json")
+UPDATE_POSTERS = os.getenv("UPDATE_POSTERS", "true").lower() == "true"
 
 # Daily-specific configuration
 PLAYLIST_COUNT = int(os.getenv("DAILY_PLAYLIST_COUNT", "14"))
@@ -496,14 +497,19 @@ def generate_daily_playlists():
         return
 
     # Get available poster images
-    print("🖼️  Loading poster images...")
-    available_images = get_available_images(PLAYLIST_POSTERS_DIR)
     used_images = set()
     
-    if available_images:
-        print(f"✅ Found {len(available_images)} poster images in '{PLAYLIST_POSTERS_DIR}'")
+    if UPDATE_POSTERS:
+        print("🖼️  Loading poster images...")
+        available_images = get_available_images(PLAYLIST_POSTERS_DIR)
+        
+        if available_images:
+            print(f"✅ Found {len(available_images)} poster images in '{PLAYLIST_POSTERS_DIR}'")
+        else:
+            print(f"⚠️  No poster images found in '{PLAYLIST_POSTERS_DIR}'. Playlists will be created without posters.")
     else:
-        print(f"⚠️  No poster images found in '{PLAYLIST_POSTERS_DIR}'. Playlists will be created without posters.")
+        print("ℹ️  Poster updates are disabled. Skipping poster loading.")
+        available_images = []
 
     # Get liked artists with weekly caching logic
     print("🎵 Loading liked artists...")
@@ -591,9 +597,9 @@ def generate_daily_playlists():
             print(f"Checking artist distribution for Playlist {i + 1}...")
             playlist_songs = balance_artist_representation(playlist_songs, songs, MAX_ARTIST_PERCENTAGE)
 
-            # Get a random unused poster image
+            # Get a random unused poster image (only if poster updates are enabled)
             poster_image = None
-            if available_images:
+            if UPDATE_POSTERS and available_images:
                 selected_image_name = get_random_unused_image(available_images, used_images)
                 if selected_image_name:
                     poster_image = os.path.join(PLAYLIST_POSTERS_DIR, selected_image_name)

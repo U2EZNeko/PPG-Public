@@ -137,6 +137,10 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Update log
 
+### 27.10.2025:
+
+  - Added randomized playlist posters
+
 ### 24.10.2025:
 
   - Moved most config values to .env, alternatively you can still define them in the scripts.
@@ -185,6 +189,14 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
 
+  27.10.2025 Update:
+  - Added a toggle-able option to replace Playlist Posters on every run
+    Will not use a poster twice per run, you can easily add your own to the folder. 
+    Images are AI generated, if you end up making cool ones go ahead and add them to the repo. 
+
+    UPDATE_POSTERS=true  is the .env value, it's true by default. Sorry if it replaced your images.
+  
+  
   24.10.2025 Update:
   - Config values were moved to .env, check example.env to see whats available. 
     Make sure you use full paths for log files just to be sure.
