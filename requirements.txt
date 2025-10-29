@@ -1,0 +1,13 @@
+# Plex Playlist Generator (PPG) - Python Dependencies
+# 
+# Install with: pip install -r requirements.txt
+
+# Plex Media Server API client
+plexapi>=4.15.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Progress bars for long-running operations
+tqdm>=4.65.0
+
