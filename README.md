@@ -200,11 +200,11 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ![example](https://github.com/user-attachments/assets/e7d246cb-2d09-4632-8778-c093415ccbf3)
 
 
-# Update infos:
-
-
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
+
+
+# Update infos:
 
  29.10.2025 Update:
  
