@@ -1,13 +1,15 @@
 # PPG - Plex Playlist Generator
-Automation scripts to generate music Playlists on your Plex Server. 
 
-Since Spotify disabled playlists through their API, I had to do it myself.
+**Automation scripts to generate music Playlists on your Plex Server.** 
+
+**Since Spotify disabled playlists through their API, I had to do it myself.**
 
 
-![wqeqwqeweweqw](https://github.com/user-attachments/assets/e8b22003-7b5a-4ee5-b445-518f276078b5)
+![Daily](https://github.com/user-attachments/assets/b8c2842a-84d9-433e-a5d1-0367af1799d6)
 
-![asdasdsa](https://github.com/user-attachments/assets/f2f51b93-aeef-4db8-aa4d-2c1dcc037fbd)
+![Weekly](https://github.com/user-attachments/assets/bbfd1053-b59e-4b52-b2e2-3958ff299e2a)
 
+### Introduction
 
 These scripts are designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 
@@ -15,11 +17,25 @@ I run the scripts with cronjobs to generate playlists for me. My Plex has over 3
 
 I'm more than happy to extend the scripts myself and through your Pull Requests. 
 
-The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> genres.txt is a list of all unique genres on MY server. You may have a genre on your server that I do not have.
+The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> Usefulstuff Folder contains genres.txt it's a list of all unique genres on MY server. You may have a genre on your server that I do not have.
 
-I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting. Make sure the "name" of the genre_group is unique.
+I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting and genres. Make sure the "name" of the genre_group is unique and avoid creating groups that are too similar to each other. 
 
+### Content table
 
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Setup](#setup)
+  - [Cronjob Examples](#cronjob-examples)
+- [Usage Description](#usage-description)
+  - [PPG-Daily and PPG-Weekly](#ppg-daily-and-ppg-weekly)
+  - [PPG-Moods](#ppg-moods)
+  - [PPG-Genres](#ppg-genres)
+  - [Copy-Playlist-To-Subuser](#copy-playlist-to-subuser)
+- [Update Log](#update-log)
+- [Information](#information)
+- [Not Working](#not-working)
+- [Planned](#planned)
 
 ### Requirements:
   - Plex server and Access Token (Navigate to some item on your Plex -> click "view XML" -> Copy token from URL
@@ -33,9 +49,9 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
 
-Cronjob examples:
+# Cronjob examples:
 
-![image](https://github.com/user-attachments/assets/d242cc6d-9810-434d-a3e9-fcdba3cc857a)
+![cron](https://github.com/user-attachments/assets/94063b48-99f4-42f7-b149-6034984218fe)
 
 
 
@@ -43,29 +59,70 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 
 
-## Usage description:
+# Usage description:
 
-- PPG-Daily and PPG-Weekly
+### PPG-Daily and PPG-Weekly
   
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
 
-  They will randomly select from genre_groups.json to create playlists
+  They will randomly select from genre_groups.json to create playlists.
 
-- PPG-Moods
+  It will write the used genre's to a log file to avoid duplicates.
+
+  JSON example
+```
+   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
+```
+### PPG-Moods
   
   Used to update "mood Mix", similar to Spotify.
 
-  You can set the moods to create mixes for in mood_groups. 
+  You can set the moods to create mixes for in mood_groups.
+  
+  JSON example
+```
+    "Melancholy": [
+    "Melancholy",
+    "Sad",
+    "Wistful",
+    "Lonely",
+    "Nostalgic",
+    "Poignant",
+    "Somber"
+  ]
+  ```
 
-- PPG-Genres
+### PPG-Genres
   
   Creates or updates "genre Mix" playlists, similar to Spotify.
 
   This will create or update playlists containing multiple genres, defined in genre_mixes.json
 
-  This allows you to select multiple similar genres and pick random songs from those. 
+  This allows you to select multiple similar genres and pick random songs from those. You can also extend the json entry with a date filter, you can chose before, after or between release years. 
 
-- Copy-Playlist-To-Subuser
+  Since plex does not save the release date for each song, I have to use the Album's year to filter. This still does the same, the problem is Plex being unable to keep up with my database so I'm missing a bunch of metadata.
+
+  JSON example
+```
+  "90s Gangster Rap Underground": {
+    "genres": [
+      "Country rap",
+      "Rap/r&b",
+      "Cali rap",
+      "Pop rap / rock",
+      "Vapor trap",
+      "Gangsta rap",
+      "Mixtape"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  ```
+
+### Copy-Playlist-To-Subuser
 
   As the name suggests, lets you copy playlists to sub-users. 
 
@@ -75,21 +132,58 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   Log into sub user -> Go to some item -> CTRL Shift I -> Go to network tab -> Find "x-Plex-Token" in the Header (might need to click on another item with the network tab open)
 
-![image](https://github.com/user-attachments/assets/4405219c-5678-4f2f-8df0-bccc5dacaa2c)
+
+![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
+
+# Update log
+
+###  Update:
+  - Date filters for genre_groups
+  - Multithreading!
+  - Log levels
+  - Moved everything to .env (scripts check for all values)
+  - Mood-grouping for final track list (not possible all the time, Plex doesnt hold this all the time)
+  - Prevent consecutive artists in playlists
+  - Prevent multiple songs from single albums spamming playlists
+  - Progress Bars!
+  - Turns out theres never been a requirements.txt lol
+
+### 27.10.2025:
+
+  - Added randomized playlist posters
+
+### 24.10.2025:
+
+  - Moved most config values to .env, alternatively you can still define them in the scripts.
+  - Hopefully final adjustment to Description
+  - Updated the groups a bit
+  - Prettied up output
+  - Used AI to comment out code because im lazy
+  - Fixed playlist shuffler, only works on regular playlists (Useful for smart home automations that cannot use the shuffle function)
+
+### 03.10.2025:
+
+  - Added Preference for liked artists
+  - Added logic to avoid artists filling whole playlists
+  - Clearer debug output
+
+### 16.01.2025:
+
+  - Added before, between and after time filters.   
+  - Added logging to reduce getting the same playlists.
+  - Removed useless fetch of all available genres from Daily script.
 
 
+# Information:
 
-## Information:
+- We're getting into territories with filters that will one way or another take a while to run. I'm multithreading a few things where possible but on slower CPUs this will be unavoidable.
+  The bigger your library the more fetching it has to do, with my close to 400k track library fetching certain genres returns a solid 20k+ songs, running through all those will take a while. 
 
 - I've created this script using a database of 300k+ songs. This left me with over 4000 unique genres and 300 moods which should cover quite a broad spectrum of songs.
 
+- If you run the script through cronjobs, use full paths to the jsons and log files!
 
-- The script uses json files to combine multiple genres/moods into a group and then randomly selects the set amount of songs to add. The jsons are formatted like this:
-
-  "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
-
-  You can easily add your own genre_groups or mood_groups just make sure it's a unique name. If you do, I'd appreciate if you share them.
-
+- If you add genre_groups or mood_groups, make their name unique!
 
 - Because sometimes the scripts cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% (can be defined in the script) of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
@@ -102,19 +196,76 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   https://seed-mix-image.spotifycdn.com/v6/img/desc/Nevergonnagiveyouupnevergonnaletyoudown/en/default
 
 
-  ![qweqwqwe](https://github.com/user-attachments/assets/a899cb5a-ad47-46c6-924d-3d3b7514e202)
+![example](https://github.com/user-attachments/assets/e7d246cb-2d09-4632-8778-c093415ccbf3)
+
+
+# Update infos:
 
 
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
 
+  Update:
+  - Date filters for genre_groups
+  - Multithreading! - For fetching operations and filtering
+  - Log levels
+  - Moved everything to .env (scripts check for all values)
+  - Mood-grouping for final track list (not possible all the time, Plex doesnt hold this all the time)
+  - Prevent consecutive artists in playlists
+  - Prevent multiple songs from single albums spamming playlists
+  - Progress Bars!
+  - Turns out theres never been a requirements.txt lol
 
-## Not working
 
-- Setting a playlist Poster through API. You can set it once manually and it'll keep it forever.
+  27.10.2025 Update:
+  - Added a toggle-able option to replace Playlist Posters on every run
+    Will not use a poster twice per run, you can easily add your own to the folder. 
+    Images are AI generated, if you end up making cool ones go ahead and add them to the repo. 
+
+    UPDATE_POSTERS=true  is the .env value, it's true by default. Sorry if it replaced your images.
+  
+  
+  24.10.2025 Update:
+  - Config values were moved to .env, check example.env to see whats available. 
+    Make sure you use full paths for log files just to be sure.
+    Alternatively you can always have a value after the .env reference, i kept them in the scripts so everyone sees how. 
+
+
+  03.10.2025 Update:
+
+  - Liked Artist Preference:
+    
+    Once a week, the scripts will fetch all liked tracks and extract the artists from it.
+    It will cache this data. Limited to Weekly as it can take forever to do on large libraries. Mine takes a solid 10 minutes. lol
+
+    This should ensure more relevant playlists as a whole, I've tested it a bunch and I like it. 
+
+    You can set a percentage of how many liked artist tracks to use in the script.
+    Enabled by default, can be disabled for playlists in the json's like this.
+```
+  "Rock": {
+    "genres": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
+    "prefer_liked_artists": true
+  },
+  "Classical": {
+    "genres": ["Classical Music", "Baroque", "Opera", "Romantic Classical", "Classical Crossover", "Symphonic", "Chamber Music"],
+    "prefer_liked_artists": false
+  }
+```
+
+  - The scripts will now check a playlist once created and re-fetch tracks if an artist takes too many slots.
+    
+    Can be configured in the script.
+
+
+# Not working
+
 - Older versions of PlexAPI do not have "existing_playlist.editSummary". To set a Summary on an old version change the previous to "existing_playlist.edit(summary=f"Genres used: {genre_description}")"
 
-## Planned
+# Planned
 
-- Some sorta logging to avoid generating too similar playlists repeatedly or at least since last run.
-- Extend genre_groups even more
+- Prefer artists the user has listened to before?
+  This would probably have to be cached as it would take a long long time to fetch. Not sure if its worth yet. 
+
+- Come up with more useful filters
+  Tried but not working: BPM, Moods (semi working)
