@@ -1,4 +1,766 @@
 {
+  "90's Hits": {
+    "genres": ["Pop", "Pop Rock", "Dance Pop", "Europop", "Britpop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2000s Rock": {
+    "genres": ["Rock", "Alternative Rock", "Indie Rock", "Post-Grunge", "Pop Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "Classic 80s": {
+    "genres": ["Pop", "New Wave", "Synthpop", "Rock", "Pop Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "Recent Pop": {
+    "genres": ["Pop", "Pop Rock", "Dance Pop", "Electropop", "Indie Pop"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "60s Classics": {
+    "genres": ["Rock", "Classic Rock", "Pop", "Folk Rock", "Blues Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1960",
+      "end_date": "1969"
+    }
+  },
+  "Pre-2000 Hip Hop": {
+    "genres": ["Hip Hop", "Hip-Hop", "Old School Hip Hop", "Gangsta Rap", "East Coast Hip-Hop"],
+    "release_date_filter": {
+      "condition": "before",
+      "end_date": "2000"
+    }
+  },
+  "2010s Electronic": {
+    "genres": ["Electronic", "Electropop", "Synthwave", "Trance", "House", "Deep House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "Modern Metal": {
+    "genres": ["Metal", "Metalcore", "Alternative Metal", "Progressive Metal", "Death Metal"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "2000s Emo": {
+    "genres": ["Emo", "Emo Pop", "Pop Punk", "Post-Hardcore", "Alternative Rock", "Emo Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2000s Nu-Metal": {
+    "genres": ["Nu Metal", "Alternative Metal", "Rap Metal", "Nu-Metalcore", "Metal", "Hard Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Punk": {
+    "genres": ["Punk", "Punk Rock", "Pop Punk", "Hardcore Punk", "Ska Punk", "Garage Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Metal": {
+    "genres": ["Metal", "Heavy Metal", "Thrash Metal", "Glam Metal", "Power Metal", "Speed Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "70s Classic Rock": {
+    "genres": ["Rock", "Classic Rock", "Progressive Rock", "Hard Rock", "Blues Rock", "Arena Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "2010s Pop": {
+    "genres": ["Pop", "Pop Rock", "Dance Pop", "Electropop", "Indie Pop", "Synthpop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "80s Synth": {
+    "genres": ["Synthpop", "New Wave", "Electronic", "Synthwave", "Pop", "Electronic Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2000s Hip Hop": {
+    "genres": ["Hip Hop", "Hip-Hop", "Rap", "Trap", "Alternative Hip Hop", "Pop Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Grunge": {
+    "genres": ["Grunge", "Alternative Rock", "Post-Grunge", "Rock", "Hard Rock", "Punk Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2010s Indie": {
+    "genres": ["Indie", "Indie Rock", "Indie Pop", "Indie Folk", "Alternative Rock", "Indietronica"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "80s Hard Rock": {
+    "genres": ["Hard Rock", "Rock", "Heavy Metal", "Glam Rock", "Arena Rock", "Classic Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2000s Pop Punk": {
+    "genres": ["Pop Punk", "Punk Rock", "Pop Rock", "Alternative Rock", "Emo", "Pop Punk / Punk Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Alternative": {
+    "genres": ["Alternative Rock", "Alternative", "Post-Punk", "Indie Rock", "Grunge", "Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2010s EDM": {
+    "genres": ["Electronic", "House", "Deep House", "Progressive House", "Electro House", "Trance"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "80s Pop": {
+    "genres": ["Pop", "Synthpop", "New Wave", "Dance Pop", "Europop", "Pop Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2000s Post-Hardcore": {
+    "genres": ["Post-Hardcore", "Hardcore", "Metalcore", "Emo", "Screamo", "Alternative Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Hip Hop": {
+    "genres": ["Hip Hop", "Hip-Hop", "Gangsta Rap", "Old School Hip Hop", "East Coast Hip-Hop", "West Coast Hip-Hop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2010s Rap": {
+    "genres": ["Rap", "Hip Hop", "Trap", "Cloud Rap", "Emo Rap", "Alternative Hip Hop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "80s Punk": {
+    "genres": ["Punk", "Punk Rock", "Hardcore Punk", "Post-Punk", "New Wave", "Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2000s Alternative Metal": {
+    "genres": ["Alternative Metal", "Nu Metal", "Metal", "Hard Rock", "Post-Grunge", "Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "70s Disco": {
+    "genres": ["Disco"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "90s Trip Hop": {
+    "genres": ["Trip Hop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s New Wave": {
+    "genres": ["New Wave"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Synthwave": {
+    "genres": ["Synthwave"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Indie Rock": {
+    "genres": ["Indie Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Shoegaze": {
+    "genres": ["Shoegaze"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Synthpop": {
+    "genres": ["Synthpop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Hyperpop": {
+    "genres": ["Hyperpop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Metalcore": {
+    "genres": ["Metalcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Drum and Bass": {
+    "genres": ["Drum & Bass"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Thrash Metal": {
+    "genres": ["Thrash Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Lo-Fi": {
+    "genres": ["Lo-Fi"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Garage Rock": {
+    "genres": ["Garage Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Post-Rock": {
+    "genres": ["Post-Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Hardcore Punk": {
+    "genres": ["Hardcore Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Future Bass": {
+    "genres": ["Future Bass"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Post-Punk": {
+    "genres": ["Post-Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Breakbeat": {
+    "genres": ["Breakbeat"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Power Metal": {
+    "genres": ["Power Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "Modern Vaporwave": {
+    "genres": ["Vaporwave"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "70s Progressive Rock": {
+    "genres": ["Progressive Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "90s Techno": {
+    "genres": ["Techno"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Death Metal": {
+    "genres": ["Death Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Trap": {
+    "genres": ["Trap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Math Rock": {
+    "genres": ["Math Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Ambient": {
+    "genres": ["Ambient"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Gothic Rock": {
+    "genres": ["Gothic Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "Recent Phonk": {
+    "genres": ["Phonk"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "70s Funk": {
+    "genres": ["Funk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "90s House": {
+    "genres": ["House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Black Metal": {
+    "genres": ["Black Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Chillwave": {
+    "genres": ["Chillwave"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Screamo": {
+    "genres": ["Screamo"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Acid House": {
+    "genres": ["Acid House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Post-Punk": {
+    "genres": ["Post-Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "Modern Drift Phonk": {
+    "genres": ["Drift Phonk"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "80s Hardcore": {
+    "genres": ["Hardcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Cloud Rap": {
+    "genres": ["Cloud Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Dream Pop": {
+    "genres": ["Dream Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Grindcore": {
+    "genres": ["Grindcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Industrial": {
+    "genres": ["Industrial"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Bedroom Pop": {
+    "genres": ["Bedroom Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s IDM": {
+    "genres": ["IDM"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Darkwave": {
+    "genres": ["Darkwave"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Ska": {
+    "genres": ["Ska"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Emo Rap": {
+    "genres": ["Emo Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Glitch": {
+    "genres": ["Glitch"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Happy Hardcore": {
+    "genres": ["Happy Hardcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Crossover Thrash": {
+    "genres": ["Crossover Thrash"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Mathcore": {
+    "genres": ["Mathcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Acid Jazz": {
+    "genres": ["Acid Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Big Beat": {
+    "genres": ["Big Beat"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s EBM": {
+    "genres": ["EBM"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Nightcore": {
+    "genres": ["Nightcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Crunk": {
+    "genres": ["Crunk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Jungle": {
+    "genres": ["Jungle"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s New Romantic": {
+    "genres": ["New Romantic"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s J-Pop": {
+    "genres": ["J-Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Crust Punk": {
+    "genres": ["Crust Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "70s Punk Rock": {
+    "genres": ["Punk Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "90s Gabber": {
+    "genres": ["Gabber"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Neo-Prog": {
+    "genres": ["Neo-Prog"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s K-Pop": {
+    "genres": ["K-Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Crunkcore": {
+    "genres": ["Crunkcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "90s Goa Trance": {
+    "genres": ["Goa Trance"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "80s Post-Hardcore": {
+    "genres": ["Post-Hardcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Sludge Metal": {
+    "genres": ["Sludge Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2000s Dubstep": {
+    "genres": ["Dubstep"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk", "Arena Rock", "Art Rock", "Blues Rock", "Folk Rock", "Garage Rock", "Heartland Rock", "Southern Rock"],
   "Pop": ["Pop", "Pop Rock", "Bubblegum Pop", "Indie Pop", "Dance Pop", "Pop Punk", "Pop Rap", "J-Pop", "K-Pop", "Brazilian Pop", "Britpop", "Europop", "Latin Pop"],
   "Electronic": ["Electronic", "Electropop", "Deep House", "Tech House", "Synthwave", "Trance", "Eurodance", "Techno", "Acid Trance", "Goa Trance", "Dubstep", "House", "Ambient", "IDM", "Breakbeat"],

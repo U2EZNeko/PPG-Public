@@ -137,6 +137,18 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Update log
 
+### 29.10.2025:
+
+  - Date filters for genre_groups
+  - Multithreading!
+  - Log levels
+  - Moved everything to .env (scripts check for all values)
+  - Mood-grouping for final track list (not possible all the time, Plex doesnt hold this all the time)
+  - Prevent consecutive artists in playlists
+  - Prevent multiple songs from single albums spamming playlists
+  - Progress Bars!
+  - Turns out theres never been a requirements.txt lol
+
 ### 27.10.2025:
 
   - Added randomized playlist posters
@@ -165,6 +177,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Information:
 
+- We're getting into territories with filters that will one way or another take a while to run. I'm multithreading a few things where possible but on slower CPUs this will be unavoidable.
+  The bigger your library the more fetching it has to do, with my close to 400k track library fetching certain genres returns a solid 20k+ songs, running through all those will take a while. 
+
 - I've created this script using a database of 300k+ songs. This left me with over 4000 unique genres and 300 moods which should cover quite a broad spectrum of songs.
 
 - If you run the script through cronjobs, use full paths to the jsons and log files!
@@ -185,11 +200,27 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ![example](https://github.com/user-attachments/assets/e7d246cb-2d09-4632-8778-c093415ccbf3)
 
 
+# Update infos:
+
 
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
 
+ 29.10.2025 Update:
+ 
+  - Date filters for genre_groups
+  - Multithreading! - For fetching operations and filtering
+  - Log levels
+  - Moved everything to .env (scripts check for all values)
+  - Mood-grouping for final track list (not possible all the time, Plex doesnt hold this all the time)
+  - Prevent consecutive artists in playlists
+  - Prevent multiple songs from single albums spamming playlists
+  - Progress Bars!
+  - Turns out theres never been a requirements.txt lol
+
+
   27.10.2025 Update:
+
   - Added a toggle-able option to replace Playlist Posters on every run
     Will not use a poster twice per run, you can easily add your own to the folder. 
     Images are AI generated, if you end up making cool ones go ahead and add them to the repo. 
@@ -198,6 +229,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   
   24.10.2025 Update:
+
   - Config values were moved to .env, check example.env to see whats available. 
     Make sure you use full paths for log files just to be sure.
     Alternatively you can always have a value after the .env reference, i kept them in the scripts so everyone sees how. 
@@ -232,13 +264,12 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Not working
 
-- Setting a playlist Poster through API. You can set it once manually and it'll keep it forever. When you copy it to a sub-user the image will reset on their end, not sure why, you'd have to reset it everytime you copy the playlist over. 
 - Older versions of PlexAPI do not have "existing_playlist.editSummary". To set a Summary on an old version change the previous to "existing_playlist.edit(summary=f"Genres used: {genre_description}")"
 
 # Planned
 
-- Extend genre_groups even more
-
-  A lot of genre_groups are rather wide spread or have too many genres in them. Gonna need some manual fine tuning eventually.
+- Prefer artists the user has listened to before?
+  This would probably have to be cached as it would take a long long time to fetch. Not sure if its worth yet. 
 
 - Come up with more useful filters
+  Tried but not working: BPM, Moods (semi working)
