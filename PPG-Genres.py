@@ -6,6 +6,9 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import requests
+from urllib.parse import quote
+import tempfile
 
 # Load environment variables from .env file
 load_dotenv()
@@ -126,18 +129,47 @@ def format_duration(seconds):
 # Genres-specific configuration
 MIN_SONGS_REQUIRED = float(os.getenv("GENRES_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
 GENRE_MIXES_FILE = os.getenv("GENRE_MIXES_FILE")
+AUTO_REPLACE_POSTERS = os.getenv("GENRES_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
+
+# Normalize artist name for consistent comparison
+def normalize_artist_name(artist_name):
+    """Normalize artist name for consistent comparison.
+    Handles Unicode (German ÄÖÜ, Cyrillic), whitespace around slashes, 
+    multiple spaces, and strips leading/trailing whitespace."""
+    if not artist_name:
+        return None
+    
+    import unicodedata
+    # Normalize Unicode characters (NFC form - preserves German ÄÖÜ and Cyrillic properly)
+    # This handles composed vs decomposed forms (e.g., Ä vs A+̈)
+    normalized = unicodedata.normalize('NFC', artist_name)
+    
+    # Strip leading/trailing whitespace
+    normalized = normalized.strip()
+    
+    # Normalize whitespace around slashes (e.g., "Artist / Featuring" -> "Artist/Featuring")
+    normalized = normalized.replace(' / ', '/').replace('/ ', '/').replace(' /', '/')
+    
+    # Normalize multiple spaces to single space
+    normalized = ' '.join(normalized.split())
+    
+    return normalized
 
 # Get artist name from a track
 def get_artist_name(track):
     """Get the artist name from a track, handling different Plex track structures."""
     if hasattr(track, 'artist') and track.artist:
-        return track.artist().title if callable(track.artist) else track.artist
+        artist_name = track.artist().title if callable(track.artist) else track.artist
     elif hasattr(track, 'grandparentTitle') and track.grandparentTitle:
-        return track.grandparentTitle
-    return None
+        artist_name = track.grandparentTitle
+    else:
+        return None
+    
+    # Normalize the artist name for consistent comparison
+    return normalize_artist_name(artist_name)
 
 # Get album name from a track
 def get_album_name(track):
@@ -355,31 +387,46 @@ def get_liked_artists():
         # Try different approaches to find liked tracks
         print("🔍 Attempting to query Plex for tracks with 1+ star rating...")
         
-        # Method 1: Try searchTracks with userRating__gte
-        try:
-            liked_items = music_library.searchTracks(userRating__gte=1)
-            print(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
-        except Exception as e1:
-            print(f"❌ Method 1 failed: {e1}")
-            liked_items = []
-        
-        # Method 2: Try search with different filter syntax
-        if not liked_items:
+        liked_items = []
+        # Use tqdm to show progress for query attempts
+        with tqdm(total=3, desc="Querying Plex", unit="method") as pbar:
+            # Method 1: Try searchTracks with userRating__gte
+            pbar.set_description("Querying Plex (Method 1)")
             try:
-                liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                print(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
-            except Exception as e2:
-                print(f"❌ Method 2 failed: {e2}")
-                liked_items = []
-        
-        # Method 3: Try search with userRating__gte in filters
-        if not liked_items:
-            try:
-                liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                print(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
-            except Exception as e3:
-                print(f"❌ Method 3 failed: {e3}")
-                liked_items = []
+                liked_items = music_library.searchTracks(userRating__gte=1)
+                pbar.set_description(f"Querying Plex (Method 1): {len(liked_items):,} tracks found")
+                print(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
+                pbar.update(1)
+            except Exception as e1:
+                print(f"❌ Method 1 failed: {e1}")
+                pbar.set_description("Querying Plex (Method 1): failed")
+                pbar.update(1)
+            
+            # Method 2: Try search with different filter syntax
+            if not liked_items:
+                pbar.set_description("Querying Plex (Method 2)")
+                try:
+                    liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
+                    pbar.set_description(f"Querying Plex (Method 2): {len(liked_items):,} tracks found")
+                    print(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
+                    pbar.update(1)
+                except Exception as e2:
+                    print(f"❌ Method 2 failed: {e2}")
+                    pbar.set_description("Querying Plex (Method 2): failed")
+                    pbar.update(1)
+            
+            # Method 3: Try search with userRating__gte in filters
+            if not liked_items:
+                pbar.set_description("Querying Plex (Method 3)")
+                try:
+                    liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
+                    pbar.set_description(f"Querying Plex (Method 3): {len(liked_items):,} tracks found")
+                    print(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
+                    pbar.update(1)
+                except Exception as e3:
+                    print(f"❌ Method 3 failed: {e3}")
+                    pbar.set_description("Querying Plex (Method 3): failed")
+                    pbar.update(1)
         
         # Method 4: Fallback - get all tracks and filter manually (for debugging)
         if not liked_items:
@@ -419,6 +466,7 @@ def get_liked_artists():
         for i, track in enumerate(liked_items, 1):
             artist_name = get_artist_name(track)
             if artist_name:
+                # get_artist_name already normalizes, so add directly
                 liked_artists.add(artist_name)
             
             # Show progress every 100 tracks or at the end
@@ -720,7 +768,7 @@ def balance_artist_representation(playlist_songs, all_available_songs, max_perce
     
     # For each artist that exceeds the limit, keep only max_songs_per_artist random songs
     for artist, excess_count in artists_to_reduce.items():
-        # Find all songs by this artist
+        # Find all songs by this artist (get_artist_name already normalizes)
         artist_songs = [song for song in balanced_playlist if get_artist_name(song) == artist]
         
         # Keep only max_songs_per_artist random songs from this artist
@@ -850,7 +898,7 @@ def prefer_liked_artists(songs, liked_artists, target_count, max_liked_percentag
             log_info(f"✅ Selected {other_count} additional songs from other artists to fill playlist")
     
     # Show final distribution
-    final_liked_count = sum(1 for song in selected_songs if get_artist_name(song) in liked_artists)
+    final_liked_count = sum(1 for song in selected_songs if get_artist_name(song) and get_artist_name(song) in liked_artists)
     final_other_count = len(selected_songs) - final_liked_count
     final_liked_percentage = (final_liked_count / len(selected_songs)) * 100 if selected_songs else 0
     final_other_percentage = (final_other_count / len(selected_songs)) * 100 if selected_songs else 0
@@ -868,9 +916,15 @@ def load_liked_artists_cache():
         return None, 0, None
     
     try:
-        with open(LIKED_ARTISTS_CACHE_FILE, "r") as file:
+        with open(LIKED_ARTISTS_CACHE_FILE, "r", encoding='utf-8') as file:
             cache_data = json.load(file)
-            liked_artists = set(cache_data.get("liked_artists", []))
+            # Normalize cached artist names for consistent matching
+            raw_artists = cache_data.get("liked_artists", [])
+            liked_artists = set()
+            for artist in raw_artists:
+                normalized = normalize_artist_name(artist)
+                if normalized:
+                    liked_artists.add(normalized)
             cached_track_count = cache_data.get("liked_track_count", 0)
             cache_timestamp = cache_data.get("cache_timestamp", None)
             
@@ -901,8 +955,8 @@ def save_liked_artists_cache(liked_artists, track_count):
             "liked_track_count": track_count,
             "cache_timestamp": datetime.now().isoformat()
         }
-        with open(LIKED_ARTISTS_CACHE_FILE, "w") as file:
-            json.dump(cache_data, file, indent=2)
+        with open(LIKED_ARTISTS_CACHE_FILE, "w", encoding='utf-8') as file:
+            json.dump(cache_data, file, indent=2, ensure_ascii=False)
         print(f"✅ Saved {len(liked_artists):,} liked artists to cache (from {track_count:,} tracks)")
         print(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
     except Exception as e:
@@ -925,6 +979,75 @@ def is_cache_old(cache_timestamp):
         print(f"Error checking cache age: {e}")
         return True
 
+
+# Fetch Spotify poster image
+def fetch_spotify_poster(genre_mix_name):
+    """Fetch poster image from Spotify using the genre mix name exactly as provided."""
+    try:
+        # Use the genre mix name exactly as-is (capital letters and spaces preserved)
+        # URL-encode only special characters that need encoding
+        url_encoded_name = quote(genre_mix_name.strip(), safe=' ')
+        
+        # Construct Spotify poster URL
+        url = f"https://seed-mix-image.spotifycdn.com/v6/img/desc/{url_encoded_name}/en/default"
+        
+        log_debug(f"🎨 Fetching Spotify poster from: {url}")
+        response = requests.get(url, timeout=10, allow_redirects=True)
+        
+        if response.status_code == 200 and response.content:
+            # Check if it's actually an image (not HTML error page)
+            content_type = response.headers.get('content-type', '').lower()
+            if 'image' in content_type or response.content.startswith(b'\xff\xd8') or response.content.startswith(b'\x89PNG'):
+                log_info(f"✅ Successfully fetched Spotify poster for '{genre_mix_name}'")
+                return response.content
+            else:
+                log_debug(f"⚠️  Response is not an image (content-type: {content_type})")
+                return None
+        else:
+            log_debug(f"⚠️  Failed to fetch poster (status: {response.status_code})")
+            return None
+    except Exception as e:
+        log_debug(f"⚠️  Error fetching Spotify poster for '{genre_mix_name}': {e}")
+        return None
+
+# Upload poster to a playlist
+def upload_playlist_poster(playlist, image_path):
+    """Upload a poster image to a Plex playlist."""
+    try:
+        if image_path and os.path.exists(image_path):
+            playlist.uploadPoster(filepath=image_path)
+            log_info(f"✅ Uploaded poster: {os.path.basename(image_path)}")
+        else:
+            log_warning(f"⚠️  Poster file not found: {image_path}")
+    except Exception as e:
+        log_warning(f"⚠️  Could not upload poster: {e}")
+
+# Upload poster from image data
+def upload_playlist_poster_from_data(playlist, image_data):
+    """Upload a poster image to a Plex playlist from image data bytes."""
+    try:
+        if not image_data:
+            return False
+        
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+            tmp_file.write(image_data)
+            tmp_path = tmp_file.name
+        
+        try:
+            upload_playlist_poster(playlist, tmp_path)
+            return True
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+        
+        return False
+    except Exception as e:
+        log_warning(f"⚠️  Could not upload poster from data: {e}")
+        return False
 
 # Load genre mixes from JSON file
 # Supports both old format (key -> array) and new format (key -> {genres: array, release_date_filter: {...}})
@@ -1092,6 +1215,13 @@ def generate_genre_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 existing_playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(genre_group)
+                    if poster_data:
+                        upload_playlist_poster_from_data(existing_playlist, poster_data)
+                playlist = existing_playlist
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -1101,6 +1231,12 @@ def generate_genre_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(genre_group)
+                    if poster_data:
+                        upload_playlist_poster_from_data(playlist, poster_data)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 

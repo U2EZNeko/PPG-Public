@@ -1,115 +1,162 @@
 {
-  "Upbeat Country": [
-    "Country rap",
-    "Canadian country",
-    "Country rock",
-    "Country/country blues/country rock/rock",
-    "Country / pop",
-    "Alternative rock/country",
-    "Country/outlaw country",
-    "Americana/country/rockabilly/traditional country",
-    "Country/rockabilly/traditional country",
-    "Australian country"
+  "175 BPM": [
+    "Happy hardcore",
+    "Eurobeat",
+    "Uk hardcore"
   ],
-  "Sad Country": [
-    "Country rap",
-    "Canadian country",
-    "Country rock",
-    "Country/country blues/country rock/rock",
-    "Country / pop",
-    "Alternative rock/country",
-    "Sad rap",
-    "Country/outlaw country",
-    "Americana/country/rockabilly/traditional country",
-    "Country/rockabilly/traditional country"
+  "2010s Emo": {
+    "genres": [
+      "Emo",
+      "Emo Pop",
+      "Pop Punk",
+      "Post-Hardcore",
+      "Alternative Rock"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2010s Hip-Hop": {
+    "genres": [
+      "Hip Hop",
+      "Trap",
+      "Cloud Rap",
+      "Emo Rap",
+      "Alternative Hip Hop",
+      "Mumble Rap"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2010s Pop": {
+    "genres": [
+      "Pop",
+      "Pop Rock",
+      "Dance Pop",
+      "Electropop",
+      "Indie Pop",
+      "Synthpop"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "90s Gangster Rap Underground": {
+    "genres": [
+      "Gangsta rap",
+      "West Coast Hip-Hop",
+      "East Coast Hip-Hop",
+      "Hardcore Rap",
+      "Gangsta Rap",
+      "Old School Hip Hop",
+      "Underground Hip-Hop",
+      "Boom Bap"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Rave Underground": {
+    "genres": [
+      "Rave",
+      "Hardcore Techno",
+      "Techno",
+      "Acid House",
+      "Gabber",
+      "Happy Hardcore",
+      "Underground Techno"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground Hip-Hop": {
+    "genres": [
+      "Hip Hop",
+      "Underground Hip-Hop",
+      "Old School Hip Hop",
+      "Alternative Hip Hop",
+      "Boom Bap",
+      "Conscious Hip Hop"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground House": {
+    "genres": [
+      "House",
+      "Underground House",
+      "Deep House",
+      "Acid House",
+      "Garage House",
+      "Progressive House"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground Rap": {
+    "genres": [
+      "Rap",
+      "Underground Rap",
+      "Old School Rap",
+      "Alternative Hip Hop",
+      "Conscious Hip Hop",
+      "Boom Bap"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "Acoustic Emo": [
+    "Acoustic emo",
+    "Acoustic punk",
+    "Emo acoustic",
+    "Acoustic pop punk",
+    "Singer-songwriter emo",
+    "Folk emo",
+    "Acoustic post-hardcore",
+    "Emo acoustic rock"
   ],
-  "Lo-Fi Jazzhop": [
-    "Lo-fi / rock",
-    "Experimental / folk / folk punk / lo-fi",
-    "Lo-fi beats",
-    "Lo-fi emo",
-    "Emo / indie / indie rock / lo-fi",
-    "Folk / folk punk / lo-fi / rock",
-    "Emo / folk / folk punk / lo-fi",
-    "Lo-fi hip-hop",
-    "Indian lo-fi",
-    "Lo-fi indie"
+  "Australian Country": [
+    "Australian country",
+    "Country",
+    "Outback country",
+    "Australiana",
+    "Australian folk",
+    "Country rock"
   ],
-  "Mexican Rock": [
-    "Alternative rock / nu metal",
-    "Experimental / hard rock / rock",
-    "Boogie rock",
-    "Indie rock / psychedelic rock / rock",
-    "Alternative rock / hard rock / heavy metal / rock",
-    "Alternative pop rock",
-    "Alternative punk / alternative rock",
-    "Alternative metal / hard rock / heavy metal / nu metal",
-    "Soft rock",
-    "Arena rock / classic rock / rock"
-  ],
-  "Power Metal": [
-    "Alternative rock / nu metal",
-    "Heavy metal / metal",
-    "Death metal / metal",
-    "Italian power metal",
-    "Alternative rock / hard rock / heavy metal / rock",
-    "Alternative metal/heavy metal",
-    "Hard rock / heavy metal / nu metal / pop",
-    "British power metal",
-    "Melodic death metal / viking metal",
-    "Chiptune / classical / metal / rock"
+  "Binaural": [
+    "Binaural",
+    "Binaural beats",
+    "Ambient",
+    "Meditation",
+    "White noise",
+    "Pink noise"
   ],
   "Camping": [
     "Country",
     "Bluegrass",
     "Americana",
     "Acoustic"
-  ],
-  "Pirate": [
-    "Pirate",
-    "Celtic",
-    "Sea shanties",
-    "Folk"
-  ],
-  "Acoustic Emo": [
-    "Acoustic blues",
-    "Emocore",
-    "Emoplugg",
-    "Cloud rap / emo / hip-hop",
-    "Acoustic punk",
-    "Alternative rock / emo / hardcore punk / pop punk",
-    "Emo / post-hardcore / screamo",
-    "Alternative rock / emo / indie rock / rock",
-    "Alternative rock / emo / pop / post-punk",
-    "Emo / indie / lo-fi / slowcore"
-  ],
-  "Polka": [
-    "Folk rock / polka / pop rock / rock",
-    "Polka / punk / punk rock / sea shanty",
-    "Celtic",
-    "Sea shanties",
-    "Polka"
-  ],
-  "90s Gangster Rap Underground": [
-    "Country rap",
-    "Rap/r&b",
-    "Cali rap",
-    "Pop rap / rock",
-    "Vapor trap",
-    "Gangsta rap",
-    "Mixtape"
-  ],
-  "90s Rave Underground": [
-    "Grave wave",
-    "Rave",
-    "Jungle",
-    "Deep underground hip hop",
-    "Underground boom bap",
-    "Underground hip hop",
-    "German underground rap",
-    "Hip-hop / underground hip hop",
-    "Hip-hop/rave",
-    "Breakbeat"
   ],
   "Chillwave": [
     "Chillwave",
@@ -118,45 +165,51 @@
     "Ambient",
     "Trance/progressive"
   ],
-  "Lo-Fi Beats": [
-    "Lo-fi / rock",
-    "Experimental / folk / folk punk / lo-fi",
-    "Lo-fi beats",
-    "Azontobeats",
-    "Lo-fi emo",
-    "Focus beats",
-    "Beats",
-    "Afrobeats",
-    "Emo / indie / indie rock / lo-fi",
-    "Folk / folk punk / lo-fi / rock"
-  ],
-  "Hindi Pop": [
-    "Hindi indie",
-    "Hindustani classical"
+  "Detroit Rap": [
+    "Detroit hip hop",
+    "Detroit trap"
   ],
   "Drum and Bass": [
     "Drum and bass",
+    "Drum & bass",
     "Drum and bass / dubstep / electro house",
     "Drum and bass / dubstep / electronic",
-    "Alternative rock/breakbeat/progressive house/dubstep/drum & bass",
     "Breaks/drum & bass",
-    "Drum & bass",
-    "Drum and bass / dubstep / electronic rock / trap",
-    "Drum and bass / electronic",
-    "Drum and bass / dubstep / electro house"
-  ],
-  "Punjabi Hip Hop": [
-    "Punjabi hip hop",
-    "Punjabi pop"
-  ],
-  "Australian Country": [
-    "Australian post-hardcore",
-    "Australian alternative rock",
-    "Australian comedy"
+    "Drumstep",
+    "Liquid DnB",
+    "Neurofunk",
+    "Jungle"
   ],
   "Emo Rap": [
     "Emo rap",
     "Emo rap / indie"
+  ],
+  "German Hip Hop": [
+    "Deutschrap",
+    "German hip hop",
+    "German hip-hop",
+    "German underground rap"
+  ],
+  "Hands Up": {
+    "genres": [
+      "Hands Up",
+      "Eurodance",
+      "Dance-Pop",
+      "Italo Dance",
+      "Happy Hardcore"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2010"
+    }
+  },
+  "Hindi Pop": [
+    "Hindi Pop",
+    "Indian Pop",
+    "Bollywood Pop",
+    "Desi Pop",
+    "Indian Dance Pop"
   ],
   "Hyperpop Upbeat": [
     "Hyperpop",
@@ -165,23 +218,122 @@
     "Hyperpop francais",
     "Hyperpop en espanol"
   ],
-  "Sovietwave": [
-    "Sovietwave"
+  "Japanese Emo": {
+    "genres": [
+      "Japanese Emo",
+      "Emo",
+      "Emo Pop",
+      "Pop Punk",
+      "J-Rock",
+      "Japanese Alternative Rock"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2015"
+    }
+  },
+  "Liquid DnB": [
+    "Liquid DnB",
+    "Liquid Drum & Bass",
+    "Drum & Bass",
+    "Liquid Funk",
+    "Atmospheric DnB"
   ],
-  "Binaural": [
-    "Binaural"
+  "Lo-Fi Beats": {
+    "genres": [
+      "Lo-Fi Beats",
+      "Lo-Fi",
+      "Lo-Fi Hip-Hop",
+      "Lo-Fi Chill",
+      "Ambient Lo-Fi"
+    ],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "Lo-Fi Jazzhop": [
+    "Lo-fi hip-hop",
+    "Lo-fi beats",
+    "Lo-fi jazzhop",
+    "Jazz hip-hop",
+    "Jazz rap",
+    "Lo-fi chill",
+    "Chillhop",
+    "Jazz hop",
+    "Hip-hop jazz"
   ],
-  "German Hip Hop": [
-    "Deutschrap",
-    "German hip hop",
-    "German hip-hop",
-    "German underground rap"
+  "Mexican Rock": [
+    "Mexican rock",
+    "Rock mexicano",
+    "Alternative rock",
+    "Hard rock",
+    "Indie rock",
+    "Psychedelic rock",
+    "Alternative pop rock",
+    "Classic rock",
+    "Mexican alternative rock"
   ],
-  "UK Rap": [
-    "Uk drill",
-    "Uk hip hop",
-    "Uk hip-hop",
-    "Uk alternative hip hop"
+  "Millenial Emo": {
+    "genres": [
+      "Emo",
+      "Emo Pop",
+      "Pop Punk",
+      "Post-Hardcore",
+      "Alternative Rock",
+      "Screamo"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "Modern Punk": {
+    "genres": [
+      "Punk",
+      "Punk Rock",
+      "Pop Punk",
+      "Alternative Rock",
+      "Garage Punk",
+      "Hardcore Punk"
+    ],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "Pirate": [
+    "Pirate",
+    "Celtic",
+    "Sea shanties",
+    "Folk"
+  ],
+  "Polka": [
+    "Folk rock / polka / pop rock / rock",
+    "Polka / punk / punk rock / sea shanty",
+    "Celtic",
+    "Sea shanties",
+    "Polka"
+  ],
+  "Power Metal": [
+    "Power Metal",
+    "Heavy metal",
+    "Italian power metal",
+    "British power metal",
+    "Symphonic power metal",
+    "Progressive power metal",
+    "Speed metal",
+    "Melodic power metal",
+    "Epic power metal"
+  ],
+  "Punjabi Hip Hop": [
+    "Punjabi Hip Hop",
+    "Punjabi Rap",
+    "Desi Hip Hop",
+    "Hip Hop",
+    "Indian Hip Hop"
   ],
   "Rap Metal": [
     "Rap metal",
@@ -195,22 +347,97 @@
     "Nu-metal",
     "Nu-metalcore"
   ],
-  "Detroit Rap": [
-    "Detroit hip hop",
-    "Detroit trap"
-  ],
-  "175 BPM": [
-    "Happy hardcore",
-    "Eurobeat",
-    "Uk hardcore"
+  "Rave Techno Bass": [
+    "Rave",
+    "Techno",
+    "Hardcore Techno",
+    "Bass Music",
+    "Bassline",
+    "Hardstyle",
+    "Gabber"
   ],
   "Rock Balladen": [
     "Ballad / Pop",
     "Ballad / Pop / Pop Rock / Synthpop",
     "Ballad / Pop / Soft Rock",
-	"Ballad / Pop / Synthpop",
-	"Ballad / Soft Rock",
-	"Ballad / Synthpop",
-	"Soft Rock"
-  ]
+    "Ballad / Soft Rock",
+    "Ballad / Synthpop",
+    "Rock ballad",
+    "Power ballad",
+    "Soft Rock"
+  ],
+  "Rock Classics": {
+    "genres": [
+      "Rock",
+      "Classic Rock",
+      "Hard Rock",
+      "Arena Rock",
+      "Progressive Rock",
+      "Blues Rock"
+    ],
+    "release_date_filter": {
+      "condition": "before",
+      "end_date": "1990"
+    }
+  },
+  "Sad Country": [
+    "Country",
+    "Sad country",
+    "Country ballad",
+    "Country / pop",
+    "Outlaw country",
+    "Country blues",
+    "Americana",
+    "Traditional country",
+    "Country folk"
+  ],
+  "Sovietwave": [
+    "Sovietwave"
+  ],
+  "UK House": {
+    "genres": [
+      "UK House",
+      "House",
+      "Garage House",
+      "Deep House",
+      "UK Garage",
+      "British House"
+    ],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "2010"
+    }
+  },
+  "UK Rap": [
+    "Uk drill",
+    "Uk hip hop",
+    "Uk hip-hop",
+    "Uk alternative hip hop"
+  ],
+  "Upbeat Country": [
+    "Country",
+    "Country pop",
+    "Country rock",
+    "Country / pop",
+    "Upbeat country",
+    "Country dance",
+    "Country rockabilly",
+    "Americana country",
+    "Country / country blues / country rock / rock"
+  ],
+  "Vaportrap": {
+    "genres": [
+      "Vaportrap",
+      "Vaporwave",
+      "Trap",
+      "Lo-Fi Trap",
+      "Cloud Trap",
+      "Chill Trap"
+    ],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  }
 }

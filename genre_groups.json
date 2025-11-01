@@ -205,7 +205,7 @@
     }
   },
   "80s Punk": {
-    "genres": ["Punk", "Punk Rock", "Hardcore Punk", "Post-Punk", "New Wave", "Punk"],
+    "genres": ["Punk", "Punk Rock", "Hardcore Punk", "Post-Punk", "New Wave"],
     "release_date_filter": {
       "condition": "between",
       "start_date": "1980",
@@ -764,7 +764,7 @@
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk", "Arena Rock", "Art Rock", "Blues Rock", "Folk Rock", "Garage Rock", "Heartland Rock", "Southern Rock"],
   "Pop": ["Pop", "Pop Rock", "Bubblegum Pop", "Indie Pop", "Dance Pop", "Pop Punk", "Pop Rap", "J-Pop", "K-Pop", "Brazilian Pop", "Britpop", "Europop", "Latin Pop"],
   "Electronic": ["Electronic", "Electropop", "Deep House", "Tech House", "Synthwave", "Trance", "Eurodance", "Techno", "Acid Trance", "Goa Trance", "Dubstep", "House", "Ambient", "IDM", "Breakbeat"],
-  "Hip Hop": ["Hip Hop", "Hip-Hop", "Trap", "Cloud Rap", "Emo Rap", "Alternative Hip Hop", "Old School Hip Hop", "Lo-Fi Hip-Hop", "UK Drill", "G-Funk", "Chicago Drill", "Jamaican Dancehall", "Bay Area Hip Hop", "Russian Hip Hop", "Chicano Rap", "Afroswing", "Boom Bap", "Gangsta Rap"],
+  "Hip Hop": ["Hip Hop", "Hip-Hop", "Trap", "Cloud Rap", "Emo Rap", "Alternative Hip Hop", "Old School Hip Hop", "Lo-Fi Hip-Hop", "UK Drill", "G-Funk", "Chicago Drill", "Bay Area Hip Hop", "Russian Hip Hop", "Chicano Rap", "Afroswing", "Boom Bap", "Gangsta Rap"],
   "Metal": ["Metal", "Metalcore", "Alternative Metal", "Industrial Metal", "Death Metal", "Doom Metal", "Sludge Metal", "Gothic Metal", "Post-Hardcore", "Grindcore", "Progressive Metal", "Heavy Metal", "Black Metal", "Thrash Metal", "Speed Metal", "Power Metal"],
   "Jazz": ["Jazz", "Jazz Fusion", "Contemporary Jazz", "Jazz Rap", "Electro Jazz", "Swing", "Vocal Jazz", "Bossa Nova", "Folk Jazz", "Cool Jazz", "Bebop", "Smooth Jazz", "Big Band"],
   "Indie": ["Indie", "Indie Rock", "Indie Pop", "Indie Folk", "Indietronica", "British Indie", "Canadian Indie", "Australian Indie", "Seattle Indie", "Cali Indie", "Texas Indie", "Indie Punk", "Indie R&B"],
@@ -864,17 +864,17 @@
   "Electro & Electronic Fusion": ["Future Funk", "Dubstep / Glitch-Hop", "Tech House", "Minimal Techno", "House", "Deep House", "Progressive Electro House", "Deep Liquid Bass", "Electronic / Progressive Trance / Psytrance / Trance"],
   "Metal & Hardcore Fusion": ["Melodic Death Metal", "Hard Rock / Metal", "Deathcore", "Metalcore", "Crossover Thrash", "Avant-garde Metal", "Hard Alternative", "Nu-Metalcore", "Post-Hardcore", "Hard Bass", "German Hardcore"],
   "Global & Regional Fusion": ["Turkish Rock", "Afrofuturism", "Afrofuturismo Brasileiro", "Latin Alternative", "Brazilian Metal", "Russian Ska", "Cuban Alternative", "South African Hip Hop", "Latin Pop", "Mexican Hip Hop", "Punjabi Pop", "Cumbia", "Arabic Jazz"],
-  "Hip-Hop Subgenres": ["Battle Rap", "Conscious Hip Hop", "Hardcore Hip Hop", "Trap Hip Hop", "Hip-Hop / Trap", "Cloud Rap", "Rap Calme", "East Coast Hip Hop", "West Coast Trap", "Atlanta Bass", "Southern Soul", "Experimental Hip Hop", "Underground Hip Hop", "G-Funk"],
-  "Indie Folk & Acoustic": ["Acoustic Rock", "Acoustic Pop", "Acoustic Punk", "Folk / Progressive Rock / Rock", "Indie Folk", "Indie Folk Rock", "Indie Singer-Songwriter", "Folk-Pop", "Indie Soul"],
-  "Jazz & Blues": ["Jazz Boom Bap", "Blues Rock", "Soul Flow", "Cool Jazz", "Jazz Metal", "French Jazz", "Contemporary Jazz", "Blues Mexicano", "Jazz, Blues, Soundtrack", "Rhythm and Blues", "Afrobeat", "Bebop", "Indie R&B", "Pop R&B"],
-  "Psychedelic & Experimental": ["Psychedelic Rock", "Shoegaze", "Psychedelic Doom", "Experimental / Metal / Progressive Metal / Rock", "Psychokore", "Psychedelic Trance", "Hyperpop", "Experimental Dubstep", "Weirdcore", "Sigilkore", "Bitpop", "Dream Pop / Electronic / Hip-Hop / Pop"],
-  "Pop & Dance Fusion": ["Pop Dance", "Dance-Pop", "Dance-Pop/Electronic", "Pop EDM", "Pop-Rock", "Pop Punk / Punk Rock", "Eurodance", "Reggaeton", "Tropical House", "Modern Dance", "Viral Pop"],
-  "Soundtrack & Classical": ["German Soundtrack", "Orchestral Soundtrack", "Classical", "Classical/Instrumental/Rock", "Electronic / Electronic / Industrial / Industrial Rock", "Baroque", "Ambient Worship", "Piano Rock", "Chamber Pop", "Opera"],
-  "Alternative Metal & Nu-Metal": ["Alternative Metal", "Nu-Metal", "Alternative Metal / Hard Rock / Hip-Hop / Nu Metal", "Glam Metal", "Crossover Thrash", "Post-Hardcore", "Nu-Metalcore", "Hard Rock / Piano Rock / Pop Rock"],
-  "Punk & Post-Punk": ["Post Punk", "General Punk", "Punk Cover", "Garage Punk", "Punk 'n' Roll", "Chicano Punk", "Hardcore Punk", "Screamo", "Post-Hardcore", "Punk Rock", "Emocore", "Punk Rock Revival"],
+  "Hip-Hop Subgenres": ["Battle Rap", "Conscious Hip Hop", "Hardcore Hip Hop", "Trap Hip Hop", "Hip-Hop / Trap", "Cloud Rap", "Rap Calme", "East Coast Hip Hop", "West Coast Hip Hop", "Alternative Hip Hop", "Experimental Hip Hop", "Underground Hip Hop", "G-Funk", "Boom Bap"],
+  "Indie Folk & Acoustic": ["Acoustic Rock", "Acoustic Pop", "Acoustic Punk", "Folk / Progressive Rock / Rock", "Indie Folk", "Indie Folk Rock", "Indie Singer-Songwriter", "Folk-Pop", "Acoustic Folk"],
+  "Jazz & Blues": ["Jazz Boom Bap", "Blues Rock", "Soul Flow", "Cool Jazz", "Jazz Metal", "French Jazz", "Contemporary Jazz", "Blues Mexicano", "Jazz, Blues, Soundtrack", "Rhythm and Blues", "Bebop", "Blues Jazz", "Swing", "Electric Blues"],
+  "Psychedelic & Experimental": ["Psychedelic Rock", "Shoegaze", "Psychedelic Doom", "Experimental / Metal / Progressive Metal / Rock", "Psychedelic Trance", "Experimental Dubstep", "Dream Pop", "Neo-Psychedelic", "Psychedelic Pop", "Psychedelic Jazz", "Space Rock"],
+  "Pop & Dance Fusion": ["Pop Dance", "Dance-Pop", "Dance-Pop/Electronic", "Pop EDM", "Pop-Rock", "Eurodance", "Reggaeton", "Tropical House", "House Pop", "Electro Pop", "Viral Pop"],
+  "Soundtrack & Classical": ["German Soundtrack", "Orchestral Soundtrack", "Classical", "Classical/Instrumental", "Film Score", "Baroque", "Ambient Worship", "Chamber Pop", "Opera", "Classical Crossover"],
+  "Alternative Metal & Nu-Metal": ["Alternative Metal", "Nu-Metal", "Alternative Metal / Hard Rock / Hip-Hop / Nu Metal", "Glam Metal", "Crossover Thrash", "Post-Hardcore", "Nu-Metalcore", "Rap Metal"],
+  "Punk & Post-Punk": ["Post Punk", "Punk", "Punk Rock", "Garage Punk", "Punk 'n' Roll", "Chicano Punk", "Hardcore Punk", "Screamo", "Post-Hardcore", "Emocore", "Punk Rock Revival", "New Wave"],
   "Funk & Soul": ["Funk", "Funk Carioca", "Funk Pop", "Funk Metal", "Southern Soul", "Soul Flow", "G-Funk", "R&B", "Soulful House"],
   "Pop Rock": ["Classic Pop", "Pop Punk / Rock", "Pop Rock", "Pop-Rock, Indie Pop, Acoustic, Singer/Songwriter", "Alternative Pop Rock"],
-  "Trap & Phonk": ["Trap Latino", "Phonk Brasileiro", "Ukrainian Phonk", "Aggressive Phonk", "Trap Queen", "Drift Phonk", "Hip Hop Trap", "Rap Metal", "Rap Calm"],
+  "Trap & Phonk": ["Trap Latino", "Phonk Brasileiro", "Ukrainian Phonk", "Aggressive Phonk", "Trap Queen", "Drift Phonk", "Hip Hop Trap", "Trap", "Phonk", "Memphis Rap"],
   "Cyberpunk & Synthwave": ["Cyberpunk", "Synthwave", "Retrowave", "Darksynth", "Spacewave", "Vaporwave", "Dreamwave", "Neo-Tokyo Synth"],
   "Latin Fusions": ["Reggaeton Colombiano", "Dembow Dominicano", "Cumbia Sonidera", "Bachata Fusion", "Latincore", "Salsa Urbana", "Mexican Trap"],
   "Hyperpop & Beyond": ["Korean Hyperpop", "Proto-Hyperpop", "French Hyperpop", "Hyperpop en Español", "Bubblegum Bass", "Neon Pop Punk"],
@@ -919,7 +919,7 @@
   "Folk Fusion": ["Celtic Punk", "Neo-Folk", "Folk Metal", "Americana Country Rock", "Indie Folk Rock", "Traditional Folk", "Folktronica"],
   "Latin Energy": ["Reggaeton Mexicano", "Dembow Dominicano", "Salsa Urbana", "Cumbia Sonidera", "Bachata Fusion", "Trap Latino", "Latin Pop"],
   "Jazz Around the World": ["Middle Eastern Jazz", "Japanese Jazz Fusion", "French Jazz", "Jazz Boom Bap", "Electro Jazz", "Afrobeat Jazz", "Swing Revival"],
-  "Regional Hip-Hop 2": ["Ohio Hip-Hop", "New Orleans Rap", "Bay Area Hip-Hop", "Vietnamese Hip-Hop", "Turkish Trap Pop", "Russian Emo Rap", "African-American Classical"],
+  "Regional Hip-Hop 2": ["Ohio Hip-Hop", "New Orleans Rap", "Bay Area Hip-Hop", "Vietnamese Hip-Hop", "Turkish Trap Pop", "Russian Emo Rap"],
   "Dark Clubbing": ["Dark Trap", "Dark Synthpop", "Gothic Industrial", "Hardwave", "Darkwave", "Dark Disco", "Cyberpunk Beats"],
   "Metal Crossovers": ["Nu-Metalcore", "Deathgrass", "Post-Black Metal", "Melodic Doom", "Finnish Melodeath", "Metalcore / Rock", "Slamming Deathcore"],
   "Pop & Funk": ["Funk Rock", "Pop Rock", "Bubblegum Pop", "Funky House", "Disco Funk", "Indie Pop Rock", "Dance Funk"],
@@ -982,8 +982,8 @@
   "Dark Electronic": ["Darksynth", "Dark Ambient", "Darkwave", "Industrial Pop", "Dark Synthpop", "Cyberpunk EDM", "Dark Disco"],
   "Regional Reggae": ["Caribbean Reggae", "Mexican Reggae", "Cuban Reggae", "African Reggae", "Jamaican Dancehall", "Reggae Fusion", "Ska Reggae"],
   "Experimental Punk": ["Post-Punk Revival", "Noise Punk", "Garage Punk", "Synthpunk", "Industrial Punk", "Gypsy Punk", "Avant-Garde Punk"],
-  "Emotional Rock": ["Emo Rock", "Post-Grunge", "Alternative Emo", "Pop Punk Emo", "Indie Emo Rock", "Screamo", "Math Rock"],
-  "Asian Fusion Pop": ["K-Pop", "J-Pop", "Chinese EDM", "Thai Trap", "Filipino Indie", "Vietnamese Rap", "Japanese Metalcore"],
+  "Emotional Rock": ["Emo Rock", "Post-Grunge", "Alternative Emo", "Pop Punk Emo", "Indie Emo Rock", "Screamo", "Emo"],
+  "Asian Fusion Pop": ["K-Pop", "J-Pop", "Chinese EDM", "Thai Trap", "Filipino Indie", "Vietnamese Pop", "Chinese Pop"],
   "Gothic Variants": ["Gothic Rock", "Gothic Metal", "Dark Synth", "Gothic Punk", "Gothic Americana", "Vampire Rock", "Neo-Goth"],
   "Dreamy Sounds": ["Dreamwave", "Dream Pop", "Ambient Dreamscapes", "Chillsynth", "Shoegaze", "Neo-Psychedelic", "Dream EDM"],
   "Latin Dancefloor": ["Reggaeton", "Salsa House", "Cumbia Electronica", "Bachata EDM", "Merengue Fusion", "Latin Pop Dance", "Dembow"],
@@ -1118,5 +1118,388 @@
   "Trip Hop": ["Trip Hop"],
   "Vaporwave": ["vaporwave"],
   "Vocal Jazz": ["Vocal Jazz"],
-  "World Basic": ["World Music", "International"]
+  "World Basic": ["World Music", "International"],
+  "90s Rave Underground": {
+    "genres": ["Rave", "Hardcore Techno", "Techno", "Acid House", "Gabber", "Happy Hardcore", "Underground Techno"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground Hip-Hop": {
+    "genres": ["Hip Hop", "Underground Hip-Hop", "Old School Hip Hop", "Alternative Hip Hop", "Boom Bap", "Conscious Hip Hop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground House": {
+    "genres": ["House", "Underground House", "Deep House", "Acid House", "Garage House", "Progressive House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "90s Underground Rap": {
+    "genres": ["Rap", "Underground Rap", "Old School Rap", "Alternative Hip Hop", "Conscious Hip Hop", "Boom Bap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "Hands Up": {
+    "genres": ["Hands Up", "Eurodance", "Dance-Pop", "Italo Dance", "Happy Hardcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2010"
+    }
+  },
+  "Hindi Pop": {
+    "genres": ["Hindi Pop", "Indian Pop", "Bollywood Pop", "Desi Pop", "Indian Dance Pop"]
+  },
+  "Japanese Emo": {
+    "genres": ["Japanese Emo", "Emo", "Emo Pop", "Pop Punk", "J-Rock", "Japanese Alternative Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2015"
+    }
+  },
+  "Liquid DnB": {
+    "genres": ["Liquid DnB", "Liquid Drum & Bass", "Drum & Bass", "Liquid Funk", "Atmospheric DnB"]
+  },
+  "Lo-Fi Beats": {
+    "genres": ["Lo-Fi Beats", "Lo-Fi", "Lo-Fi Hip-Hop", "Lo-Fi Chill", "Ambient Lo-Fi"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "Millenial Emo": {
+    "genres": ["Emo", "Emo Pop", "Pop Punk", "Post-Hardcore", "Alternative Rock", "Screamo"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "Modern Punk": {
+    "genres": ["Punk", "Punk Rock", "Pop Punk", "Alternative Rock", "Garage Punk", "Hardcore Punk"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "Punjabi Hip Hop": {
+    "genres": ["Punjabi Hip Hop", "Punjabi Rap", "Desi Hip Hop", "Hip Hop", "Indian Hip Hop"]
+  },
+  "Rave Techno Bass": {
+    "genres": ["Rave", "Techno", "Hardcore Techno", "Bass Music", "Bassline", "Hardstyle", "Gabber"]
+  },
+  "Rock Classics": {
+    "genres": ["Rock", "Classic Rock", "Hard Rock", "Arena Rock", "Progressive Rock", "Blues Rock"],
+    "release_date_filter": {
+      "condition": "before",
+      "end_date": "1990"
+    }
+  },
+  "UK House": {
+    "genres": ["UK House", "House", "Garage House", "Deep House", "UK Garage", "British House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "2010"
+    }
+  },
+  "Vaportrap": {
+    "genres": ["Vaportrap", "Vaporwave", "Trap", "Lo-Fi Trap", "Cloud Trap", "Chill Trap"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2010"
+    }
+  },
+  "70s Hip Hop": {
+    "genres": ["Hip Hop", "Old School Hip Hop", "Disco Rap", "Funk Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "80s Hip Hop": {
+    "genres": ["Hip Hop", "Old School Hip Hop", "Golden Age Hip Hop", "Boom Bap", "Gangsta Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "2010s Hip Hop": {
+    "genres": ["Hip Hop", "Trap", "Cloud Rap", "Emo Rap", "Alternative Hip Hop", "Mumble Rap"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Hip Hop": {
+    "genres": ["Hip Hop", "Trap", "Drill", "Cloud Rap", "Alternative Hip Hop", "Trap Soul"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "80s Dance": {
+    "genres": ["Dance-Pop", "Disco", "Funk", "Italo Disco", "Hi-NRG", "Eurodisco"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "90s Dance": {
+    "genres": ["Eurodance", "Dance-Pop", "House", "Techno", "Trance", "Happy Hardcore"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2000s Dance": {
+    "genres": ["Eurodance", "Dance-Pop", "Hands Up", "Progressive House", "Trance", "Electro House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2010s Dance": {
+    "genres": ["EDM", "Big Room", "Progressive House", "Future House", "Deep House", "Tropical House"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Dance": {
+    "genres": ["EDM", "Future Bass", "House", "Techno", "Trance", "Melodic House"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "70s Rock": {
+    "genres": ["Rock", "Classic Rock", "Progressive Rock", "Hard Rock", "Arena Rock", "Southern Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "2010s Rock": {
+    "genres": ["Rock", "Alternative Rock", "Indie Rock", "Modern Rock", "Garage Rock", "Pop Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Rock": {
+    "genres": ["Rock", "Alternative Rock", "Indie Rock", "Modern Rock", "Post-Punk Revival"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "60s Pop": {
+    "genres": ["Pop", "Bubblegum Pop", "Pop Rock", "Brill Building Pop", "Sunshine Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1960",
+      "end_date": "1969"
+    }
+  },
+  "70s Pop": {
+    "genres": ["Pop", "Pop Rock", "Soft Rock", "Bubblegum Pop", "Disco Pop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "2000s Pop": {
+    "genres": ["Pop", "Pop Rock", "Dance-Pop", "Teen Pop", "Pop Punk", "Electropop"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "70s Metal": {
+    "genres": ["Metal", "Heavy Metal", "Hard Rock", "Progressive Metal", "Blues Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "2000s Metal": {
+    "genres": ["Metal", "Nu Metal", "Metalcore", "Alternative Metal", "Death Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2010s Metal": {
+    "genres": ["Metal", "Metalcore", "Deathcore", "Progressive Metal", "Alternative Metal", "Sludge Metal"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Metal": {
+    "genres": ["Metal", "Metalcore", "Deathcore", "Progressive Metal", "Modern Metal"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "2010s Punk": {
+    "genres": ["Punk", "Punk Rock", "Pop Punk", "Hardcore Punk", "Garage Punk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Punk": {
+    "genres": ["Punk", "Punk Rock", "Pop Punk", "Hardcore Punk", "Post-Punk Revival"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "2010s Emo": {
+    "genres": ["Emo", "Emo Pop", "Pop Punk", "Post-Hardcore", "Alternative Rock"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Emo": {
+    "genres": ["Emo", "Emo Pop", "Pop Punk", "Alternative Rock", "Emo Rap"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "70s Jazz": {
+    "genres": ["Jazz", "Jazz Fusion", "Funk Jazz", "Soul Jazz", "Progressive Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1970",
+      "end_date": "1979"
+    }
+  },
+  "80s Jazz": {
+    "genres": ["Jazz", "Contemporary Jazz", "Smooth Jazz", "Jazz Fusion", "Acid Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "90s Jazz": {
+    "genres": ["Jazz", "Acid Jazz", "Jazz Rap", "Contemporary Jazz", "Nu Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2000s Jazz": {
+    "genres": ["Jazz", "Nu Jazz", "Jazz Rap", "Contemporary Jazz", "Electro Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2010s Jazz": {
+    "genres": ["Jazz", "Contemporary Jazz", "Nu Jazz", "Jazz Rap", "Electronic Jazz"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s Jazz": {
+    "genres": ["Jazz", "Contemporary Jazz", "Jazz Fusion", "Jazz Rap", "Modern Jazz"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "2000s Electronic": {
+    "genres": ["Electronic", "Electropop", "Synthwave", "Trance", "House", "IDM"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2020s Electronic": {
+    "genres": ["Electronic", "Synthwave", "Future Bass", "House", "Techno", "Hyperpop"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  },
+  "80s R&B": {
+    "genres": ["R&B", "Contemporary R&B", "New Jack Swing", "Soul", "Funk"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1980",
+      "end_date": "1989"
+    }
+  },
+  "90s R&B": {
+    "genres": ["R&B", "Contemporary R&B", "Hip Hop Soul", "Neo-Soul", "New Jack Swing"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "1990",
+      "end_date": "1999"
+    }
+  },
+  "2000s R&B": {
+    "genres": ["R&B", "Contemporary R&B", "Hip Hop Soul", "Neo-Soul", "Crunk & B"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2000",
+      "end_date": "2009"
+    }
+  },
+  "2010s R&B": {
+    "genres": ["R&B", "Contemporary R&B", "Alternative R&B", "Trap Soul", "Neo-Soul"],
+    "release_date_filter": {
+      "condition": "between",
+      "start_date": "2010",
+      "end_date": "2019"
+    }
+  },
+  "2020s R&B": {
+    "genres": ["R&B", "Contemporary R&B", "Alternative R&B", "Trap Soul", "Indie R&B"],
+    "release_date_filter": {
+      "condition": "after",
+      "start_date": "2020"
+    }
+  }
 }

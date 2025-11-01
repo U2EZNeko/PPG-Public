@@ -184,14 +184,42 @@ def upload_playlist_poster(playlist, image_path):
     except Exception as e:
         log_warning(f"⚠️  Could not upload poster: {e}")
 
+# Normalize artist name for consistent comparison
+def normalize_artist_name(artist_name):
+    """Normalize artist name for consistent comparison.
+    Handles Unicode (German ÄÖÜ, Cyrillic), whitespace around slashes, 
+    multiple spaces, and strips leading/trailing whitespace."""
+    if not artist_name:
+        return None
+    
+    import unicodedata
+    # Normalize Unicode characters (NFC form - preserves German ÄÖÜ and Cyrillic properly)
+    # This handles composed vs decomposed forms (e.g., Ä vs A+̈)
+    normalized = unicodedata.normalize('NFC', artist_name)
+    
+    # Strip leading/trailing whitespace
+    normalized = normalized.strip()
+    
+    # Normalize whitespace around slashes (e.g., "Artist / Featuring" -> "Artist/Featuring")
+    normalized = normalized.replace(' / ', '/').replace('/ ', '/').replace(' /', '/')
+    
+    # Normalize multiple spaces to single space
+    normalized = ' '.join(normalized.split())
+    
+    return normalized
+
 # Get artist name from a track
 def get_artist_name(track):
     """Get the artist name from a track, handling different Plex track structures."""
     if hasattr(track, 'artist') and track.artist:
-        return track.artist().title if callable(track.artist) else track.artist
+        artist_name = track.artist().title if callable(track.artist) else track.artist
     elif hasattr(track, 'grandparentTitle') and track.grandparentTitle:
-        return track.grandparentTitle
-    return None
+        artist_name = track.grandparentTitle
+    else:
+        return None
+    
+    # Normalize the artist name for consistent comparison
+    return normalize_artist_name(artist_name)
 
 # Get album name from a track
 def get_album_name(track):
@@ -407,33 +435,48 @@ def get_liked_artists():
         music_library = plex.library.section("Music")
         
         # Try different approaches to find liked tracks
-        log_debug("🔍 Attempting to query Plex for tracks with 1+ star rating...")
+        log_info("🔍 Attempting to query Plex for tracks with 1+ star rating...")
         
-        # Method 1: Try searchTracks with userRating__gte
-        try:
-            liked_items = music_library.searchTracks(userRating__gte=1)
-            log_debug(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
-        except Exception as e1:
-            log_debug(f"❌ Method 1 failed: {e1}")
-            liked_items = []
-        
-        # Method 2: Try search with different filter syntax
-        if not liked_items:
+        liked_items = []
+        # Use tqdm to show progress for query attempts
+        with tqdm(total=3, desc="Querying Plex", unit="method", disable=(LOG_LEVEL in ["WARNING", "ERROR"])) as pbar:
+            # Method 1: Try searchTracks with userRating__gte
+            pbar.set_description("Querying Plex (Method 1)")
             try:
-                liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                log_debug(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
-            except Exception as e2:
-                log_debug(f"❌ Method 2 failed: {e2}")
-                liked_items = []
-        
-        # Method 3: Try search with userRating__gte in filters
-        if not liked_items:
-            try:
-                liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                log_debug(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
-            except Exception as e3:
-                log_debug(f"❌ Method 3 failed: {e3}")
-                liked_items = []
+                liked_items = music_library.searchTracks(userRating__gte=1)
+                pbar.set_description(f"Querying Plex (Method 1): {len(liked_items):,} tracks found")
+                log_debug(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
+                pbar.update(1)
+            except Exception as e1:
+                log_debug(f"❌ Method 1 failed: {e1}")
+                pbar.set_description("Querying Plex (Method 1): failed")
+                pbar.update(1)
+            
+            # Method 2: Try search with different filter syntax
+            if not liked_items:
+                pbar.set_description("Querying Plex (Method 2)")
+                try:
+                    liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
+                    pbar.set_description(f"Querying Plex (Method 2): {len(liked_items):,} tracks found")
+                    log_debug(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
+                    pbar.update(1)
+                except Exception as e2:
+                    log_debug(f"❌ Method 2 failed: {e2}")
+                    pbar.set_description("Querying Plex (Method 2): failed")
+                    pbar.update(1)
+            
+            # Method 3: Try search with userRating__gte in filters
+            if not liked_items:
+                pbar.set_description("Querying Plex (Method 3)")
+                try:
+                    liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
+                    pbar.set_description(f"Querying Plex (Method 3): {len(liked_items):,} tracks found")
+                    log_debug(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
+                    pbar.update(1)
+                except Exception as e3:
+                    log_debug(f"❌ Method 3 failed: {e3}")
+                    pbar.set_description("Querying Plex (Method 3): failed")
+                    pbar.update(1)
         
         # Method 4: Fallback - get all tracks and filter manually (for debugging)
         if not liked_items:
@@ -1002,9 +1045,15 @@ def load_liked_artists_cache():
         return None, 0, None
     
     try:
-        with open(LIKED_ARTISTS_CACHE_FILE, "r") as file:
+        with open(LIKED_ARTISTS_CACHE_FILE, "r", encoding='utf-8') as file:
             cache_data = json.load(file)
-            liked_artists = set(cache_data.get("liked_artists", []))
+            # Normalize cached artist names for consistent matching
+            raw_artists = cache_data.get("liked_artists", [])
+            liked_artists = set()
+            for artist in raw_artists:
+                normalized = normalize_artist_name(artist)
+                if normalized:
+                    liked_artists.add(normalized)
             cached_track_count = cache_data.get("liked_track_count", 0)
             cache_timestamp = cache_data.get("cache_timestamp", None)
             
@@ -1035,8 +1084,8 @@ def save_liked_artists_cache(liked_artists, track_count):
             "liked_track_count": track_count,
             "cache_timestamp": datetime.now().isoformat()
         }
-        with open(LIKED_ARTISTS_CACHE_FILE, "w") as file:
-            json.dump(cache_data, file, indent=2)
+        with open(LIKED_ARTISTS_CACHE_FILE, "w", encoding='utf-8') as file:
+            json.dump(cache_data, file, indent=2, ensure_ascii=False)
         log_info(f"✅ Saved {len(liked_artists):,} liked artists to cache (from {track_count:,} tracks)")
         log_debug(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
     except Exception as e:
