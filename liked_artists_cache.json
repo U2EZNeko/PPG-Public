@@ -727,5 +727,3633 @@
     "Павел Кондратенко"
   ],
   "liked_track_count": 1212,
-  "cache_timestamp": "2025-11-02T16:03:18.943659"
+  "cache_timestamp": "2025-11-02T16:03:18.943659",
+  "validation": {
+    "Necro": {
+      "valid": true,
+      "track_count": 1829,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Frank Sinatra": {
+      "valid": true,
+      "track_count": 1785,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Guy Mitchell": {
+      "valid": true,
+      "track_count": 1496,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Scooter": {
+      "valid": true,
+      "track_count": 1255,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kool Savas": {
+      "valid": true,
+      "track_count": 1026,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Apathy": {
+      "valid": true,
+      "track_count": 994,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Monkees": {
+      "valid": true,
+      "track_count": 933,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Green Day": {
+      "valid": true,
+      "track_count": 924,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kylie Minogue": {
+      "valid": true,
+      "track_count": 915,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Brooklyn Bounce": {
+      "valid": true,
+      "track_count": 893,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rihanna": {
+      "valid": true,
+      "track_count": 835,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "David Bowie": {
+      "valid": true,
+      "track_count": 800,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eminem": {
+      "valid": true,
+      "track_count": 768,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Various Artists": {
+      "valid": true,
+      "track_count": 763,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Elton John": {
+      "valid": true,
+      "track_count": 757,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Falco": {
+      "valid": true,
+      "track_count": 738,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ultraklystron": {
+      "valid": true,
+      "track_count": 715,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Andrew Spencer": {
+      "valid": true,
+      "track_count": 709,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Celldweller": {
+      "valid": true,
+      "track_count": 707,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Scorpions": {
+      "valid": true,
+      "track_count": 702,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Oasis": {
+      "valid": true,
+      "track_count": 691,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Buzzcocks": {
+      "valid": true,
+      "track_count": 684,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lynyrd Skynyrd": {
+      "valid": true,
+      "track_count": 659,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kollegah": {
+      "valid": true,
+      "track_count": 656,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kontra K": {
+      "valid": true,
+      "track_count": 656,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "deadmau5": {
+      "valid": true,
+      "track_count": 653,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Toten Hosen": {
+      "valid": true,
+      "track_count": 648,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Anti-Flag": {
+      "valid": true,
+      "track_count": 646,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Afroman": {
+      "valid": true,
+      "track_count": 640,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lady Gaga": {
+      "valid": true,
+      "track_count": 613,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Gollum": {
+      "valid": true,
+      "track_count": 601,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bowling for Soup": {
+      "valid": true,
+      "track_count": 597,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bad Religion": {
+      "valid": true,
+      "track_count": 572,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "50 Cent": {
+      "valid": true,
+      "track_count": 561,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Darren Styles": {
+      "valid": true,
+      "track_count": 552,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eko Fresh": {
+      "valid": true,
+      "track_count": 540,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alligatoah": {
+      "valid": true,
+      "track_count": 523,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bob Sinclar": {
+      "valid": true,
+      "track_count": 514,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "AFI": {
+      "valid": true,
+      "track_count": 477,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Smashing Pumpkins": {
+      "valid": true,
+      "track_count": 470,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dion": {
+      "valid": true,
+      "track_count": 459,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Maroon 5": {
+      "valid": true,
+      "track_count": 448,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jimmy Eat World": {
+      "valid": true,
+      "track_count": 433,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bushido": {
+      "valid": true,
+      "track_count": 420,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Ärzte": {
+      "valid": true,
+      "track_count": 414,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Böhse Onkelz": {
+      "valid": true,
+      "track_count": 413,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sybyr": {
+      "valid": true,
+      "track_count": 412,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Streets": {
+      "valid": true,
+      "track_count": 411,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Erste Allgemeine Verunsicherung": {
+      "valid": true,
+      "track_count": 407,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Example": {
+      "valid": true,
+      "track_count": 407,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Silverstein": {
+      "valid": true,
+      "track_count": 400,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "2Pac": {
+      "valid": true,
+      "track_count": 395,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mos Def": {
+      "valid": true,
+      "track_count": 394,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "All Time Low": {
+      "valid": true,
+      "track_count": 393,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Marshall Tucker Band": {
+      "valid": true,
+      "track_count": 391,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SDP": {
+      "valid": true,
+      "track_count": 384,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Dean": {
+      "valid": true,
+      "track_count": 379,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Xzibit": {
+      "valid": true,
+      "track_count": 379,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sean Paul": {
+      "valid": true,
+      "track_count": 377,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dropkick Murphys": {
+      "valid": true,
+      "track_count": 376,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gigi D'Agostino": {
+      "valid": true,
+      "track_count": 374,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "XXXTENTACION": {
+      "valid": true,
+      "track_count": 372,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Infected Mushroom": {
+      "valid": true,
+      "track_count": 357,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dave Rodgers": {
+      "valid": true,
+      "track_count": 356,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "INNA": {
+      "valid": true,
+      "track_count": 355,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Funker Vogt": {
+      "valid": true,
+      "track_count": 348,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Wu‐Tang Clan": {
+      "valid": true,
+      "track_count": 345,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Noisia": {
+      "valid": true,
+      "track_count": 337,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Foo Fighters": {
+      "valid": true,
+      "track_count": 336,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rise Against": {
+      "valid": true,
+      "track_count": 336,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "bbno$": {
+      "valid": true,
+      "track_count": 334,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lana Del Rey": {
+      "valid": true,
+      "track_count": 333,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mobb Deep": {
+      "valid": true,
+      "track_count": 330,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "JAY‐Z": {
+      "valid": true,
+      "track_count": 324,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mega Ran": {
+      "valid": true,
+      "track_count": 319,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fall Out Boy": {
+      "valid": true,
+      "track_count": 318,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dizzee Rascal": {
+      "valid": true,
+      "track_count": 316,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "$uicideboy$": {
+      "valid": true,
+      "track_count": 314,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Britney Spears": {
+      "valid": true,
+      "track_count": 309,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ill Bill": {
+      "valid": true,
+      "track_count": 308,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ozzy Osbourne": {
+      "valid": true,
+      "track_count": 307,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Prinzen": {
+      "valid": true,
+      "track_count": 303,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Logic": {
+      "valid": true,
+      "track_count": 298,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "And One": {
+      "valid": true,
+      "track_count": 296,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Paramore": {
+      "valid": true,
+      "track_count": 288,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tame Impala": {
+      "valid": true,
+      "track_count": 286,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Halestorm": {
+      "valid": true,
+      "track_count": 284,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sum 41": {
+      "valid": true,
+      "track_count": 284,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Robbie Williams": {
+      "valid": true,
+      "track_count": 283,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Turtles": {
+      "valid": true,
+      "track_count": 283,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Freddie Gibbs": {
+      "valid": true,
+      "track_count": 282,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Timbaland": {
+      "valid": true,
+      "track_count": 282,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kurupt": {
+      "valid": true,
+      "track_count": 278,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "03 Greedo": {
+      "valid": true,
+      "track_count": 272,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jedi Mind Tricks": {
+      "valid": true,
+      "track_count": 272,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "blink‐182": {
+      "valid": true,
+      "track_count": 271,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Static‐X": {
+      "valid": true,
+      "track_count": 270,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Rasmus": {
+      "valid": true,
+      "track_count": 266,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yolanda Be Cool": {
+      "valid": true,
+      "track_count": 264,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bonnie Tyler": {
+      "valid": true,
+      "track_count": 250,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Deichkind": {
+      "valid": true,
+      "track_count": 250,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Verb T": {
+      "valid": true,
+      "track_count": 250,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Basslovers United": {
+      "valid": true,
+      "track_count": 248,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Shakira": {
+      "valid": true,
+      "track_count": 248,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Big Star": {
+      "valid": true,
+      "track_count": 247,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "K.I.Z": {
+      "valid": true,
+      "track_count": 247,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sunrise Avenue": {
+      "valid": true,
+      "track_count": 247,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Nomy": {
+      "valid": true,
+      "track_count": 246,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Fresh": {
+      "valid": true,
+      "track_count": 245,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Katy Perry": {
+      "valid": true,
+      "track_count": 245,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Topmodelz": {
+      "valid": true,
+      "track_count": 242,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Feeder": {
+      "valid": true,
+      "track_count": 240,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Migos": {
+      "valid": true,
+      "track_count": 239,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ol’ Dirty Bastard": {
+      "valid": true,
+      "track_count": 237,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "3 Doors Down": {
+      "valid": true,
+      "track_count": 236,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Marteria": {
+      "valid": true,
+      "track_count": 231,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Snowgoons": {
+      "valid": true,
+      "track_count": 231,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The All‐American Rejects": {
+      "valid": true,
+      "track_count": 230,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Less Than Jake": {
+      "valid": true,
+      "track_count": 228,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Chiddy Bang": {
+      "valid": true,
+      "track_count": 226,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Volbeat": {
+      "valid": true,
+      "track_count": 224,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Krupps": {
+      "valid": true,
+      "track_count": 220,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dire Straits": {
+      "valid": true,
+      "track_count": 220,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "guardin": {
+      "valid": true,
+      "track_count": 219,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Breaking Benjamin": {
+      "valid": true,
+      "track_count": 217,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mac Miller": {
+      "valid": true,
+      "track_count": 217,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Creedence Clearwater Revival": {
+      "valid": true,
+      "track_count": 215,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Electric Callboy": {
+      "valid": true,
+      "track_count": 213,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lily Allen": {
+      "valid": true,
+      "track_count": 213,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lil Baby": {
+      "valid": true,
+      "track_count": 212,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Butthole Surfers": {
+      "valid": true,
+      "track_count": 211,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Sammy": {
+      "valid": true,
+      "track_count": 210,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dirty Dike": {
+      "valid": true,
+      "track_count": 210,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Uppermost": {
+      "valid": true,
+      "track_count": 208,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Offspring": {
+      "valid": true,
+      "track_count": 206,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bloodhound Gang": {
+      "valid": true,
+      "track_count": 203,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Celph Titled": {
+      "valid": true,
+      "track_count": 199,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kaiser Chiefs": {
+      "valid": true,
+      "track_count": 199,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Foreign Beggars": {
+      "valid": true,
+      "track_count": 196,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Blümchen": {
+      "valid": true,
+      "track_count": 195,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Post Malone": {
+      "valid": true,
+      "track_count": 195,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cam Meekins": {
+      "valid": true,
+      "track_count": 194,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Empyre One": {
+      "valid": true,
+      "track_count": 194,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Nelly Furtado": {
+      "valid": true,
+      "track_count": 194,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Anti‐Flag": {
+      "valid": true,
+      "track_count": 192,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Empire of the Sun": {
+      "valid": true,
+      "track_count": 192,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fergie": {
+      "valid": true,
+      "track_count": 192,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mindless Self Indulgence": {
+      "valid": true,
+      "track_count": 192,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Icon for Hire": {
+      "valid": true,
+      "track_count": 191,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Thrice": {
+      "valid": true,
+      "track_count": 190,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Approaching Nirvana": {
+      "valid": true,
+      "track_count": 189,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lil’ Kim": {
+      "valid": true,
+      "track_count": 189,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Nirvana": {
+      "valid": true,
+      "track_count": 189,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "NERO": {
+      "valid": true,
+      "track_count": 187,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DMX": {
+      "valid": true,
+      "track_count": 185,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jake Bugg": {
+      "valid": true,
+      "track_count": 184,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Verve": {
+      "valid": true,
+      "track_count": 182,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Borgore": {
+      "valid": true,
+      "track_count": 181,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mayday Parade": {
+      "valid": true,
+      "track_count": 181,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "twenty one pilots": {
+      "valid": true,
+      "track_count": 181,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "21 Savage": {
+      "valid": true,
+      "track_count": 180,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "BABYMETAL": {
+      "valid": true,
+      "track_count": 180,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cinnamon Chasers": {
+      "valid": true,
+      "track_count": 180,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Souls of Mischief": {
+      "valid": true,
+      "track_count": 180,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Former Fat Boys": {
+      "valid": true,
+      "track_count": 176,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Packy": {
+      "valid": true,
+      "track_count": 176,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dabbla": {
+      "valid": true,
+      "track_count": 172,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Powerman 5000": {
+      "valid": true,
+      "track_count": 172,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Billy Idol": {
+      "valid": true,
+      "track_count": 171,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Senses Fail": {
+      "valid": true,
+      "track_count": 171,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "A Day to Remember": {
+      "valid": true,
+      "track_count": 170,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pegboard Nerds": {
+      "valid": true,
+      "track_count": 166,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Arctic Monkeys": {
+      "valid": true,
+      "track_count": 164,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fliptrix": {
+      "valid": true,
+      "track_count": 164,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Owl City": {
+      "valid": true,
+      "track_count": 163,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "BabyTron": {
+      "valid": true,
+      "track_count": 160,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Black Eyed Peas": {
+      "valid": true,
+      "track_count": 160,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Far East Movement": {
+      "valid": true,
+      "track_count": 160,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fools Garden": {
+      "valid": true,
+      "track_count": 160,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vinnie Paz": {
+      "valid": true,
+      "track_count": 160,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bloc Party": {
+      "valid": true,
+      "track_count": 159,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bolier": {
+      "valid": true,
+      "track_count": 159,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sido": {
+      "valid": true,
+      "track_count": 158,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Favorite": {
+      "valid": true,
+      "track_count": 157,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Luniz": {
+      "valid": true,
+      "track_count": 157,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Johnny Cash": {
+      "valid": true,
+      "track_count": 155,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Will Smith": {
+      "valid": true,
+      "track_count": 155,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MGMT": {
+      "valid": true,
+      "track_count": 154,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Puddle of Mudd": {
+      "valid": true,
+      "track_count": 154,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Skindred": {
+      "valid": true,
+      "track_count": 150,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rabbit Junk": {
+      "valid": true,
+      "track_count": 149,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MARINA": {
+      "valid": true,
+      "track_count": 147,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hot Mulligan": {
+      "valid": true,
+      "track_count": 146,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mono & Nikitaman": {
+      "valid": true,
+      "track_count": 143,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vengaboys": {
+      "valid": true,
+      "track_count": 143,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pitbull": {
+      "valid": true,
+      "track_count": 141,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yung Gravy": {
+      "valid": true,
+      "track_count": 141,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dope": {
+      "valid": true,
+      "track_count": 139,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Basshunter": {
+      "valid": true,
+      "track_count": 138,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hollywood Undead": {
+      "valid": true,
+      "track_count": 138,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Killswitch Engage": {
+      "valid": true,
+      "track_count": 138,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Zombie Nation": {
+      "valid": true,
+      "track_count": 138,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Falling in Reverse": {
+      "valid": true,
+      "track_count": 137,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Amy Winehouse": {
+      "valid": true,
+      "track_count": 135,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Asking Alexandria": {
+      "valid": true,
+      "track_count": 135,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ZHU": {
+      "valid": true,
+      "track_count": 134,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Billy Talent": {
+      "valid": true,
+      "track_count": 133,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bring Me the Horizon": {
+      "valid": true,
+      "track_count": 133,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fox Stevenson": {
+      "valid": true,
+      "track_count": 133,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Madcon": {
+      "valid": true,
+      "track_count": 133,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Seether": {
+      "valid": true,
+      "track_count": 132,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Styles of Beyond": {
+      "valid": true,
+      "track_count": 132,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rob Zombie": {
+      "valid": true,
+      "track_count": 131,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Wolfmother": {
+      "valid": true,
+      "track_count": 131,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Darude": {
+      "valid": true,
+      "track_count": 130,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Casper": {
+      "valid": true,
+      "track_count": 129,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sonic Syndicate": {
+      "valid": true,
+      "track_count": 129,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Ataris": {
+      "valid": true,
+      "track_count": 129,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Feint": {
+      "valid": true,
+      "track_count": 128,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Five Finger Death Punch": {
+      "valid": true,
+      "track_count": 127,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "A Tribe Called Quest": {
+      "valid": true,
+      "track_count": 125,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cypress Hill": {
+      "valid": true,
+      "track_count": 125,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Imogen Heap": {
+      "valid": true,
+      "track_count": 125,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Avril Lavigne": {
+      "valid": true,
+      "track_count": 124,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Denzel Curry": {
+      "valid": true,
+      "track_count": 124,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lindsey Stirling": {
+      "valid": true,
+      "track_count": 124,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Craig Campbell": {
+      "valid": true,
+      "track_count": 123,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DevilDriver": {
+      "valid": true,
+      "track_count": 123,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Atzen": {
+      "valid": true,
+      "track_count": 123,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Escape the Fate": {
+      "valid": true,
+      "track_count": 123,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Aqua": {
+      "valid": true,
+      "track_count": 122,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "GZA": {
+      "valid": true,
+      "track_count": 121,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "WIZO": {
+      "valid": true,
+      "track_count": 121,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yeah Yeah Yeahs": {
+      "valid": true,
+      "track_count": 121,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Foster the People": {
+      "valid": true,
+      "track_count": 120,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mom Jeans.": {
+      "valid": true,
+      "track_count": 119,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "In This Moment": {
+      "valid": true,
+      "track_count": 118,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Thousand Foot Krutch": {
+      "valid": true,
+      "track_count": 117,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cage9": {
+      "valid": true,
+      "track_count": 116,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rammstein": {
+      "valid": true,
+      "track_count": 116,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "We the Kings": {
+      "valid": true,
+      "track_count": 116,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Greydon Square": {
+      "valid": true,
+      "track_count": 115,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Dreadnoughts": {
+      "valid": true,
+      "track_count": 115,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Freddie Dredd": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MixAndMash": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Origami Angel": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Original God": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Real Booty Babes": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Trailerpark": {
+      "valid": true,
+      "track_count": 114,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Plain White T’s": {
+      "valid": true,
+      "track_count": 112,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Red Hot Chili Peppers": {
+      "valid": true,
+      "track_count": 112,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "3OH!3": {
+      "valid": true,
+      "track_count": 111,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Skizzy Mars": {
+      "valid": true,
+      "track_count": 111,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ytcracker": {
+      "valid": true,
+      "track_count": 111,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Caramella Girls": {
+      "valid": true,
+      "track_count": 109,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Loverboy": {
+      "valid": true,
+      "track_count": 109,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Panjabi MC": {
+      "valid": true,
+      "track_count": 109,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rebelution": {
+      "valid": true,
+      "track_count": 109,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Manian": {
+      "valid": true,
+      "track_count": 108,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fabolous": {
+      "valid": true,
+      "track_count": 108,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hoodie Allen": {
+      "valid": true,
+      "track_count": 108,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Klangkarussell": {
+      "valid": true,
+      "track_count": 108,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Royal Republic": {
+      "valid": true,
+      "track_count": 108,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "D12": {
+      "valid": true,
+      "track_count": 107,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Blyatman": {
+      "valid": true,
+      "track_count": 106,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ocean Wisdom": {
+      "valid": true,
+      "track_count": 106,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MASTER BOOT RECORD": {
+      "valid": true,
+      "track_count": 105,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pop Smoke": {
+      "valid": true,
+      "track_count": 105,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sick Puppies": {
+      "valid": true,
+      "track_count": 105,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Veela": {
+      "valid": true,
+      "track_count": 105,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Flogging Molly": {
+      "valid": true,
+      "track_count": 104,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cyrus": {
+      "valid": true,
+      "track_count": 103,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kendrick Lamar": {
+      "valid": true,
+      "track_count": 103,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dual Core": {
+      "valid": true,
+      "track_count": 102,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Norma Sheffield": {
+      "valid": true,
+      "track_count": 102,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "convolk": {
+      "valid": true,
+      "track_count": 102,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Taio Cruz": {
+      "valid": true,
+      "track_count": 101,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Sequenza": {
+      "valid": true,
+      "track_count": 100,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Guano Apes": {
+      "valid": true,
+      "track_count": 100,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Panic! at the Disco": {
+      "valid": true,
+      "track_count": 100,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rob & Chris": {
+      "valid": true,
+      "track_count": 100,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rob Mayth": {
+      "valid": true,
+      "track_count": 100,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Getter": {
+      "valid": true,
+      "track_count": 99,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Modestep": {
+      "valid": true,
+      "track_count": 99,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Scandroid": {
+      "valid": true,
+      "track_count": 99,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Raised Fist": {
+      "valid": true,
+      "track_count": 98,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "t.A.T.u.": {
+      "valid": true,
+      "track_count": 98,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "McCafferty": {
+      "valid": true,
+      "track_count": 97,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pendulum": {
+      "valid": true,
+      "track_count": 97,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Longest Johns": {
+      "valid": true,
+      "track_count": 97,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yellowcard": {
+      "valid": true,
+      "track_count": 97,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Beach House": {
+      "valid": true,
+      "track_count": 96,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "CYBERTHING!": {
+      "valid": true,
+      "track_count": 96,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Limp Bizkit": {
+      "valid": true,
+      "track_count": 96,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "pokelawls": {
+      "valid": true,
+      "track_count": 96,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "30 Seconds to Mars": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Darius & Finlay": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Drainpuppet": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Feed Me": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Joji": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Party Animals": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Street Dogs": {
+      "valid": true,
+      "track_count": 95,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "88rising": {
+      "valid": true,
+      "track_count": 94,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jesse Dangerously": {
+      "valid": true,
+      "track_count": 94,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ScHoolboy Q": {
+      "valid": true,
+      "track_count": 94,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Zomboy": {
+      "valid": true,
+      "track_count": 93,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Blue Stahli": {
+      "valid": true,
+      "track_count": 92,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Blumio": {
+      "valid": true,
+      "track_count": 92,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Burgos": {
+      "valid": true,
+      "track_count": 92,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Slow Magic": {
+      "valid": true,
+      "track_count": 91,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jerry Heil": {
+      "valid": true,
+      "track_count": 90,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Papa Roach": {
+      "valid": true,
+      "track_count": 90,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MC Frontalot": {
+      "valid": true,
+      "track_count": 89,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Clams Casino": {
+      "valid": true,
+      "track_count": 88,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Deez Nuts": {
+      "valid": true,
+      "track_count": 87,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yonas": {
+      "valid": true,
+      "track_count": 87,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Taking Back Sunday": {
+      "valid": true,
+      "track_count": 86,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sugarcult": {
+      "valid": true,
+      "track_count": 85,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cavetown": {
+      "valid": true,
+      "track_count": 84,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die! Die! Die!": {
+      "valid": true,
+      "track_count": 84,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "009 Sound System": {
+      "valid": true,
+      "track_count": 83,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eazy‐E": {
+      "valid": true,
+      "track_count": 83,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Empire! Empire! (I Was a Lonely Estate)": {
+      "valid": true,
+      "track_count": 83,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pink Guy": {
+      "valid": true,
+      "track_count": 83,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "We Are the Ocean": {
+      "valid": true,
+      "track_count": 83,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "letlive.": {
+      "valid": true,
+      "track_count": 82,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Camping in Alaska": {
+      "valid": true,
+      "track_count": 81,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "WILLOW": {
+      "valid": true,
+      "track_count": 80,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "We Came as Romans": {
+      "valid": true,
+      "track_count": 80,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bullets and Octane": {
+      "valid": true,
+      "track_count": 79,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MUZZ": {
+      "valid": true,
+      "track_count": 79,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Andrew W.K.": {
+      "valid": true,
+      "track_count": 78,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dougal": {
+      "valid": true,
+      "track_count": 78,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "I Prevail": {
+      "valid": true,
+      "track_count": 78,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Miss May I": {
+      "valid": true,
+      "track_count": 78,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Prodigy": {
+      "valid": true,
+      "track_count": 78,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tony Orlando & Dawn": {
+      "valid": true,
+      "track_count": 77,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vampire Weekend": {
+      "valid": true,
+      "track_count": 77,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "White Zombie": {
+      "valid": true,
+      "track_count": 77,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "fish narc": {
+      "valid": true,
+      "track_count": 77,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Modern Baseball": {
+      "valid": true,
+      "track_count": 75,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "NUTRONIC": {
+      "valid": true,
+      "track_count": 75,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Schäffer the Darklord": {
+      "valid": true,
+      "track_count": 75,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Caravan Palace": {
+      "valid": true,
+      "track_count": 74,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Costel van Dein": {
+      "valid": true,
+      "track_count": 74,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ohrbooten": {
+      "valid": true,
+      "track_count": 73,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gnarls Barkley": {
+      "valid": true,
+      "track_count": 72,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Status Quo": {
+      "valid": true,
+      "track_count": 72,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mallory Knox": {
+      "valid": true,
+      "track_count": 71,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Knife Party": {
+      "valid": true,
+      "track_count": 70,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mt Eden": {
+      "valid": true,
+      "track_count": 70,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Benjie": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Good Charlotte": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rev Theory": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sleeping With Sirens": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Unknown Mortal Orchestra": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Weiland": {
+      "valid": true,
+      "track_count": 69,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "$werve": {
+      "valid": true,
+      "track_count": 68,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gemini Syndrome": {
+      "valid": true,
+      "track_count": 68,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "King & Queen": {
+      "valid": true,
+      "track_count": 68,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The xx": {
+      "valid": true,
+      "track_count": 68,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Frauenarzt": {
+      "valid": true,
+      "track_count": 67,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "La Roux": {
+      "valid": true,
+      "track_count": 67,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Cochise": {
+      "valid": true,
+      "track_count": 66,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "From First to Last": {
+      "valid": true,
+      "track_count": 66,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pet Symmetry": {
+      "valid": true,
+      "track_count": 66,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Phantogram": {
+      "valid": true,
+      "track_count": 66,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "PROBASS ∆ HARDI": {
+      "valid": true,
+      "track_count": 65,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Four Owls": {
+      "valid": true,
+      "track_count": 65,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "$NOT": {
+      "valid": true,
+      "track_count": 64,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Froggy Fresh": {
+      "valid": true,
+      "track_count": 64,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Army of the Pharaohs": {
+      "valid": true,
+      "track_count": 63,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lazerpunk": {
+      "valid": true,
+      "track_count": 63,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lolita Jolie": {
+      "valid": true,
+      "track_count": 63,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "My Chemical Romance": {
+      "valid": true,
+      "track_count": 63,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "POORSTACY": {
+      "valid": true,
+      "track_count": 63,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gorillaz": {
+      "valid": true,
+      "track_count": 62,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Laura Brehm": {
+      "valid": true,
+      "track_count": 62,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SAINt JHN": {
+      "valid": true,
+      "track_count": 62,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Throw the Fight": {
+      "valid": true,
+      "track_count": 62,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ikkimel": {
+      "valid": true,
+      "track_count": 61,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Glitch Mob": {
+      "valid": true,
+      "track_count": 61,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Antytila": {
+      "valid": true,
+      "track_count": 59,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Baynk": {
+      "valid": true,
+      "track_count": 59,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Crystal Castles": {
+      "valid": true,
+      "track_count": 59,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hush": {
+      "valid": true,
+      "track_count": 59,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Akustikrausch": {
+      "valid": true,
+      "track_count": 57,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fallout: New Vegas Radio": {
+      "valid": true,
+      "track_count": 56,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rex Orange County": {
+      "valid": true,
+      "track_count": 56,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Zebrahead": {
+      "valid": true,
+      "track_count": 56,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Abor & Tynna": {
+      "valid": true,
+      "track_count": 55,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hovey Benjamin": {
+      "valid": true,
+      "track_count": 55,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "K’naan": {
+      "valid": true,
+      "track_count": 55,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tristam": {
+      "valid": true,
+      "track_count": 55,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "89ers": {
+      "valid": true,
+      "track_count": 54,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ndls404": {
+      "valid": true,
+      "track_count": 54,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yameii Online": {
+      "valid": true,
+      "track_count": 53,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pakito": {
+      "valid": true,
+      "track_count": 52,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rucka Rucka Ali": {
+      "valid": true,
+      "track_count": 51,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Crown the Empire": {
+      "valid": true,
+      "track_count": 50,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ FGT": {
+      "valid": true,
+      "track_count": 50,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Technotronic": {
+      "valid": true,
+      "track_count": 50,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Title Fight": {
+      "valid": true,
+      "track_count": 50,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tombstone da Deadman": {
+      "valid": true,
+      "track_count": 49,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Adelitas Way": {
+      "valid": true,
+      "track_count": 48,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Deep Blue Something": {
+      "valid": true,
+      "track_count": 48,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Heart Attack Man": {
+      "valid": true,
+      "track_count": 48,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lootpack": {
+      "valid": true,
+      "track_count": 48,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "e-dubble": {
+      "valid": true,
+      "track_count": 48,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "100 gecs": {
+      "valid": true,
+      "track_count": 47,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Catfish and the Bottlemen": {
+      "valid": true,
+      "track_count": 47,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eiffel 65": {
+      "valid": true,
+      "track_count": 47,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "La Coka Nostra": {
+      "valid": true,
+      "track_count": 47,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lost Frequencies": {
+      "valid": true,
+      "track_count": 47,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "JANK": {
+      "valid": true,
+      "track_count": 46,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Last Dinosaurs": {
+      "valid": true,
+      "track_count": 46,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ericdoa": {
+      "valid": true,
+      "track_count": 46,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "I Set My Friends on Fire": {
+      "valid": true,
+      "track_count": 45,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Serum 114": {
+      "valid": true,
+      "track_count": 45,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Aaron West and The Roaring Twenties": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "East Clubbers": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gopnik McBlyat": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "LoveandKeef": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pretty Sick": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Trash Boat": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "quinn": {
+      "valid": true,
+      "track_count": 44,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Enter Shikari": {
+      "valid": true,
+      "track_count": 43,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "R.E.M.": {
+      "valid": true,
+      "track_count": 43,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sabaton": {
+      "valid": true,
+      "track_count": 43,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Steve Lacy": {
+      "valid": true,
+      "track_count": 43,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Crazy Town": {
+      "valid": true,
+      "track_count": 42,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Damian “Jr. Gong” Marley": {
+      "valid": true,
+      "track_count": 42,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dave Darell": {
+      "valid": true,
+      "track_count": 42,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eyedea & Abilities": {
+      "valid": true,
+      "track_count": 42,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Audioslave": {
+      "valid": true,
+      "track_count": 41,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DVRST": {
+      "valid": true,
+      "track_count": 41,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gregor Le Dahl": {
+      "valid": true,
+      "track_count": 41,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Killers": {
+      "valid": true,
+      "track_count": 41,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Younger Hunger": {
+      "valid": true,
+      "track_count": 41,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "BENEE": {
+      "valid": true,
+      "track_count": 40,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Constera": {
+      "valid": true,
+      "track_count": 40,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Boys Like Girls": {
+      "valid": true,
+      "track_count": 39,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dr. Awkward": {
+      "valid": true,
+      "track_count": 39,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kordhell": {
+      "valid": true,
+      "track_count": 38,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Plattenpapzt": {
+      "valid": true,
+      "track_count": 38,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Three Days Grace": {
+      "valid": true,
+      "track_count": 38,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Saint Punk": {
+      "valid": true,
+      "track_count": 37,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ScurtDae": {
+      "valid": true,
+      "track_count": 37,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Yaz": {
+      "valid": true,
+      "track_count": 37,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "dj poolboi": {
+      "valid": true,
+      "track_count": 37,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Her Bright Skies": {
+      "valid": true,
+      "track_count": 35,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Signal Void": {
+      "valid": true,
+      "track_count": 35,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tiny Little Houses": {
+      "valid": true,
+      "track_count": 35,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Youth Fountain": {
+      "valid": true,
+      "track_count": 35,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "$hirak": {
+      "valid": true,
+      "track_count": 34,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fort Minor": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "G‐Unit": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MOONBOY": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mareux": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pink Floyd": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Zero 9:36": {
+      "valid": true,
+      "track_count": 33,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Elefant": {
+      "valid": true,
+      "track_count": 32,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fritz Kalkbrenner": {
+      "valid": true,
+      "track_count": 32,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kero Kero Bonito": {
+      "valid": true,
+      "track_count": 32,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "OBu": {
+      "valid": true,
+      "track_count": 32,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Capoxxo": {
+      "valid": true,
+      "track_count": 31,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Charmer": {
+      "valid": true,
+      "track_count": 31,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gala": {
+      "valid": true,
+      "track_count": 31,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Heavy Metal Kings": {
+      "valid": true,
+      "track_count": 31,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Edward Maya": {
+      "valid": true,
+      "track_count": 30,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pentakill": {
+      "valid": true,
+      "track_count": 30,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Five Stars": {
+      "valid": true,
+      "track_count": 30,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Villagers of Ioannina City": {
+      "valid": true,
+      "track_count": 30,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "d0llywood1": {
+      "valid": true,
+      "track_count": 30,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Satomi": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Funk Tribu": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Heaven’s Basement": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rollergirl": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ski Aggu": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "НКНКТ": {
+      "valid": true,
+      "track_count": 29,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dxrk ダーク": {
+      "valid": true,
+      "track_count": 28,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kaito Shoma": {
+      "valid": true,
+      "track_count": 28,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "PKEW PKEW PKEW": {
+      "valid": true,
+      "track_count": 28,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "PinkPantheress": {
+      "valid": true,
+      "track_count": 28,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Serena Isioma": {
+      "valid": true,
+      "track_count": 28,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Breaking Through": {
+      "valid": true,
+      "track_count": 27,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ephixa": {
+      "valid": true,
+      "track_count": 27,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tenacious D": {
+      "valid": true,
+      "track_count": 27,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Thirty Seconds to Mars": {
+      "valid": true,
+      "track_count": 27,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "girl in red": {
+      "valid": true,
+      "track_count": 27,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ghøstkid": {
+      "valid": true,
+      "track_count": 26,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "PreHistoric animals": {
+      "valid": true,
+      "track_count": 26,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alice Gas": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Autopilot Off": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dropout Kings": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Go_A": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Makaveli": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Starjunk 95": {
+      "valid": true,
+      "track_count": 25,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Shortie No Mass": {
+      "valid": true,
+      "track_count": 24,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vexare": {
+      "valid": true,
+      "track_count": 24,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Destroy Rebuild Until God Shows": {
+      "valid": true,
+      "track_count": 23,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Die Vamummtn": {
+      "valid": true,
+      "track_count": 23,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Dead 60s": {
+      "valid": true,
+      "track_count": 23,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vikki Flowz": {
+      "valid": true,
+      "track_count": 23,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Endeverafter": {
+      "valid": true,
+      "track_count": 22,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pretty Vicious": {
+      "valid": true,
+      "track_count": 22,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "+44": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DotEXE": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Meltt": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "RAUMM": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Raveboy": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Simps": {
+      "valid": true,
+      "track_count": 21,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Adept": {
+      "valid": true,
+      "track_count": 20,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gold Route": {
+      "valid": true,
+      "track_count": 20,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MC Virgins": {
+      "valid": true,
+      "track_count": 20,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Paul Stanley": {
+      "valid": true,
+      "track_count": 20,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bedside Kites": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Canadian Softball": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rütekker": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Terror Reid": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Gentle Men": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Toto": {
+      "valid": true,
+      "track_count": 19,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "8(913)": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dougal & Gammer": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fugees": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Goos": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Grupo Frontera": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "JKLN": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kabuto the Python": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kalush Orchestra": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mounika.": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Saiya Tiaw": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Springstil": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "peach tinted": {
+      "valid": true,
+      "track_count": 18,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "First and Forever": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ill Niño": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kinder des Zorns": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Krewella": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rhyme Asylum": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Street Connect": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Stromae": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Treyarch": {
+      "valid": true,
+      "track_count": 17,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Blue Foundation": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bullet for My Valentine": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "CORPSE": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hostile Groove": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kalte Liebe": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MOZ": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Major Look": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "OB1": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Random": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Talul": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The F-Ups": {
+      "valid": true,
+      "track_count": 16,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DATSKO": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dance Gavin Dance": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Gregory Reveret": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jon Bellion": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kev Koko": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lance Inc.": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "REZZ": {
+      "valid": true,
+      "track_count": 15,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Armitage Shanks": {
+      "valid": true,
+      "track_count": 14,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jason Derulo": {
+      "valid": true,
+      "track_count": 14,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Finger Eleven": {
+      "valid": true,
+      "track_count": 13,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jet": {
+      "valid": true,
+      "track_count": 13,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ash blakk": {
+      "valid": true,
+      "track_count": 13,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "southstar": {
+      "valid": true,
+      "track_count": 13,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rav": {
+      "valid": true,
+      "track_count": 12,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Soul Strip": {
+      "valid": true,
+      "track_count": 12,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Spill Canvas": {
+      "valid": true,
+      "track_count": 12,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Wreckage": {
+      "valid": true,
+      "track_count": 12,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dharmata": {
+      "valid": true,
+      "track_count": 11,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Flux Pavilion": {
+      "valid": true,
+      "track_count": 11,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mega NRG Man": {
+      "valid": true,
+      "track_count": 11,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Notorious B.I.G.": {
+      "valid": true,
+      "track_count": 11,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tuid": {
+      "valid": true,
+      "track_count": 11,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ayhouse & Tomkay": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DANZINGER 99": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Eric Prydz": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "N.W.A": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "One Morning Left": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "P$C": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "stxrz": {
+      "valid": true,
+      "track_count": 10,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "CamelPhat": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Exodia": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Flawless Issues": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "His Statue Falls": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "RØNIN": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Tom Morello": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "webcage": {
+      "valid": true,
+      "track_count": 9,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ABBA": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alessandra Mussolini": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alles ist die Sekte": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Childish Gambino": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Claude VonStroke": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "FiNCH": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "G Luné": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "JunkBunny": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pharmacist": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Pierce the Veil": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Righteous Vendetta": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Samurai Pizza Cats": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Suicide Machines": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ThxSoMch": {
+      "valid": true,
+      "track_count": 8,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Daft Punk": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Headhunterz": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "KennyHoopla": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kute": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Queens of the Stone Age": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Slyzexx": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "kramsen": {
+      "valid": true,
+      "track_count": 7,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "INZO": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "MUPP": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Midwest Pen Pals": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sewerperson": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Spamtec": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "goosetaf": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "vierre cloud": {
+      "valid": true,
+      "track_count": 6,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "A$AP Rocky": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ark Woods": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Bad Computer": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "FEVER 333": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Famous Last Words": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "HINOIチーム": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Martin Solveig": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Moritz": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "OH!DULCEARi": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Queen": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SEBii": {
+      "valid": true,
+      "track_count": 5,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Avantasia": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Curse": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Antoine": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DR. GABBA": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dj Twisty": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Edwin Rosen": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ennaria": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hyper": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SadSvit": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sadfriendd": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Shubh": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Riverboat Gamblers": {
+      "valid": true,
+      "track_count": 4,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Brick + Mortar": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Kalle Koschinsky": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Korn": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lighter Shade": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Raizer": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sharam": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Snoop Dogg": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The White Stripes": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Virtual Riot": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Ye": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Марний": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Павел Кондратенко": {
+      "valid": true,
+      "track_count": 3,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "ATB": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alex Lahey": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Band of Skulls": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DMNTED": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dogs": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fukkk Offf": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "GLORY BALE": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Hixxy": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jam Baxter": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "LIL DUSTY G": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Laura Les": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lunchbox Avenue": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Marilyn Manson": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Netsky": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Nevertheless": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "OK Go": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Selker": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "TARAS KEEN": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Trapt": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vnce Dolanbay": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "dnbmoo": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "luvlxckdown": {
+      "valid": true,
+      "track_count": 2,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Alicia Bridges": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Blue Öyster Cult": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Brakes": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Burned Time Machine": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Busta Rhymes": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Chin Up, Kid": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Daesh": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "DJ Roy Davis": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Deine Lieblings Rapper": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dirty Wormz": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dr. Dre": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Dynoro": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Fujiya & Miyagi": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Geoxor": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "I'm DMA": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "J Clyde": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jaycut": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Jay-Z": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Klavdia Petrivna": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Leslie Parrish": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lil Wayne": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lisa Mitchell": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Linkin Park": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lower Than Atlantis": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Lo‐Pro": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Mattafix": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Miilkbone": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Oleg Novosad": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "OutKast": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "P.E.P.E.": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Power Glove": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Redman": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "RiFF RAFF": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Rez": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Robert Palmer": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "S3RL": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SEVER": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "SIERRA": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Skepta": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Skrillex": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Spilt Milk/Relaye": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Sysdemes": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "T.I.": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Technobase.Fm": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "The Stripes": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Train": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Vidma": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "YATSUTA": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Zatox": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "eightiesheadachetape": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    },
+    "Колін": {
+      "valid": true,
+      "track_count": 1,
+      "validated_at": "2025-11-02T20:01:47.456521"
+    }
+  },
+  "validation_timestamp": "2025-11-02T20:01:47.456521"
 }
