@@ -127,7 +127,7 @@ def format_duration(seconds):
 # Genres-specific configuration
 MIN_SONGS_REQUIRED = float(os.getenv("GENRES_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
 GENRE_MIXES_FILE = os.getenv("GENRE_MIXES_FILE")
-AUTO_REPLACE_POSTERS = os.getenv("GENRES_AUTO_REPLACE_POSTERS", "false").lower() == "true"
+GENRES_REPLACE_POSTERS = os.getenv("GENRES_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -1068,7 +1068,7 @@ def generate_genre_playlists():
                 existing_playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
                 
                 # Fetch and upload Spotify poster if enabled
-                if AUTO_REPLACE_POSTERS:
+                if GENRES_REPLACE_POSTERS:
                     poster_data = fetch_spotify_poster(genre_group)
                     if poster_data:
                         upload_playlist_poster_from_data(existing_playlist, poster_data)
@@ -1084,7 +1084,7 @@ def generate_genre_playlists():
                 playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
                 
                 # Fetch and upload Spotify poster if enabled
-                if AUTO_REPLACE_POSTERS:
+                if GENRES_REPLACE_POSTERS:
                     poster_data = fetch_spotify_poster(genre_group)
                     if poster_data:
                         upload_playlist_poster_from_data(playlist, poster_data)
