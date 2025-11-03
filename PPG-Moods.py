@@ -6,6 +6,9 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import requests
+from urllib.parse import quote
+import tempfile
 
 # Load environment variables from .env file
 load_dotenv()
@@ -124,6 +127,7 @@ def format_duration(seconds):
 # Moods-specific configuration
 MIN_TRACK_PERCENT = float(os.getenv("MOODS_MIN_TRACK_PERCENT"))
 MOOD_GROUPS_FILE = os.getenv("MOOD_GROUPS_FILE")
+AUTO_REPLACE_POSTERS = os.getenv("MOODS_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -831,6 +835,76 @@ def load_liked_artists_cache():
         return None, 0, None
 
 
+# Fetch Spotify poster image
+def fetch_spotify_poster(mood_mix_name):
+    """Fetch poster image from Spotify using the mood mix name exactly as provided."""
+    try:
+        # Use the mood mix name exactly as-is (capital letters and spaces preserved)
+        # URL-encode only special characters that need encoding
+        url_encoded_name = quote(mood_mix_name.strip(), safe=' ')
+        
+        # Construct Spotify poster URL
+        url = f"https://seed-mix-image.spotifycdn.com/v6/img/desc/{url_encoded_name}/en/default"
+        
+        log_debug(f"🎨 Fetching Spotify poster from: {url}")
+        response = requests.get(url, timeout=10, allow_redirects=True)
+        
+        if response.status_code == 200 and response.content:
+            # Check if it's actually an image (not HTML error page)
+            content_type = response.headers.get('content-type', '').lower()
+            if 'image' in content_type or response.content.startswith(b'\xff\xd8') or response.content.startswith(b'\x89PNG'):
+                log_info(f"✅ Successfully fetched Spotify poster for '{mood_mix_name}'")
+                return response.content
+            else:
+                log_debug(f"⚠️  Response is not an image (content-type: {content_type})")
+                return None
+        else:
+            log_debug(f"⚠️  Failed to fetch poster (status: {response.status_code})")
+            return None
+    except Exception as e:
+        log_debug(f"⚠️  Error fetching Spotify poster for '{mood_mix_name}': {e}")
+        return None
+
+# Upload poster to a playlist
+def upload_playlist_poster(playlist, image_path):
+    """Upload a poster image to a Plex playlist."""
+    try:
+        if image_path and os.path.exists(image_path):
+            playlist.uploadPoster(filepath=image_path)
+            log_info(f"✅ Uploaded poster: {os.path.basename(image_path)}")
+        else:
+            log_warning(f"⚠️  Poster file not found: {image_path}")
+    except Exception as e:
+        log_warning(f"⚠️  Could not upload poster: {e}")
+
+# Upload poster from image data
+def upload_playlist_poster_from_data(playlist, image_data):
+    """Upload a poster image to a Plex playlist from image data bytes."""
+    try:
+        if not image_data:
+            return False
+        
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+            tmp_file.write(image_data)
+            tmp_path = tmp_file.name
+        
+        try:
+            upload_playlist_poster(playlist, tmp_path)
+            return True
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+        
+        return False
+    except Exception as e:
+        log_warning(f"⚠️  Could not upload poster from data: {e}")
+        return False
+
+
 # Load mood groups from JSON file
 # Supports both old format (key -> array) and new format (key -> {moods: array, release_date_filter: {...}})
 def load_mood_groups():
@@ -994,6 +1068,13 @@ def generate_mood_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 existing_playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(group_name)
+                    if poster_data:
+                        upload_playlist_poster_from_data(existing_playlist, poster_data)
+                playlist = existing_playlist
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -1003,6 +1084,12 @@ def generate_mood_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(group_name)
+                    if poster_data:
+                        upload_playlist_poster_from_data(playlist, poster_data)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 

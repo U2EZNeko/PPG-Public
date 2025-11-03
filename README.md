@@ -31,6 +31,7 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
   - [PPG-Daily and PPG-Weekly](#ppg-daily-and-ppg-weekly)
   - [PPG-Moods](#ppg-moods)
   - [PPG-Genres](#ppg-genres)
+  - [Fetch-Artist-Cache](#fetch-artist-cache)
   - [Copy-Playlist-To-Subuser](#copy-playlist-to-subuser)
 - [Update Log](#update-log)
 - [Information](#information)
@@ -122,6 +123,15 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   },
   ```
 
+### Fetch-Artist-Cache
+  
+  Fetches liked artists from Plex and writes them to a cache file.
+  
+  Will fetch directly liked artists and grabs artists from liked tracks. 
+
+  Best to run once weekly, takes a hot minute to fetch all data.
+
+
 ### Copy-Playlist-To-Subuser
 
   As the name suggests, lets you copy playlists to sub-users. 
@@ -137,7 +147,14 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 # Update log
 
-###  Update:
+### 03.11.2025:
+
+  - Liked artist fetching is now its own script
+  - Automatically sets posters for genre-mixes 
+  - Added cache validation script. (only checks if the artist in cache returns any songs)
+  - Removed caching code from scripts
+
+### 29.10.2025:
   - Date filters for genre_groups
   - Multithreading!
   - Log levels
