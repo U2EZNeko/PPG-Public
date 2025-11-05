@@ -150,7 +150,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ### 03.11.2025:
 
   - Liked artist fetching is now its own script
-  - Automatically sets posters for genre-mixes 
+  - Automatically sets posters for genre and mood mixes (yoinked from Spotify)
   - Added cache validation script. (only checks if the artist in cache returns any songs)
   - Removed caching code from scripts
 
