@@ -47,6 +47,7 @@ REQUIRED_ENV_VARS = [
     # Liked Artists-specific
     "LIKED_ARTISTS_PLAYLIST_COUNT",
     "LIKED_ARTISTS_MIN_SONGS_REQUIRED",
+    "LIKED_ARTISTS_SIMILARITY_METHOD",
     "LIKED_ARTISTS_LOG_FILE",
     "LIKED_ARTISTS_MAX_LOG_ENTRIES"
 ]
@@ -127,7 +128,9 @@ def format_duration(seconds):
 # Liked Artists-specific configuration
 PLAYLIST_COUNT = int(os.getenv("LIKED_ARTISTS_PLAYLIST_COUNT"))
 MIN_SONGS_REQUIRED = float(os.getenv("LIKED_ARTISTS_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
-# Available similarity methods (will be randomly selected per playlist)
+# Similarity method configuration
+SIMILARITY_METHOD_CONFIG = os.getenv("LIKED_ARTISTS_SIMILARITY_METHOD").lower()
+# Available similarity methods (used when method is "random")
 AVAILABLE_SIMILARITY_METHODS = ["genre", "similar_artists", "similar_tracks", "combined"]
 LOG_FILE = os.getenv("LIKED_ARTISTS_LOG_FILE")
 MAX_LOG_ENTRIES = int(os.getenv("LIKED_ARTISTS_MAX_LOG_ENTRIES"))
@@ -1121,9 +1124,19 @@ def generate_liked_artists_playlists():
             
             log_info(f"✅ Found {len(artist_tracks)} tracks by {artist_original}")
             
-            # Randomly select a similarity method for this playlist
-            selected_method = random.choice(AVAILABLE_SIMILARITY_METHODS)
-            log_info(f"🎲 Randomly selected similarity method: {selected_method}")
+            # Select similarity method (random if configured, otherwise use configured method)
+            if SIMILARITY_METHOD_CONFIG == "random":
+                selected_method = random.choice(AVAILABLE_SIMILARITY_METHODS)
+                log_info(f"🎲 Randomly selected similarity method: {selected_method}")
+            else:
+                # Validate the configured method
+                if SIMILARITY_METHOD_CONFIG in AVAILABLE_SIMILARITY_METHODS:
+                    selected_method = SIMILARITY_METHOD_CONFIG
+                    log_info(f"📌 Using configured similarity method: {selected_method}")
+                else:
+                    log_warning(f"⚠️  Invalid similarity method '{SIMILARITY_METHOD_CONFIG}'. Using random selection.")
+                    selected_method = random.choice(AVAILABLE_SIMILARITY_METHODS)
+                    log_info(f"🎲 Randomly selected similarity method: {selected_method}")
             
             # Extract similarity attributes from artist's tracks
             log_info(f"🔍 Extracting similarity attributes ({selected_method}) from artist's tracks...")

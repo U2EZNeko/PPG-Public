@@ -123,7 +123,16 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   },
   ```
 
-### Fetch-Artist-Cache
+### PPG-LikedArtists
+
+  Uses Liked artists to create playlists.
+  
+  Should use similar artists or similar tracks depending on the playlist. 
+
+  Takes a while as liked-tracks are not cached (yet)
+
+
+### Fetch-liked-artists
   
   Fetches liked artists from Plex and writes them to a cache file.
   
@@ -146,6 +155,12 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
 
 # Update log
+
+### 10.11.2025:
+
+  - Added PPG-LikedArtists
+  - Uses cache to get artists and creates a playlist with similar songs, moods or artists. 
+
 
 ### 03.11.2025:
 
