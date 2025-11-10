@@ -838,18 +838,41 @@ def get_similar_tracks(music_library, track):
 def get_tracks_by_artist(music_library, artist_name):
     """Get all tracks by a specific artist."""
     try:
-        # Try searching by artist name
-        tracks = music_library.searchTracks(artist=artist_name, limit=None)
-        if tracks:
-            return tracks
+        # First, try to get the artist object and get tracks from it
+        artist_obj = get_artist_object(music_library, artist_name)
+        if artist_obj:
+            try:
+                # Get tracks from the artist object
+                if hasattr(artist_obj, 'tracks'):
+                    tracks = artist_obj.tracks()
+                    if tracks:
+                        log_debug(f"Found {len(tracks)} tracks from artist object for '{artist_name}'")
+                        return tracks
+                # Alternative: try albums and get tracks from albums
+                if hasattr(artist_obj, 'albums'):
+                    albums = artist_obj.albums()
+                    tracks = []
+                    for album in albums:
+                        if hasattr(album, 'tracks'):
+                            album_tracks = album.tracks()
+                            tracks.extend(album_tracks)
+                    if tracks:
+                        log_debug(f"Found {len(tracks)} tracks from artist albums for '{artist_name}'")
+                        return tracks
+            except Exception as e:
+                log_debug(f"Error getting tracks from artist object: {e}")
         
-        # Fallback: search by grandparentTitle
+        # Fallback: search all tracks and filter by artist name
+        log_debug(f"Falling back to searching all tracks for '{artist_name}'...")
         all_tracks = music_library.searchTracks(limit=None)
         matching_tracks = []
         for track in all_tracks:
             track_artist = get_artist_name_original(track)
             if track_artist and normalize_artist_name(track_artist) == normalize_artist_name(artist_name):
                 matching_tracks.append(track)
+        
+        if matching_tracks:
+            log_debug(f"Found {len(matching_tracks)} tracks by searching all tracks for '{artist_name}'")
         return matching_tracks
     except Exception as e:
         log_error(f"Error getting tracks for artist '{artist_name}': {e}")
