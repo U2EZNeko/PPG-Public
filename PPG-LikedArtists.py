@@ -560,10 +560,12 @@ def analyze_artist_distribution(playlist_songs):
     return artist_counts
 
 # Balance artist representation in playlist to max percentage per artist
-def balance_artist_representation(playlist_songs, all_available_songs, max_percentage=0.3):
+def balance_artist_representation(playlist_songs, all_available_songs, max_percentage=0.3, target_size=None):
     """Ensure no single artist represents more than max_percentage of the playlist."""
-    total_songs = len(playlist_songs)
-    max_songs_per_artist = int(total_songs * max_percentage)
+    # Use target size if provided, otherwise use current playlist size
+    if target_size is None:
+        target_size = len(playlist_songs)
+    max_songs_per_artist = int(target_size * max_percentage)
     
     log_info(f"🔄 Balancing artist representation (max {max_percentage*100:.0f}% per artist = {max_songs_per_artist} songs)")
     
@@ -595,7 +597,7 @@ def balance_artist_representation(playlist_songs, all_available_songs, max_perce
         
         log_debug(f"Kept {len(songs_to_keep)} songs from '{artist}', removed {len(songs_to_remove)}")
     
-    songs_needed = total_songs - len(balanced_playlist)
+    songs_needed = target_size - len(balanced_playlist)
     if songs_needed > 0:
         log_debug(f"Need to add {songs_needed} more songs to reach target size")
         
@@ -681,65 +683,100 @@ def get_artist_object(music_library, artist_name):
 
 # Get similar artists from Plex API
 def get_similar_artists(music_library, artist_name):
-    """Get similar artists using Plex's relatedItems API."""
+    """Get similar artists using Plex's API."""
     try:
         artist_obj = get_artist_object(music_library, artist_name)
         if not artist_obj:
             log_debug(f"Could not find artist object for '{artist_name}'")
             return []
         
-        # Try to get related items (similar artists)
         similar_artists = []
+        
+        # Method 1: Try relatedItems method
         try:
-            # Check if artist has relatedItems method
             if hasattr(artist_obj, 'relatedItems'):
                 related = artist_obj.relatedItems()
                 if related:
                     for item in related:
-                        if hasattr(item, 'type') and item.type == 'artist':
-                            similar_artists.append(item)
+                        if hasattr(item, 'type'):
+                            item_type = item.type if hasattr(item, 'type') else getattr(item, 'TYPE', None)
+                            if item_type == 'artist':
+                                similar_artists.append(item)
+                    if similar_artists:
+                        log_debug(f"Found {len(similar_artists)} similar artists via relatedItems()")
         except Exception as e:
             log_debug(f"Error accessing relatedItems: {e}")
         
-        # Try alternative method: check for similar attribute
+        # Method 2: Try similar() method
         if not similar_artists:
             try:
                 if hasattr(artist_obj, 'similar'):
                     similar = artist_obj.similar()
                     if similar:
-                        similar_artists = similar
+                        similar_artists = similar if isinstance(similar, list) else [similar]
+                        if similar_artists:
+                            log_debug(f"Found {len(similar_artists)} similar artists via similar()")
             except Exception as e:
-                log_debug(f"Error accessing similar: {e}")
+                log_debug(f"Error accessing similar(): {e}")
         
-        # Try alternative: use the API directly
+        # Method 3: Try API endpoint /library/metadata/{ratingKey}/related
         if not similar_artists:
             try:
-                # Try to access via API endpoint for related items
                 url = f"/library/metadata/{artist_obj.ratingKey}/related"
                 response = artist_obj._server.query(url)
                 
-                # Parse XML response
-                if response and hasattr(response, 'attrib'):
-                    # Try to find related artists in the response
+                if response:
                     from xml.etree import ElementTree as ET
                     if isinstance(response, ET.Element):
+                        # Look for Directory elements with type="artist"
                         for item in response.findall('.//Directory'):
                             if item.get('type') == 'artist':
-                                # Create artist object from the XML
                                 artist_key = item.get('key')
                                 if artist_key:
                                     try:
                                         related_artist = music_library.fetchItem(artist_key)
                                         if related_artist:
                                             similar_artists.append(related_artist)
-                                    except:
-                                        pass
+                                    except Exception as e:
+                                        log_debug(f"Error fetching artist from key {artist_key}: {e}")
+                        if similar_artists:
+                            log_debug(f"Found {len(similar_artists)} similar artists via API endpoint")
             except Exception as e:
-                log_debug(f"Error accessing related via API: {e}")
+                log_debug(f"Error accessing /related API endpoint: {e}")
+        
+        # Method 4: Try /library/metadata/{ratingKey}/similar endpoint
+        if not similar_artists:
+            try:
+                url = f"/library/metadata/{artist_obj.ratingKey}/similar"
+                response = artist_obj._server.query(url)
+                
+                if response:
+                    from xml.etree import ElementTree as ET
+                    if isinstance(response, ET.Element):
+                        for item in response.findall('.//Directory'):
+                            if item.get('type') == 'artist':
+                                artist_key = item.get('key')
+                                if artist_key:
+                                    try:
+                                        related_artist = music_library.fetchItem(artist_key)
+                                        if related_artist:
+                                            similar_artists.append(related_artist)
+                                    except Exception as e:
+                                        log_debug(f"Error fetching artist from key {artist_key}: {e}")
+                        if similar_artists:
+                            log_debug(f"Found {len(similar_artists)} similar artists via /similar endpoint")
+            except Exception as e:
+                log_debug(f"Error accessing /similar API endpoint: {e}")
+        
+        if not similar_artists:
+            log_warning(f"⚠️  No similar artists found for '{artist_name}'. Note: Similar artists require Plex Pass and completed sonic analysis.")
+            log_debug(f"Artist ratingKey: {artist_obj.ratingKey}, tried methods: relatedItems(), similar(), /related, /similar")
         
         return similar_artists
     except Exception as e:
         log_debug(f"Error getting similar artists for '{artist_name}': {e}")
+        import traceback
+        log_debug(traceback.format_exc())
         return []
 
 # Get a random liked track
@@ -784,37 +821,40 @@ def get_similar_tracks(music_library, track):
     try:
         similar_tracks = []
         
-        # Try to get related items (similar tracks)
+        # Method 1: Try relatedItems method
         try:
-            # Check if track has relatedItems method
             if hasattr(track, 'relatedItems'):
                 related = track.relatedItems()
                 if related:
                     for item in related:
-                        if hasattr(item, 'type') and item.type == 'track':
-                            similar_tracks.append(item)
+                        if hasattr(item, 'type'):
+                            item_type = item.type if hasattr(item, 'type') else getattr(item, 'TYPE', None)
+                            if item_type == 'track':
+                                similar_tracks.append(item)
+                    if similar_tracks:
+                        log_debug(f"Found {len(similar_tracks)} similar tracks via relatedItems()")
         except Exception as e:
             log_debug(f"Error accessing relatedItems: {e}")
         
-        # Try alternative method: check for similar attribute
+        # Method 2: Try similar() method
         if not similar_tracks:
             try:
                 if hasattr(track, 'similar'):
                     similar = track.similar()
                     if similar:
-                        similar_tracks = similar
+                        similar_tracks = similar if isinstance(similar, list) else [similar]
+                        if similar_tracks:
+                            log_debug(f"Found {len(similar_tracks)} similar tracks via similar()")
             except Exception as e:
-                log_debug(f"Error accessing similar: {e}")
+                log_debug(f"Error accessing similar(): {e}")
         
-        # Try alternative: use the API directly
+        # Method 3: Try API endpoint /library/metadata/{ratingKey}/related
         if not similar_tracks:
             try:
-                # Try to access via API endpoint for related items
                 url = f"/library/metadata/{track.ratingKey}/related"
                 response = track._server.query(url)
                 
-                # Parse XML response
-                if response and hasattr(response, 'attrib'):
+                if response:
                     from xml.etree import ElementTree as ET
                     if isinstance(response, ET.Element):
                         for item in response.findall('.//Track'):
@@ -824,14 +864,45 @@ def get_similar_tracks(music_library, track):
                                     related_track = music_library.fetchItem(track_key)
                                     if related_track:
                                         similar_tracks.append(related_track)
-                                except:
-                                    pass
+                                except Exception as e:
+                                    log_debug(f"Error fetching track from key {track_key}: {e}")
+                        if similar_tracks:
+                            log_debug(f"Found {len(similar_tracks)} similar tracks via /related endpoint")
             except Exception as e:
-                log_debug(f"Error accessing related via API: {e}")
+                log_debug(f"Error accessing /related API endpoint: {e}")
+        
+        # Method 4: Try /library/metadata/{ratingKey}/similar endpoint
+        if not similar_tracks:
+            try:
+                url = f"/library/metadata/{track.ratingKey}/similar"
+                response = track._server.query(url)
+                
+                if response:
+                    from xml.etree import ElementTree as ET
+                    if isinstance(response, ET.Element):
+                        for item in response.findall('.//Track'):
+                            track_key = item.get('key')
+                            if track_key:
+                                try:
+                                    related_track = music_library.fetchItem(track_key)
+                                    if related_track:
+                                        similar_tracks.append(related_track)
+                                except Exception as e:
+                                    log_debug(f"Error fetching track from key {track_key}: {e}")
+                        if similar_tracks:
+                            log_debug(f"Found {len(similar_tracks)} similar tracks via /similar endpoint")
+            except Exception as e:
+                log_debug(f"Error accessing /similar API endpoint: {e}")
+        
+        if not similar_tracks:
+            log_warning(f"⚠️  No similar tracks found for '{track.title}'. Note: Similar tracks require Plex Pass and completed sonic analysis.")
+            log_debug(f"Track ratingKey: {track.ratingKey}, tried methods: relatedItems(), similar(), /related, /similar")
         
         return similar_tracks
     except Exception as e:
         log_debug(f"Error getting similar tracks: {e}")
+        import traceback
+        log_debug(traceback.format_exc())
         return []
 
 # Get tracks by artist name
@@ -949,7 +1020,7 @@ def find_similar_tracks_via_artists(music_library, artist_name, exclude_artists=
     return similar_tracks
 
 # Find similar tracks using a liked track
-def find_similar_tracks_via_track(music_library, exclude_artists=None):
+def find_similar_tracks_via_track(music_library, exclude_artists=None, fallback_to_genre=True):
     """Find tracks similar to a random liked track using Plex's similar tracks feature."""
     if exclude_artists is None:
         exclude_artists = set()
@@ -971,12 +1042,6 @@ def find_similar_tracks_via_track(music_library, exclude_artists=None):
     log_info(f"🔍 Finding similar tracks for '{track_title}'...")
     similar_tracks_list = get_similar_tracks(music_library, liked_track)
     
-    if not similar_tracks_list:
-        log_warning(f"⚠️  No similar tracks found for '{track_title}'. Falling back to genre-based search.")
-        return []
-    
-    log_info(f"✅ Found {len(similar_tracks_list)} similar tracks")
-    
     # Filter out tracks from excluded artists
     for track in similar_tracks_list:
         track_id = getattr(track, 'ratingKey', None) or id(track)
@@ -985,6 +1050,28 @@ def find_similar_tracks_via_track(music_library, exclude_artists=None):
             if artist not in exclude_artists:
                 similar_tracks.append(track)
                 seen_tracks.add(track_id)
+    
+    if not similar_tracks:
+        log_warning(f"⚠️  No similar tracks found for '{track_title}'.")
+        if fallback_to_genre:
+            log_info(f"🔄 Falling back to genre-based search...")
+            # Get genres from the liked track and search by genre
+            track_genres = get_track_genres(liked_track)
+            if track_genres:
+                for genre in track_genres:
+                    try:
+                        genre_tracks = music_library.search(genre=genre, libtype="track", limit=None)
+                        for track in genre_tracks:
+                            track_id = getattr(track, 'ratingKey', None) or id(track)
+                            if track_id not in seen_tracks:
+                                artist = get_artist_name(track)
+                                if artist not in exclude_artists:
+                                    similar_tracks.append(track)
+                                    seen_tracks.add(track_id)
+                    except Exception as e:
+                        log_debug(f"Error searching genre '{genre}': {e}")
+                log_info(f"✅ Found {len(similar_tracks)} tracks via genre fallback")
+        return similar_tracks
     
     log_info(f"✅ Found {len(similar_tracks)} similar tracks (after filtering excluded artists)")
     return similar_tracks
@@ -1181,6 +1268,30 @@ def generate_liked_artists_playlists():
             if selected_method == "similar_artists" or selected_method == "similar_tracks":
                 # Use Plex's similar artists or similar tracks API
                 similar_tracks = find_similar_tracks(music_library, similarity_data, selected_method, exclude_artists, artist_original)
+                
+                # If no similar tracks found, fall back to genre-based search
+                if not similar_tracks and selected_method == "similar_tracks":
+                    log_warning(f"⚠️  No similar tracks found. Falling back to genre-based search...")
+                    # Extract genres from artist's tracks and use genre search
+                    genre_attrs = set()
+                    for track in artist_tracks:
+                        genres = get_track_genres(track)
+                        genre_attrs.update(genres)
+                    if genre_attrs:
+                        log_info(f"🔄 Using {len(genre_attrs)} genres from artist's tracks as fallback...")
+                        genre_data = genre_attrs
+                        similar_tracks = find_similar_tracks(music_library, genre_data, "genre", exclude_artists, artist_original)
+                elif not similar_tracks and selected_method == "similar_artists":
+                    log_warning(f"⚠️  No similar artists found. Falling back to genre-based search...")
+                    # Extract genres from artist's tracks and use genre search
+                    genre_attrs = set()
+                    for track in artist_tracks:
+                        genres = get_track_genres(track)
+                        genre_attrs.update(genres)
+                    if genre_attrs:
+                        log_info(f"🔄 Using {len(genre_attrs)} genres from artist's tracks as fallback...")
+                        genre_data = genre_attrs
+                        similar_tracks = find_similar_tracks(music_library, genre_data, "genre", exclude_artists, artist_original)
             else:
                 if not similarity_attributes:
                     log_warning(f"⚠️  No similarity attributes found for '{artist_original}'. Using artist's tracks only.")
@@ -1201,10 +1312,16 @@ def generate_liked_artists_playlists():
                 all_available_tracks = list(artist_tracks) + similar_tracks
                 
                 # Select tracks for playlist (prefer artist's tracks but include similar ones)
-                # Use 30-50% from the artist, rest from similar tracks
-                artist_percentage = random.uniform(0.3, 0.5)
-                artist_count = int(SONGS_PER_PLAYLIST * artist_percentage)
-                artist_count = min(artist_count, len(artist_tracks))
+                if similar_tracks:
+                    # Use 30-50% from the artist, rest from similar tracks
+                    artist_percentage = random.uniform(0.3, 0.5)
+                    artist_count = int(SONGS_PER_PLAYLIST * artist_percentage)
+                    artist_count = min(artist_count, len(artist_tracks))
+                else:
+                    # If no similar tracks, use more from the artist (up to MAX_ARTIST_PERCENTAGE)
+                    max_artist_count = int(SONGS_PER_PLAYLIST * MAX_ARTIST_PERCENTAGE)
+                    artist_count = min(max_artist_count, len(artist_tracks), SONGS_PER_PLAYLIST)
+                    log_info(f"📊 No similar tracks found, using up to {MAX_ARTIST_PERCENTAGE*100:.0f}% from artist ({artist_count} tracks)")
                 
                 selected_artist_tracks = random.sample(artist_tracks, artist_count) if artist_tracks else []
                 remaining_slots = SONGS_PER_PLAYLIST - len(selected_artist_tracks)
@@ -1214,13 +1331,25 @@ def generate_liked_artists_playlists():
                     similar_count = min(remaining_slots, len(available_similar))
                     selected_similar = random.sample(available_similar, similar_count)
                     playlist_songs = selected_artist_tracks + selected_similar
+                elif not similar_tracks and remaining_slots > 0:
+                    # If no similar tracks but we need more, use more artist tracks (up to limit)
+                    max_total_artist = int(SONGS_PER_PLAYLIST * MAX_ARTIST_PERCENTAGE)
+                    if len(selected_artist_tracks) < max_total_artist and len(artist_tracks) > len(selected_artist_tracks):
+                        additional_needed = min(remaining_slots, max_total_artist - len(selected_artist_tracks), len(artist_tracks) - len(selected_artist_tracks))
+                        if additional_needed > 0:
+                            available_artist = [t for t in artist_tracks if t not in selected_artist_tracks]
+                            if available_artist:
+                                additional = random.sample(available_artist, min(additional_needed, len(available_artist)))
+                                selected_artist_tracks.extend(additional)
+                                log_info(f"📊 Added {len(additional)} more tracks from artist to fill playlist")
+                    playlist_songs = selected_artist_tracks
                 else:
                     playlist_songs = selected_artist_tracks
                 
                 log_info(f"✅ Selected {len(selected_artist_tracks)} tracks from {artist_original} and {len(playlist_songs) - len(selected_artist_tracks)} similar tracks")
             
-            # Balance artist representation
-            playlist_songs = balance_artist_representation(playlist_songs, all_available_tracks, MAX_ARTIST_PERCENTAGE)
+            # Balance artist representation (use target playlist size for calculation)
+            playlist_songs = balance_artist_representation(playlist_songs, all_available_tracks, MAX_ARTIST_PERCENTAGE, SONGS_PER_PLAYLIST)
             
             # Apply quality filters
             log_info(f"🔄 Applying quality filters for Playlist {i + 1}...")
