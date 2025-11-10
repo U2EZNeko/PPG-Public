@@ -129,8 +129,6 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   Should use similar artists or similar tracks depending on the playlist. 
 
-  Takes a while as liked-tracks are not cached (yet)
-
 
 ### Fetch-liked-artists
   
@@ -139,6 +137,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   Will fetch directly liked artists and grabs artists from liked tracks. 
 
   Best to run once weekly, takes a hot minute to fetch all data.
+
+  Also now fetches all liked songs for faster access.
 
 
 ### Copy-Playlist-To-Subuser
@@ -159,7 +159,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ### 10.11.2025:
 
   - Added PPG-LikedArtists
-  - Uses cache to get artists and creates a playlist with similar songs, moods or artists. 
+  - Uses cache to get artists and creates a playlist with similar songs or artists.
+  - Cache file will now hold all liked tracks. 
 
 
 ### 03.11.2025:

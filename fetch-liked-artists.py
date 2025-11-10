@@ -227,7 +227,8 @@ def get_liked_artists_directly():
 # Get liked artists from Plex by fetching liked tracks directly (1+ stars)
 def get_liked_artists_from_tracks():
     """Get a list of artist names from all liked tracks (1+ stars) in Plex.
-    Returns a list of original artist names (preserving casing) and the track count."""
+    Returns a tuple of (artist_names_list, track_count, liked_tracks_list).
+    liked_tracks_list contains the actual track objects for caching."""
     try:
         print("🎵 Fetching liked artists from Plex by querying liked tracks...")
         liked_artists_normalized = set()  # For deduplication
@@ -446,7 +447,7 @@ def get_liked_artists_from_tracks():
             print("1. Do you have tracks rated 1+ stars in Plex?")
             print("2. Are you logged in as the correct user?")
             print("3. Is your Plex server up to date?")
-            return [], 0
+            return [], 0, []
         
         print(f"🎯 Found {len(liked_items):,} liked tracks, extracting artists...")
         print()
@@ -475,32 +476,45 @@ def get_liked_artists_from_tracks():
         print(f"✅ Extraction complete!")
         print(f"   📊 Total tracks processed: {len(liked_items):,}")
         print(f"   🎤 Unique artists found: {len(original_names):,}")
-        return original_names, len(liked_items)
+        return original_names, len(liked_items), liked_items
         
     except Exception as e:
         print(f"❌ Error fetching liked artists: {e}")
         import traceback
         traceback.print_exc()
-        return [], 0
+        return [], 0, []
 
 
 # Save liked artists to cache file
-def save_liked_artists_cache(liked_artists_list, track_count):
-    """Save liked artists and track count to cache file.
-    liked_artists_list should be a list of original artist names (preserving casing)."""
-    print("💾 Saving liked artists to cache...")
+def save_liked_artists_cache(liked_artists_list, track_count, liked_tracks_list=None):
+    """Save liked artists, track count, and liked tracks to cache file.
+    liked_artists_list should be a list of original artist names (preserving casing).
+    liked_tracks_list should be a list of track ratingKeys (for quick lookup)."""
+    print("💾 Saving liked artists and tracks to cache...")
     try:
         # Sort for consistent output
         sorted_artists = sorted(liked_artists_list)
         
+        # Extract track ratingKeys for caching
+        liked_track_keys = []
+        if liked_tracks_list:
+            print(f"📝 Extracting track keys from {len(liked_tracks_list):,} liked tracks...")
+            for track in liked_tracks_list:
+                if hasattr(track, 'ratingKey'):
+                    liked_track_keys.append(track.ratingKey)
+            print(f"✅ Extracted {len(liked_track_keys):,} track keys")
+        
         cache_data = {
             "liked_artists": sorted_artists,
             "liked_track_count": track_count,
+            "liked_track_keys": liked_track_keys,
             "cache_timestamp": datetime.now().isoformat()
         }
         with open(LIKED_ARTISTS_CACHE_FILE, "w", encoding='utf-8') as file:
             json.dump(cache_data, file, indent=2, ensure_ascii=False)
         print(f"✅ Saved {len(liked_artists_list):,} liked artists to cache (from {track_count:,} tracks)")
+        if liked_track_keys:
+            print(f"✅ Saved {len(liked_track_keys):,} liked track keys to cache")
         print(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
         print(f"📁 Cache file: {LIKED_ARTISTS_CACHE_FILE}")
     except Exception as e:
@@ -544,8 +558,8 @@ def main():
     direct_artists = get_liked_artists_directly()
     print()
     
-    # Source 2: Artists from liked tracks
-    track_artists, track_count = get_liked_artists_from_tracks()
+    # Source 2: Artists from liked tracks (also returns the tracks themselves)
+    track_artists, track_count, liked_tracks = get_liked_artists_from_tracks()
     print()
     
     # Merge results from both sources
@@ -559,14 +573,16 @@ def main():
     print(f"   - Total unique artists: {len(all_liked_artists):,}")
     if track_count > 0:
         print(f"   - Liked tracks processed: {track_count:,}")
+    if liked_tracks:
+        print(f"   - Liked track objects cached: {len(liked_tracks):,}")
     print()
     
     if not all_liked_artists:
         print("\n❌ No liked artists found. Exiting.")
         return
     
-    # Save to cache
-    save_liked_artists_cache(all_liked_artists, track_count)
+    # Save to cache (including liked tracks)
+    save_liked_artists_cache(all_liked_artists, track_count, liked_tracks)
     
     print()
     print("=" * 60)
