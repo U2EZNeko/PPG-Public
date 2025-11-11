@@ -930,7 +930,9 @@ def write_daily_log(log_entries):
 
 # Load liked artists from cache file
 def load_liked_artists_cache():
-    """Load liked artists and track count from cache file."""
+    """Load liked artists and track count from cache file.
+    Supports both old format (list of strings) and new format (list of dicts with 'id' and 'name').
+    Returns (liked_artists_set, track_count, cache_timestamp)"""
     log_debug("🔍 Checking liked artists cache...")
     if not os.path.exists(LIKED_ARTISTS_CACHE_FILE):
         log_debug("❌ No liked artists cache found.")
@@ -939,13 +941,32 @@ def load_liked_artists_cache():
     try:
         with open(LIKED_ARTISTS_CACHE_FILE, "r", encoding='utf-8') as file:
             cache_data = json.load(file)
-            # Normalize cached artist names for consistent matching
+            
+            # Try new format first (detailed with IDs)
+            detailed_artists = cache_data.get("liked_artists_detailed", [])
+            # Fallback to old format
             raw_artists = cache_data.get("liked_artists", [])
+            
             liked_artists = set()
-            for artist in raw_artists:
-                normalized = normalize_artist_name(artist)
-                if normalized:
-                    liked_artists.add(normalized)
+            
+            # Process detailed format (new format with IDs)
+            if detailed_artists and isinstance(detailed_artists[0], dict):
+                log_debug("📊 Loading artists from detailed format (with IDs)...")
+                for artist_info in detailed_artists:
+                    artist_name = artist_info.get('name', '')
+                    if artist_name:
+                        normalized = normalize_artist_name(artist_name)
+                        if normalized:
+                            liked_artists.add(normalized)
+            # Fallback to old format (just names)
+            elif raw_artists:
+                log_debug("📊 Loading artists from legacy format (names only)...")
+                for artist in raw_artists:
+                    if isinstance(artist, str):
+                        normalized = normalize_artist_name(artist)
+                        if normalized:
+                            liked_artists.add(normalized)
+            
             cached_track_count = cache_data.get("liked_track_count", 0)
             cache_timestamp = cache_data.get("cache_timestamp", None)
             

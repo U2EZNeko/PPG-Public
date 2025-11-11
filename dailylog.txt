@@ -1,30 +1,3 @@
-Metal
-Cyber Beats
-Retro Revival
-Downtempo / Electronic
-Hip Hop
-Progressive Extended
-Pop Punk
-Vintage Pop
-Regional Folk Sounds
-Tropical Beats
-Club Beats
-Pop Punk Variants
-80s Hard Rock
-80s Punk
-Funk
-Folk / Progressive Rock / Rock
-Street Beats
-2010s Indie
-Blues rock
-Breakbeat
-Acoustic
-90s Hip Hop
-Country
-2000s Metalcore
-Lo-fi Worlds
-Pop & Funk
-Jazz Explorations
 Reggae Basic
 Pop & Dance Fusion
 Global Electronica
@@ -48,3 +21,30 @@ Trap & Phonk
 2010s Chillwave
 2020s Punk
 Progressive Trance Variants
+German Viral Rap
+2000s Pop
+Alternative World Sounds
+Electronic
+Indie Dreamscapes
+2020s R&B
+Jazz
+2000s Emo
+New Wave
+2010s Hyperpop
+Dance
+2020s Dance
+Romantic Ballads
+Island Rhythms
+Electro & Electronic Fusion
+Psychedelic & Experimental
+French Touch
+2000s Post-Hardcore
+Heavy Metal Variants
+Folk Crossovers
+Retro Synth
+Global Pop Trends
+Modern Punk
+Easy Listening
+90s Alternative
+Glam Revival
+Bass-Heavy EDM

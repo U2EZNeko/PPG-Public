@@ -106,12 +106,12 @@ def get_artist_name_original(track):
 
 # Get liked artists directly from Plex (artists with 1+ star rating)
 def get_liked_artists_directly():
-    """Get a list of artist names that are directly rated/liked in Plex (1+ stars).
-    Returns a list of original artist names (preserving casing)."""
+    """Get a list of artist info (ID and name) that are directly rated/liked in Plex (1+ stars).
+    Returns a list of dicts with 'id' and 'name' keys."""
     try:
         print("🎤 Fetching liked artists directly from Plex (rated artists)...")
         liked_artists_normalized = set()  # For deduplication
-        liked_artists_dict = {}  # Maps normalized -> original (preserves original casing)
+        liked_artists_dict = {}  # Maps normalized -> {"id": ratingKey, "name": original_name}
         
         # Get music library
         music_library = plex.library.section("Music")
@@ -188,11 +188,13 @@ def get_liked_artists_directly():
             print("⚠️ No directly rated artists found. This is normal if you only rate tracks, not artists.")
             return []
         
-        print(f"🎯 Found {len(liked_artists_items):,} directly rated artists, extracting names...")
+        print(f"🎯 Found {len(liked_artists_items):,} directly rated artists, extracting IDs and names...")
         
-        # Extract artist names
+        # Extract artist IDs and names
         for i, artist in enumerate(liked_artists_items, 1):
             artist_name = artist.title
+            artist_id = getattr(artist, 'ratingKey', None)
+            
             if artist_name:
                 # Normalize whitespace
                 artist_name = artist_name.strip()
@@ -202,20 +204,23 @@ def get_liked_artists_directly():
                 artist_normalized = normalize_artist_name(artist_name)
                 if artist_normalized:
                     liked_artists_normalized.add(artist_normalized)
-                    # Store original name (preserve casing)
+                    # Store ID and name (preserve casing)
                     if artist_normalized not in liked_artists_dict:
-                        liked_artists_dict[artist_normalized] = artist_name
+                        liked_artists_dict[artist_normalized] = {
+                            "id": artist_id,
+                            "name": artist_name
+                        }
             
             # Show progress
             if i % 50 == 0 or i == len(liked_artists_items):
                 progress_percent = (i / len(liked_artists_items)) * 100
                 print(f"Processing artists: {i:,}/{len(liked_artists_items):,} ({progress_percent:.1f}%) - Found {len(liked_artists_normalized):,} unique so far", end='\r')
         
-        # Return list of original names
-        original_names = [liked_artists_dict[norm] for norm in sorted(liked_artists_normalized)]
+        # Return list of artist info dicts
+        artist_info_list = [liked_artists_dict[norm] for norm in sorted(liked_artists_normalized)]
         
-        print(f"\n🎉 Found {len(original_names):,} unique directly rated artists")
-        return original_names
+        print(f"\n🎉 Found {len(artist_info_list):,} unique directly rated artists")
+        return artist_info_list
         
     except Exception as e:
         print(f"❌ Error fetching liked artists directly: {e}")
@@ -224,15 +229,31 @@ def get_liked_artists_directly():
         return []
 
 
+# Get artist ID from a track
+def get_artist_id(track):
+    """Get the artist ID (ratingKey) from a track."""
+    try:
+        if hasattr(track, 'artist') and track.artist:
+            artist_obj = track.artist() if callable(track.artist) else track.artist
+            if hasattr(artist_obj, 'ratingKey'):
+                return artist_obj.ratingKey
+        # Try to get from grandparent (album -> artist)
+        if hasattr(track, 'grandparentRatingKey'):
+            return track.grandparentRatingKey
+        return None
+    except Exception as e:
+        return None
+
 # Get liked artists from Plex by fetching liked tracks directly (1+ stars)
 def get_liked_artists_from_tracks():
-    """Get a list of artist names from all liked tracks (1+ stars) in Plex.
-    Returns a tuple of (artist_names_list, track_count, liked_tracks_list).
+    """Get a list of artist info (ID and name) from all liked tracks (1+ stars) in Plex.
+    Returns a tuple of (artist_info_list, track_count, liked_tracks_list).
+    artist_info_list contains dicts with 'id' and 'name' keys.
     liked_tracks_list contains the actual track objects for caching."""
     try:
         print("🎵 Fetching liked artists from Plex by querying liked tracks...")
         liked_artists_normalized = set()  # For deduplication
-        liked_artists_dict = {}  # Maps normalized -> original (preserves original casing)
+        liked_artists_dict = {}  # Maps normalized -> {"id": ratingKey, "name": original_name}
         
         # Get music library
         music_library = plex.library.section("Music")
@@ -455,13 +476,18 @@ def get_liked_artists_from_tracks():
         # Extract artists with progress display
         for i, track in enumerate(liked_items, 1):
             artist_original = get_artist_name_original(track)
+            artist_id = get_artist_id(track)
+            
             if artist_original:
                 artist_normalized = normalize_artist_name(artist_original)
                 if artist_normalized:
                     liked_artists_normalized.add(artist_normalized)
-                    # Store original name (preserve the first occurrence's casing)
+                    # Store ID and name (preserve the first occurrence's casing)
                     if artist_normalized not in liked_artists_dict:
-                        liked_artists_dict[artist_normalized] = artist_original
+                        liked_artists_dict[artist_normalized] = {
+                            "id": artist_id,
+                            "name": artist_original
+                        }
             
             # Show progress every 50 tracks or at the end
             if i % 50 == 0 or i == len(liked_items):
@@ -469,14 +495,14 @@ def get_liked_artists_from_tracks():
                 print(f"📊 Processing: {i:,}/{len(liked_items):,} tracks ({progress_percent:.1f}%) | Songs found: {i:,} | Unique artists: {len(liked_artists_normalized):,}", end='\r')
                 sys.stdout.flush()
         
-        # Return list of original names (sorted for consistent output)
-        original_names = [liked_artists_dict[norm] for norm in sorted(liked_artists_normalized)]
+        # Return list of artist info dicts (sorted for consistent output)
+        artist_info_list = [liked_artists_dict[norm] for norm in sorted(liked_artists_normalized)]
         
         print()  # Clear the progress line
         print(f"✅ Extraction complete!")
         print(f"   📊 Total tracks processed: {len(liked_items):,}")
-        print(f"   🎤 Unique artists found: {len(original_names):,}")
-        return original_names, len(liked_items), liked_items
+        print(f"   🎤 Unique artists found: {len(artist_info_list):,}")
+        return artist_info_list, len(liked_items), liked_items
         
     except Exception as e:
         print(f"❌ Error fetching liked artists: {e}")
@@ -488,12 +514,20 @@ def get_liked_artists_from_tracks():
 # Save liked artists to cache file
 def save_liked_artists_cache(liked_artists_list, track_count, liked_tracks_list=None):
     """Save liked artists, track count, and liked tracks to cache file.
-    liked_artists_list should be a list of original artist names (preserving casing).
+    liked_artists_list should be a list of dicts with 'id' and 'name' keys, or a list of strings (for backward compatibility).
     liked_tracks_list should be a list of track ratingKeys (for quick lookup)."""
     print("💾 Saving liked artists and tracks to cache...")
     try:
-        # Sort for consistent output
-        sorted_artists = sorted(liked_artists_list)
+        # Handle both new format (dicts with id/name) and old format (strings) for backward compatibility
+        if liked_artists_list and isinstance(liked_artists_list[0], dict):
+            # New format: list of dicts with 'id' and 'name'
+            sorted_artists = sorted(liked_artists_list, key=lambda x: x.get('name', '').lower())
+            # Also create a simple name list for backward compatibility
+            artist_names = [artist.get('name', '') for artist in sorted_artists if artist.get('name')]
+        else:
+            # Old format: list of strings
+            sorted_artists = sorted(liked_artists_list) if liked_artists_list else []
+            artist_names = sorted_artists
         
         # Extract track ratingKeys for caching
         liked_track_keys = []
@@ -505,14 +539,15 @@ def save_liked_artists_cache(liked_artists_list, track_count, liked_tracks_list=
             print(f"✅ Extracted {len(liked_track_keys):,} track keys")
         
         cache_data = {
-            "liked_artists": sorted_artists,
+            "liked_artists": artist_names,  # Backward compatible: simple list of names
+            "liked_artists_detailed": sorted_artists,  # New format: list of dicts with id and name
             "liked_track_count": track_count,
             "liked_track_keys": liked_track_keys,
             "cache_timestamp": datetime.now().isoformat()
         }
         with open(LIKED_ARTISTS_CACHE_FILE, "w", encoding='utf-8') as file:
             json.dump(cache_data, file, indent=2, ensure_ascii=False)
-        print(f"✅ Saved {len(liked_artists_list):,} liked artists to cache (from {track_count:,} tracks)")
+        print(f"✅ Saved {len(artist_names):,} liked artists to cache (from {track_count:,} tracks)")
         if liked_track_keys:
             print(f"✅ Saved {len(liked_track_keys):,} liked track keys to cache")
         print(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
@@ -526,19 +561,34 @@ def save_liked_artists_cache(liked_artists_list, track_count, liked_tracks_list=
 # Merge artist lists from multiple sources, deduplicating by normalized names
 def merge_artist_lists(*artist_lists):
     """Merge multiple lists of artists, deduplicating by normalized names.
-    Returns a list of original artist names (preserving casing from first occurrence)."""
+    Handles both new format (dicts with 'id' and 'name') and old format (strings).
+    Returns a list of dicts with 'id' and 'name' keys (preserving ID and name from first occurrence)."""
     merged_normalized = set()
-    merged_dict = {}  # Maps normalized -> original
+    merged_dict = {}  # Maps normalized -> {"id": ratingKey, "name": original_name}
     
     for artist_list in artist_lists:
-        for artist_name in artist_list:
-            if artist_name:
-                artist_normalized = normalize_artist_name(artist_name)
-                if artist_normalized and artist_normalized not in merged_normalized:
-                    merged_normalized.add(artist_normalized)
-                    merged_dict[artist_normalized] = artist_name
+        for artist_item in artist_list:
+            if artist_item:
+                # Handle both new format (dict) and old format (string)
+                if isinstance(artist_item, dict):
+                    artist_name = artist_item.get('name', '')
+                    artist_id = artist_item.get('id', None)
+                else:
+                    # Old format: just a string
+                    artist_name = artist_item
+                    artist_id = None
+                
+                if artist_name:
+                    artist_normalized = normalize_artist_name(artist_name)
+                    if artist_normalized and artist_normalized not in merged_normalized:
+                        merged_normalized.add(artist_normalized)
+                        # Prefer ID from first occurrence, but keep name from first occurrence
+                        merged_dict[artist_normalized] = {
+                            "id": artist_id,
+                            "name": artist_name
+                        }
     
-    # Return sorted list of original names
+    # Return sorted list of artist info dicts
     return [merged_dict[norm] for norm in sorted(merged_normalized)]
 
 
@@ -571,6 +621,10 @@ def main():
     print(f"   - Directly rated artists: {len(direct_artists):,}")
     print(f"   - Artists from liked tracks: {len(track_artists):,}")
     print(f"   - Total unique artists: {len(all_liked_artists):,}")
+    # Count how many have IDs
+    artists_with_ids = sum(1 for artist in all_liked_artists if isinstance(artist, dict) and artist.get('id'))
+    if artists_with_ids > 0:
+        print(f"   - Artists with IDs: {artists_with_ids:,}")
     if track_count > 0:
         print(f"   - Liked tracks processed: {track_count:,}")
     if liked_tracks:

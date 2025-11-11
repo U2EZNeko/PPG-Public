@@ -39,11 +39,14 @@ REQUIRED_ENV_VARS = [
     # Shared configuration
     "SONGS_PER_PLAYLIST",
     "MAX_ARTIST_PERCENTAGE",
+    "MAX_LIKED_ARTISTS_PERCENTAGE",
+    "MIN_VARIETY_PERCENTAGE",
     "LIKED_ARTISTS_CACHE_FILE",
     # Quality & Variety
     "MIN_SONG_DURATION_SECONDS",
     "MAX_SONGS_PER_ALBUM",
     "PREVENT_CONSECUTIVE_ARTISTS",
+    "MOOD_GROUPING_ENABLED",
     # Logging
     "LOG_LEVEL",
     # Liked Artists-specific
@@ -68,12 +71,15 @@ SUPPORTED_IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.bmp')
 # Shared configuration
 SONGS_PER_PLAYLIST = int(os.getenv("SONGS_PER_PLAYLIST"))
 MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE"))
+MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE"))
+MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE"))
 LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE")
 
 # Quality & Variety configuration
 MIN_SONG_DURATION_SECONDS = int(os.getenv("MIN_SONG_DURATION_SECONDS"))
 MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
+MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
 
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
@@ -334,6 +340,25 @@ def get_track_genres(track):
         log_debug(f"Error getting genres for track '{track.title}': {e}")
         return []
 
+# Get track mood
+def get_track_mood(track):
+    """Get the mood from a track."""
+    try:
+        if hasattr(track, 'mood') and track.mood:
+            # Mood can be a list or a single value
+            if isinstance(track.mood, list):
+                return track.mood[0] if track.mood else None
+            return track.mood
+        elif hasattr(track, 'moods') and track.moods:
+            # Some tracks have 'moods' (plural)
+            if isinstance(track.moods, list):
+                return track.moods[0] if track.moods else None
+            return track.moods
+        return None
+    except Exception as e:
+        log_debug(f"Error getting mood for track '{track.title}': {e}")
+        return None
+
 # Get track style
 def get_track_style(track):
     """Get style from a track."""
@@ -494,9 +519,78 @@ def prevent_consecutive_artists(playlist_songs):
     log_debug(f"🔄 Reordered playlist to minimize consecutive artist repeats")
     return reordered[:len(playlist_songs)]
 
+# Group and sort by mood
+def group_by_mood(playlist_songs):
+    """Group and sort tracks by mood for better flow. Picks a random mood from existing tracks and groups by it."""
+    log_debug(f"🎵 Starting mood grouping for {len(playlist_songs)} tracks")
+    
+    # Extract all moods from tracks
+    tracks_with_mood = []
+    tracks_without_mood = []
+    mood_counts = {}  # Count occurrences of each mood
+    
+    for track in playlist_songs:
+        mood = get_track_mood(track)
+        if mood:
+            tracks_with_mood.append((track, mood))
+            mood_counts[mood] = mood_counts.get(mood, 0) + 1
+        else:
+            tracks_without_mood.append(track)
+    
+    log_debug(f"  📊 Mood data found: {len(tracks_with_mood)} tracks have mood, {len(tracks_without_mood)} tracks missing mood")
+    
+    if not tracks_with_mood:
+        # No mood data available, just shuffle
+        log_debug(f"  ⚠️  No mood data available for any tracks. Shuffling playlist randomly.")
+        random.shuffle(playlist_songs)
+        return playlist_songs
+    
+    # Show available moods
+    log_debug(f"  🎭 Found {len(mood_counts)} unique moods:")
+    for mood, count in sorted(mood_counts.items(), key=lambda x: x[1], reverse=True):
+        log_debug(f"    - {mood}: {count} tracks")
+    
+    # Pick a random mood from the available moods
+    if mood_counts:
+        selected_mood = random.choice(list(mood_counts.keys()))
+        log_info(f"  🎯 Selected mood for grouping: '{selected_mood}' ({mood_counts[selected_mood]} tracks)")
+        
+        # Group tracks by selected mood
+        tracks_matching_mood = [track for track, mood in tracks_with_mood if mood == selected_mood]
+        tracks_other_moods = [track for track, mood in tracks_with_mood if mood != selected_mood]
+        
+        # Start with tracks matching the selected mood
+        grouped = tracks_matching_mood.copy()
+        random.shuffle(grouped)
+        
+        # Add tracks with other moods
+        random.shuffle(tracks_other_moods)
+        grouped.extend(tracks_other_moods)
+        
+        # Interleave tracks without mood data randomly
+        if tracks_without_mood:
+            log_debug(f"  🔀 Interleaving {len(tracks_without_mood)} tracks without mood data randomly")
+            random.shuffle(tracks_without_mood)
+            for track in tracks_without_mood:
+                # Insert at random position (avoiding the beginning where mood-matched tracks are)
+                if len(grouped) > len(tracks_matching_mood):
+                    pos = random.randint(len(tracks_matching_mood), len(grouped))
+                    grouped.insert(pos, track)
+                else:
+                    grouped.append(track)
+        
+        log_info(f"✅ Mood grouping complete: {len(tracks_matching_mood)} tracks with selected mood '{selected_mood}' grouped first, {len(tracks_other_moods)} other mood tracks, {len(tracks_without_mood)} tracks without mood interleaved")
+        return grouped
+    else:
+        # Fallback: just shuffle
+        log_debug(f"  ⚠️  No valid moods found. Shuffling playlist randomly.")
+        random.shuffle(playlist_songs)
+        return playlist_songs
+
 # Apply all quality filters to a playlist
 def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seconds=90, 
-                          max_songs_per_album=1, prevent_consecutive=True):
+                          max_songs_per_album=1, prevent_consecutive=True, 
+                          mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
     original_count = len(playlist_songs)
     
@@ -516,6 +610,12 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
         playlist_songs = prevent_consecutive_artists(playlist_songs)
         log_info(f"✅ Reordered playlist to minimize consecutive artist repeats")
     
+    # Group by mood if enabled (after other filters, before finalizing)
+    if mood_grouping and len(playlist_songs) > 1:
+        log_info(f"🔄 Grouping songs by mood...")
+        playlist_songs = group_by_mood(playlist_songs)
+        # group_by_mood already logs completion
+    
     log_info(f"✅ Quality filters complete: {original_count} tracks -> {len(playlist_songs)} tracks")
     return playlist_songs
 
@@ -530,6 +630,102 @@ def analyze_artist_distribution(playlist_songs):
             artist_counts[artist_name] = artist_counts.get(artist_name, 0) + 1
     
     return artist_counts
+
+# Helper function to categorize a batch of songs
+def categorize_song_batch(song_batch, liked_artists):
+    """Categorize a batch of songs into liked and other artists. Used for parallel processing."""
+    liked_batch = []
+    other_batch = []
+    for song in song_batch:
+        artist_name = get_artist_name(song)
+        if artist_name and artist_name in liked_artists:
+            liked_batch.append(song)
+        else:
+            other_batch.append(song)
+    return (liked_batch, other_batch)
+
+# Prefer songs from liked artists with guaranteed variety
+def prefer_liked_artists(songs, liked_artists, target_count, max_liked_percentage=0.9, min_variety_percentage=0.1):
+    """Select songs with preference for liked artists, but ensure minimum variety from other artists."""
+    if not liked_artists:
+        log_debug("No liked artists found, selecting randomly.")
+        return random.sample(songs, min(len(songs), target_count))
+    
+    # Calculate target counts based on percentages
+    max_liked_count = int(target_count * max_liked_percentage)
+    min_variety_count = int(target_count * min_variety_percentage)
+    
+    log_debug(f"Target distribution: max {max_liked_percentage*100:.0f}% liked artists ({max_liked_count}), min {min_variety_percentage*100:.0f}% variety ({min_variety_count})")
+    
+    # Separate songs into liked and non-liked artists using multi-threading
+    log_info(f"🔄 Categorizing {len(songs)} songs by liked artists (multi-threaded)...")
+    liked_songs = []
+    other_songs = []
+    
+    # Determine optimal batch size and number of workers
+    # Use smaller batches for better load distribution, but not too small to avoid overhead
+    batch_size = max(50, len(songs) // 20)  # Aim for ~20 batches, minimum 50 songs per batch
+    num_workers = min(10, max(4, len(songs) // batch_size))  # 4-10 workers depending on song count
+    
+    # Split songs into batches
+    song_batches = [songs[i:i + batch_size] for i in range(0, len(songs), batch_size)]
+    
+    # Process batches in parallel
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        # Submit all batches
+        future_to_batch = {executor.submit(categorize_song_batch, batch, liked_artists): batch for batch in song_batches}
+        
+        # Collect results with progress bar
+        with tqdm(total=len(song_batches), desc="Categorizing songs", unit="batch", disable=(LOG_LEVEL in ["WARNING", "ERROR"])) as pbar:
+            for future in as_completed(future_to_batch):
+                batch = future_to_batch[future]
+                try:
+                    liked_batch, other_batch = future.result()
+                    liked_songs.extend(liked_batch)
+                    other_songs.extend(other_batch)
+                    pbar.update(1)
+                    pbar.set_postfix({"liked": len(liked_songs), "other": len(other_songs)})
+                except Exception as e:
+                    log_error(f"Error processing batch: {e}")
+                    pbar.update(1)
+    
+    log_info(f"✅ Found {len(liked_songs)} songs from liked artists, {len(other_songs)} from other artists")
+    
+    selected_songs = []
+    
+    # Ensure minimum variety first
+    if other_songs and min_variety_count > 0:
+        variety_count = min(len(other_songs), min_variety_count)
+        selected_songs.extend(random.sample(other_songs, variety_count))
+        log_debug(f"Selected {variety_count} songs from other artists for guaranteed variety")
+    
+    # Fill remaining slots with liked artists (up to max percentage)
+    remaining_slots = target_count - len(selected_songs)
+    if liked_songs and remaining_slots > 0:
+        liked_count = min(len(liked_songs), remaining_slots, max_liked_count)
+        selected_songs.extend(random.sample(liked_songs, liked_count))
+        log_debug(f"Selected {liked_count} songs from liked artists")
+    
+    # Fill any remaining slots with more other songs if needed
+    remaining_slots = target_count - len(selected_songs)
+    if other_songs and remaining_slots > 0:
+        other_count = min(len(other_songs), remaining_slots)
+        # Remove already selected songs from available pool
+        available_other_songs = [song for song in other_songs if song not in selected_songs]
+        if available_other_songs:
+            other_count = min(len(available_other_songs), other_count)
+            selected_songs.extend(random.sample(available_other_songs, other_count))
+            log_debug(f"Selected {other_count} additional songs from other artists to fill playlist")
+    
+    # Show final distribution
+    final_liked_count = sum(1 for song in selected_songs if get_artist_name(song) in liked_artists)
+    final_other_count = len(selected_songs) - final_liked_count
+    final_liked_percentage = (final_liked_count / len(selected_songs)) * 100 if selected_songs else 0
+    final_other_percentage = (final_other_count / len(selected_songs)) * 100 if selected_songs else 0
+    
+    log_info(f"📊 Final selection: {final_liked_count} from liked artists ({final_liked_percentage:.1f}%), {final_other_count} from other artists ({final_other_percentage:.1f}%)")
+    
+    return selected_songs
 
 # Balance artist representation in playlist to max percentage per artist
 def balance_artist_representation(playlist_songs, all_available_songs, max_percentage=0.3, target_size=None):
@@ -595,51 +791,95 @@ def balance_artist_representation(playlist_songs, all_available_songs, max_perce
 # Load liked artists from cache file
 def load_liked_artists_cache():
     """Load liked artists, track count, and liked track keys from cache file.
-    Returns (liked_artists_set, track_count, cache_timestamp, artist_name_map, liked_track_keys_list)"""
+    Supports both old format (list of strings) and new format (list of dicts with 'id' and 'name').
+    Returns (liked_artists_set, track_count, cache_timestamp, artist_name_map, liked_track_keys_list, artist_id_map)
+    artist_id_map maps normalized artist name -> artist ID (ratingKey)"""
     log_debug("🔍 Checking liked artists cache...")
     if not os.path.exists(LIKED_ARTISTS_CACHE_FILE):
         log_debug("❌ No liked artists cache found.")
-        return None, 0, None, {}, []
+        return None, 0, None, {}, [], {}
     
     try:
         with open(LIKED_ARTISTS_CACHE_FILE, "r", encoding='utf-8') as file:
             cache_data = json.load(file)
+            
+            # Try new format first (detailed with IDs)
+            detailed_artists = cache_data.get("liked_artists_detailed", [])
+            # Fallback to old format
             raw_artists = cache_data.get("liked_artists", [])
+            
             liked_artists = set()
-            artist_name_map = {}  # normalized -> original
-            for artist in raw_artists:
-                normalized = normalize_artist_name(artist)
-                if normalized:
-                    liked_artists.add(normalized)
-                    artist_name_map[normalized] = artist
+            artist_name_map = {}  # normalized -> original name
+            artist_id_map = {}  # normalized -> artist ID (ratingKey)
+            
+            # Process detailed format (new format with IDs)
+            if detailed_artists and isinstance(detailed_artists[0], dict):
+                log_debug("📊 Loading artists from detailed format (with IDs)...")
+                for artist_info in detailed_artists:
+                    artist_name = artist_info.get('name', '')
+                    artist_id = artist_info.get('id', None)
+                    if artist_name:
+                        normalized = normalize_artist_name(artist_name)
+                        if normalized:
+                            liked_artists.add(normalized)
+                            artist_name_map[normalized] = artist_name
+                            if artist_id:
+                                artist_id_map[normalized] = artist_id
+            # Fallback to old format (just names)
+            elif raw_artists:
+                log_debug("📊 Loading artists from legacy format (names only)...")
+                for artist in raw_artists:
+                    if isinstance(artist, str):
+                        normalized = normalize_artist_name(artist)
+                        if normalized:
+                            liked_artists.add(normalized)
+                            artist_name_map[normalized] = artist
+            
             cached_track_count = cache_data.get("liked_track_count", 0)
             liked_track_keys = cache_data.get("liked_track_keys", [])
             cache_timestamp = cache_data.get("cache_timestamp", None)
             
+            artists_with_ids = len(artist_id_map)
             if cache_timestamp:
                 from datetime import datetime
                 cache_date = datetime.fromisoformat(cache_timestamp)
                 days_old = (datetime.now() - cache_date).days
                 log_info(f"✅ Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
+                if artists_with_ids > 0:
+                    log_info(f"✅ Loaded {artists_with_ids:,} artist IDs for accurate matching")
                 if liked_track_keys:
                     log_info(f"✅ Loaded {len(liked_track_keys):,} liked track keys from cache")
                 log_debug(f"📅 Cache is {days_old} days old")
-                return liked_artists, cached_track_count, cache_timestamp, artist_name_map, liked_track_keys
+                return liked_artists, cached_track_count, cache_timestamp, artist_name_map, liked_track_keys, artist_id_map
             else:
                 log_info(f"✅ Loaded {len(liked_artists):,} liked artists from cache (from {cached_track_count:,} tracks)")
+                if artists_with_ids > 0:
+                    log_info(f"✅ Loaded {artists_with_ids:,} artist IDs for accurate matching")
                 if liked_track_keys:
                     log_info(f"✅ Loaded {len(liked_track_keys):,} liked track keys from cache")
                 log_warning("⚠️ Cache has no timestamp - will refresh to add timestamp")
-                return liked_artists, cached_track_count, None, artist_name_map, liked_track_keys
+                return liked_artists, cached_track_count, None, artist_name_map, liked_track_keys, artist_id_map
     except Exception as e:
         log_error(f"❌ Error loading liked artists cache: {e}")
-        return None, 0, None, {}, []
+        return None, 0, None, {}, [], {}
 
-# Get artist object by name
-def get_artist_object(music_library, artist_name):
-    """Get the artist object from Plex by name."""
+# Get artist object by name or ID
+def get_artist_object(music_library, artist_name, artist_id=None):
+    """Get the artist object from Plex by name or ID.
+    If artist_id is provided, uses it for direct lookup (more accurate).
+    Otherwise falls back to name-based search."""
     try:
-        # Try searching for the artist
+        # If we have an ID, use it for direct lookup (most accurate)
+        if artist_id:
+            try:
+                artist = music_library.fetchItem(artist_id)
+                if artist and hasattr(artist, 'type') and artist.type == 'artist':
+                    log_debug(f"✅ Found artist by ID: {artist_name} (ID: {artist_id})")
+                    return artist
+            except Exception as e:
+                log_debug(f"Could not fetch artist by ID {artist_id}: {e}, falling back to name search")
+        
+        # Fallback: Try searching for the artist by name
         artists = music_library.searchArtists(title=artist_name)
         if artists:
             # Find exact match (case-insensitive)
@@ -660,10 +900,10 @@ def get_artist_object(music_library, artist_name):
         return None
 
 # Get similar artists from Plex API using sonicallySimilar method
-def get_similar_artists(music_library, artist_name):
+def get_similar_artists(music_library, artist_name, artist_id=None):
     """Get similar artists using Plex's sonicallySimilar API method."""
     try:
-        artist_obj = get_artist_object(music_library, artist_name)
+        artist_obj = get_artist_object(music_library, artist_name, artist_id)
         if not artist_obj:
             log_debug(f"Could not find artist object for '{artist_name}'")
             return []
@@ -938,12 +1178,13 @@ def get_similar_tracks(music_library, track, use_fallbacks=False):
         log_debug(traceback.format_exc())
         return []
 
-# Get tracks by artist name
-def get_tracks_by_artist(music_library, artist_name):
-    """Get all tracks by a specific artist."""
+# Get tracks by artist name or ID
+def get_tracks_by_artist(music_library, artist_name, artist_id=None):
+    """Get all tracks by a specific artist.
+    If artist_id is provided, uses it for direct lookup (more accurate)."""
     try:
         # First, try to get the artist object and get tracks from it
-        artist_obj = get_artist_object(music_library, artist_name)
+        artist_obj = get_artist_object(music_library, artist_name, artist_id)
         if artist_obj:
             try:
                 # Get tracks from the artist object
@@ -1020,8 +1261,9 @@ def extract_similarity_attributes(tracks, method):
         return all_attributes
 
 # Find similar tracks using similar artists
-def find_similar_tracks_via_artists(music_library, artist_name, exclude_artists=None):
-    """Find tracks from similar artists using Plex's similar artists feature."""
+def find_similar_tracks_via_artists(music_library, artist_name, exclude_artists=None, artist_id=None):
+    """Find tracks from similar artists using Plex's similar artists feature.
+    If artist_id is provided, uses it for more accurate artist lookup."""
     if exclude_artists is None:
         exclude_artists = set()
     
@@ -1029,7 +1271,7 @@ def find_similar_tracks_via_artists(music_library, artist_name, exclude_artists=
     seen_tracks = set()
     
     log_info(f"🔍 Finding similar artists for '{artist_name}'...")
-    similar_artists = get_similar_artists(music_library, artist_name)
+    similar_artists = get_similar_artists(music_library, artist_name, artist_id)
     
     if not similar_artists:
         log_warning(f"⚠️  No similar artists found for '{artist_name}'. Falling back to genre-based search.")
@@ -1367,8 +1609,10 @@ def generate_liked_artists_playlists():
         log_error("❌ No liked artists cache found. Run fetch-liked-artists.py to create the cache.")
         return
     
-    liked_artists, cached_track_count, cache_timestamp, artist_name_map, liked_track_keys = cache_result
+    liked_artists, cached_track_count, cache_timestamp, artist_name_map, liked_track_keys, artist_id_map = cache_result
     log_info(f"✅ Loaded {len(liked_artists):,} liked artists from cache")
+    if artist_id_map:
+        log_info(f"✅ Loaded {len(artist_id_map):,} artist IDs for accurate matching")
     if liked_track_keys:
         log_info(f"✅ Loaded {len(liked_track_keys):,} liked track keys from cache (will use for fast track selection)")
 
@@ -1421,11 +1665,15 @@ def generate_liked_artists_playlists():
                 
                 # Select a random artist
                 artist_normalized, artist_original = random.choice(list(available_artists.items()))
+                # Get artist ID if available for more accurate matching
+                artist_id = artist_id_map.get(artist_normalized) if artist_id_map else None
                 log_info(f"\n🎵 Starting generation for Playlist {i + 1} (Artist: {artist_original})...")
+                if artist_id:
+                    log_debug(f"🎯 Using artist ID {artist_id} for accurate matching")
                 
                 # Get tracks by this artist (for the playlist)
                 log_info(f"🔍 Fetching tracks by {artist_original}...")
-                artist_tracks = get_tracks_by_artist(music_library, artist_original)
+                artist_tracks = get_tracks_by_artist(music_library, artist_original, artist_id)
                 
                 if not artist_tracks:
                     log_warning(f"⚠️  No tracks found for artist '{artist_original}'. Skipping playlist {i + 1}.")
@@ -1436,7 +1684,7 @@ def generate_liked_artists_playlists():
                 # Find similar artists and get their tracks
                 exclude_artists = {artist_normalized}
                 log_info(f"🔍 Finding similar artists for '{artist_original}'...")
-                similar_tracks = find_similar_tracks_via_artists(music_library, artist_original, exclude_artists)
+                similar_tracks = find_similar_tracks_via_artists(music_library, artist_original, exclude_artists, artist_id)
                 
                 # Use artist name for poster
                 poster_artist_name = artist_original
@@ -1579,7 +1827,8 @@ def generate_liked_artists_playlists():
                 all_available_tracks,
                 min_duration_seconds=MIN_SONG_DURATION_SECONDS,
                 max_songs_per_album=MAX_SONGS_PER_ALBUM,
-                prevent_consecutive=PREVENT_CONSECUTIVE_ARTISTS
+                prevent_consecutive=PREVENT_CONSECUTIVE_ARTISTS,
+                mood_grouping=MOOD_GROUPING_ENABLED
             )
             
             # Poster artist name is already set above for both methods
