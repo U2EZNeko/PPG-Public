@@ -370,7 +370,10 @@ def filter_by_release_date(tracks, date_filter):
                     log_error(f"Error processing batch: {e}")
                     pbar.update(1)
     
-    log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    if len(tracks) > 0:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    else:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks (no tracks to filter)")
     return filtered
 
 # Count liked tracks only (for cache validation)
@@ -1035,6 +1038,7 @@ def generate_weekly_playlists():
             songs = []
             selected_group = None
             selected_genres = None
+            total_songs = 0  # Initialize to avoid undefined variable errors
 
             # Keep retrying until we find a genre group with enough songs
             for attempt in range(10):  # Retry up to 10 times for each playlist
@@ -1086,16 +1090,24 @@ def generate_weekly_playlists():
                 total_songs = len(songs)
                 log_debug(f"Total songs found for group '{selected_group}': {total_songs}")
 
-                # Check if the number of songs is >= 80% of SONGS_PER_PLAYLIST
-                if total_songs >= MIN_SONGS_REQUIRED:
+                # Check if we found any songs at all, and if the number of songs is >= MIN_SONGS_REQUIRED
+                if total_songs == 0:
+                    log_warning(f"⚠️  No tracks found for genre group '{selected_group}'. Retrying with a different genre group...")
+                    continue  # Retry with a different genre group
+                elif total_songs >= MIN_SONGS_REQUIRED:
                     log_info(f"✅ Found sufficient songs ({total_songs}) for Playlist {i + 1}. Creating playlist.")
                     break  # We found enough songs, break out of the retry loop
                 else:
-                    log_debug(f"Not enough songs for Playlist {i + 1}. Retrying with a different genre group...")
+                    log_warning(f"⚠️  Not enough songs ({total_songs}) for Playlist {i + 1} (need at least {MIN_SONGS_REQUIRED}). Retrying with a different genre group...")
 
             if total_songs < MIN_SONGS_REQUIRED:
                 log_error(f"❌ Error: Could not find enough songs after 10 attempts. Skipping playlist {i + 1}.")
                 continue  # Skip this playlist if we couldn't find enough songs
+            
+            # Safety check: if we somehow still have 0 songs, skip this playlist
+            if total_songs == 0:
+                log_error(f"❌ Error: No songs found after retries. Skipping playlist {i + 1}.")
+                continue
 
             # Select the required number of songs (up to SONGS_PER_PLAYLIST)
             if liked_artists:

@@ -321,7 +321,10 @@ def filter_by_release_date(tracks, date_filter):
                     log_error(f"Error processing batch: {e}")
                     pbar.update(1)
     
-    log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    if len(tracks) > 0:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    else:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks (no tracks to filter)")
     return filtered
 
 # Count liked tracks only (for cache validation)

@@ -1033,65 +1033,30 @@ def get_similar_artists(music_library, artist_name, artist_id=None):
         log_debug(traceback.format_exc())
         return []
 
-# Get a random liked track (using cached track keys)
+# Get a random liked track (using cached track keys only)
 def get_random_liked_track(music_library, liked_track_keys=None):
-    """Get a random track from liked tracks using cached track keys.
-    If liked_track_keys is provided, uses those. Otherwise falls back to querying Plex."""
+    """Get a random track from liked tracks using cached track keys only.
+    Does not query Plex directly - relies on the cache created by fetch-liked-artists.py.
+    If liked_track_keys is not provided or empty, returns None."""
     try:
-        # If we have cached track keys, use them (much faster!)
-        if liked_track_keys and len(liked_track_keys) > 0:
-            log_debug(f"🔍 get_random_liked_track: Using cached track keys ({len(liked_track_keys)} tracks)")
-            # Pick a random key
-            random_key = random.choice(liked_track_keys)
-            log_debug(f"🔍 get_random_liked_track: Selected track key: {random_key}")
-            
-            # Fetch the track by key
-            try:
-                track = music_library.fetchItem(random_key)
-                log_debug(f"🔍 get_random_liked_track: Fetched track: {getattr(track, 'title', 'Unknown')}")
-                return track
-            except Exception as e:
-                log_warning(f"⚠️  Error fetching track with key {random_key}: {e}")
-                # Fall through to query method
-                log_debug(f"🔍 get_random_liked_track: Falling back to query method...")
+        # Must have cached track keys - we don't query Plex directly
+        if not liked_track_keys or len(liked_track_keys) == 0:
+            log_warning("⚠️  No cached track keys available. Run fetch-liked-artists.py to create the cache.")
+            return None
         
-        # Fallback: Query Plex directly (slower)
-        log_debug(f"🔍 get_random_liked_track: Starting search for liked tracks (fallback method)...")
-        liked_tracks = []
+        log_debug(f"🔍 get_random_liked_track: Using cached track keys ({len(liked_track_keys)} tracks)")
+        # Pick a random key
+        random_key = random.choice(liked_track_keys)
+        log_debug(f"🔍 get_random_liked_track: Selected track key: {random_key}")
         
-        # Method 1: Try searchTracks with userRating__gte
+        # Fetch the track by key
         try:
-            log_debug(f"🔍 get_random_liked_track: Trying Method 1 (searchTracks)...")
-            liked_tracks = music_library.searchTracks(userRating__gte=1)
-            log_debug(f"🔍 get_random_liked_track: Method 1 returned {len(liked_tracks)} tracks")
-        except Exception as e1:
-            log_debug(f"Method 1 failed: {e1}")
-        
-        # Method 2: Try search with different filter syntax
-        if not liked_tracks:
-            try:
-                log_debug(f"🔍 get_random_liked_track: Trying Method 2 (search with userRating>=)...")
-                liked_tracks = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                log_debug(f"🔍 get_random_liked_track: Method 2 returned {len(liked_tracks)} tracks")
-            except Exception as e2:
-                log_debug(f"Method 2 failed: {e2}")
-        
-        # Method 3: Try search with userRating__gte in filters
-        if not liked_tracks:
-            try:
-                log_debug(f"🔍 get_random_liked_track: Trying Method 3 (search with userRating__gte)...")
-                liked_tracks = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                log_debug(f"🔍 get_random_liked_track: Method 3 returned {len(liked_tracks)} tracks")
-            except Exception as e3:
-                log_debug(f"Method 3 failed: {e3}")
-        
-        if liked_tracks:
-            log_debug(f"🔍 get_random_liked_track: Selecting random track from {len(liked_tracks)} tracks...")
-            selected = random.choice(liked_tracks)
-            log_debug(f"🔍 get_random_liked_track: Selected track: {getattr(selected, 'title', 'Unknown')}")
-            return selected
-        else:
-            log_warning("⚠️  No liked tracks found")
+            track = music_library.fetchItem(random_key)
+            log_debug(f"🔍 get_random_liked_track: Fetched track: {getattr(track, 'title', 'Unknown')}")
+            return track
+        except Exception as e:
+            log_warning(f"⚠️  Error fetching track with key {random_key}: {e}")
+            log_warning("⚠️  Track may have been deleted from Plex. Consider refreshing the cache with fetch-liked-artists.py")
             return None
     except Exception as e:
         log_error(f"❌ Error getting random liked track: {e}")
