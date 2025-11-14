@@ -33,7 +33,6 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
   - [PPG-Genres](#ppg-genres)
   - [Copy-Playlist-To-Subuser](#copy-playlist-to-subuser)
 - [Update Log](#update-log)
-- [Information](#information)
 - [Not Working](#not-working)
 - [Planned](#planned)
 
@@ -135,7 +134,19 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
 
-# Update log
+# Update log and infos
+
+###  14.11.2025 Update:
+
+  - Smarter caching (backwards compatible but recommend to run fetch-liked-artists once)
+  - PPG-LikedArtists has been added
+  - Fixed a bug with empty genres
+  - Now caches liked-tracks
+  - Automatically sets posters for genre, mood and artist mixes (yoinked from Spotify)
+  - Added cache validation script. (only checks if the artist in cache returns any songs)
+  - Removed caching code from scripts
+  - "Prettied" up code with AI for readability. Not sure if i like it.
+
 
 ### 29.10.2025:
 
@@ -203,63 +214,6 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   change the URL to whatever you want and save the image. ezpz
   (or add the link directly in Plex)
 
-
-# Update infos:
-
- 29.10.2025 Update:
- 
-  - Date filters for genre_groups
-  - Multithreading! - For fetching operations and filtering
-  - Log levels
-  - Moved everything to .env (scripts check for all values)
-  - Mood-grouping for final track list (not possible all the time, Plex doesnt hold this all the time)
-  - Prevent consecutive artists in playlists
-  - Prevent multiple songs from single albums spamming playlists
-  - Progress Bars!
-  - Turns out theres never been a requirements.txt lol
-
-
-  27.10.2025 Update:
-
-  - Added a toggle-able option to replace Playlist Posters on every run
-    Will not use a poster twice per run, you can easily add your own to the folder. 
-    Images are AI generated, if you end up making cool ones go ahead and add them to the repo. 
-
-    UPDATE_POSTERS=true  is the .env value, it's true by default. Sorry if it replaced your images.
-  
-  
-  24.10.2025 Update:
-
-  - Config values were moved to .env, check example.env to see whats available. 
-    Make sure you use full paths for log files just to be sure.
-    Alternatively you can always have a value after the .env reference, i kept them in the scripts so everyone sees how. 
-
-
-  03.10.2025 Update:
-
-  - Liked Artist Preference:
-    
-    Once a week, the scripts will fetch all liked tracks and extract the artists from it.
-    It will cache this data. Limited to Weekly as it can take forever to do on large libraries. Mine takes a solid 10 minutes. lol
-
-    This should ensure more relevant playlists as a whole, I've tested it a bunch and I like it. 
-
-    You can set a percentage of how many liked artist tracks to use in the script.
-    Enabled by default, can be disabled for playlists in the json's like this.
-```
-  "Rock": {
-    "genres": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk"],
-    "prefer_liked_artists": true
-  },
-  "Classical": {
-    "genres": ["Classical Music", "Baroque", "Opera", "Romantic Classical", "Classical Crossover", "Symphonic", "Chamber Music"],
-    "prefer_liked_artists": false
-  }
-```
-
-  - The scripts will now check a playlist once created and re-fetch tracks if an artist takes too many slots.
-    
-    Can be configured in the script.
 
 
 # Not working

@@ -6,6 +6,9 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import requests
+from urllib.parse import quote
+import tempfile
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,7 +41,6 @@ REQUIRED_ENV_VARS = [
     "MAX_LIKED_ARTISTS_PERCENTAGE",
     "MIN_VARIETY_PERCENTAGE",
     "LIKED_ARTISTS_CACHE_FILE",
-    "CACHE_DAYS",
     # Quality & Variety
     "MIN_SONG_DURATION_SECONDS",
     "MAX_SONGS_PER_ALBUM",
@@ -64,7 +66,6 @@ MAX_ARTIST_PERCENTAGE = float(os.getenv("MAX_ARTIST_PERCENTAGE"))
 MAX_LIKED_ARTISTS_PERCENTAGE = float(os.getenv("MAX_LIKED_ARTISTS_PERCENTAGE"))
 MIN_VARIETY_PERCENTAGE = float(os.getenv("MIN_VARIETY_PERCENTAGE"))
 LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE")
-CACHE_DAYS = int(os.getenv("CACHE_DAYS"))
 
 # Quality & Variety configuration
 MIN_SONG_DURATION_SECONDS = int(os.getenv("MIN_SONG_DURATION_SECONDS"))
@@ -126,18 +127,47 @@ def format_duration(seconds):
 # Moods-specific configuration
 MIN_TRACK_PERCENT = float(os.getenv("MOODS_MIN_TRACK_PERCENT"))
 MOOD_GROUPS_FILE = os.getenv("MOOD_GROUPS_FILE")
+AUTO_REPLACE_POSTERS = os.getenv("MOODS_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
+
+# Normalize artist name for consistent comparison
+def normalize_artist_name(artist_name):
+    """Normalize artist name for consistent comparison.
+    Handles Unicode (German ÄÖÜ, Cyrillic), whitespace around slashes, 
+    multiple spaces, and strips leading/trailing whitespace."""
+    if not artist_name:
+        return None
+    
+    import unicodedata
+    # Normalize Unicode characters (NFC form - preserves German ÄÖÜ and Cyrillic properly)
+    # This handles composed vs decomposed forms (e.g., Ä vs A+̈)
+    normalized = unicodedata.normalize('NFC', artist_name)
+    
+    # Strip leading/trailing whitespace
+    normalized = normalized.strip()
+    
+    # Normalize whitespace around slashes (e.g., "Artist / Featuring" -> "Artist/Featuring")
+    normalized = normalized.replace(' / ', '/').replace('/ ', '/').replace(' /', '/')
+    
+    # Normalize multiple spaces to single space
+    normalized = ' '.join(normalized.split())
+    
+    return normalized
 
 # Get artist name from a track
 def get_artist_name(track):
     """Get the artist name from a track, handling different Plex track structures."""
     if hasattr(track, 'artist') and track.artist:
-        return track.artist().title if callable(track.artist) else track.artist
+        artist_name = track.artist().title if callable(track.artist) else track.artist
     elif hasattr(track, 'grandparentTitle') and track.grandparentTitle:
-        return track.grandparentTitle
-    return None
+        artist_name = track.grandparentTitle
+    else:
+        return None
+    
+    # Normalize the artist name for consistent comparison
+    return normalize_artist_name(artist_name)
 
 # Get album name from a track
 def get_album_name(track):
@@ -291,7 +321,10 @@ def filter_by_release_date(tracks, date_filter):
                     log_error(f"Error processing batch: {e}")
                     pbar.update(1)
     
-    log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    if len(tracks) > 0:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    else:
+        log_info(f"✅ Release date filter: {len(tracks)} tracks -> {len(filtered)} tracks (no tracks to filter)")
     return filtered
 
 # Count liked tracks only (for cache validation)
@@ -341,97 +374,6 @@ def count_liked_tracks():
         print(f"❌ Error counting liked tracks: {e}")
         return 0
 
-
-# Get liked artists from Plex by fetching liked tracks directly (1+ stars)
-def get_liked_artists():
-    """Get a set of artist names from all liked tracks (1+ stars) in Plex."""
-    try:
-        print("🎵 Fetching liked artists from Plex by querying liked tracks directly...")
-        liked_artists = set()
-        
-        # Get music library
-        music_library = plex.library.section("Music")
-        
-        # Try different approaches to find liked tracks
-        print("🔍 Attempting to query Plex for tracks with 1+ star rating...")
-        
-        # Method 1: Try searchTracks with userRating__gte
-        try:
-            liked_items = music_library.searchTracks(userRating__gte=1)
-            print(f"✅ Method 1 (searchTracks): Found {len(liked_items):,} liked tracks")
-        except Exception as e1:
-            print(f"❌ Method 1 failed: {e1}")
-            liked_items = []
-        
-        # Method 2: Try search with different filter syntax
-        if not liked_items:
-            try:
-                liked_items = music_library.search(libtype="track", filters={'userRating>=': 1}, limit=None)
-                print(f"✅ Method 2 (search with userRating>=): Found {len(liked_items):,} liked tracks")
-            except Exception as e2:
-                print(f"❌ Method 2 failed: {e2}")
-                liked_items = []
-        
-        # Method 3: Try search with userRating__gte in filters
-        if not liked_items:
-            try:
-                liked_items = music_library.search(libtype="track", filters={'userRating__gte': 1}, limit=None)
-                print(f"✅ Method 3 (search with userRating__gte): Found {len(liked_items):,} liked tracks")
-            except Exception as e3:
-                print(f"❌ Method 3 failed: {e3}")
-                liked_items = []
-        
-        # Method 4: Fallback - get all tracks and filter manually (for debugging)
-        if not liked_items:
-            print("⚠️ All direct filtering methods failed. Falling back to manual filtering for debugging...")
-            print("🐌 This will be slower but will help us debug the issue.")
-            all_tracks = music_library.search(libtype="track", limit=None)
-            print(f"📊 Loaded {len(all_tracks):,} total tracks for manual filtering...")
-            
-            # Debug: Check a few tracks for their userRating
-            print("🔍 Checking first 10 tracks for userRating values:")
-            for i, track in enumerate(all_tracks[:10]):
-                rating = getattr(track, 'userRating', 'No userRating attribute')
-                print(f"  Track {i+1}: {track.title} - userRating: {rating}")
-            
-            # Filter manually
-            liked_items = []
-            for i, track in enumerate(all_tracks):
-                if hasattr(track, 'userRating') and track.userRating and track.userRating >= 1:
-                    liked_items.append(track)
-                
-                # Show progress every 5000 tracks
-                if i % 5000 == 0 and i > 0:
-                    print(f"Manual filtering progress: {i:,}/{len(all_tracks):,} tracks - Found {len(liked_items):,} liked tracks so far", end='\r')
-            
-            print(f"\n✅ Manual filtering complete: Found {len(liked_items):,} liked tracks")
-        
-        if not liked_items:
-            print("❌ No liked tracks found with any method. Please check:")
-            print("1. Do you have tracks rated 1+ stars in Plex?")
-            print("2. Are you logged in as the correct user?")
-            print("3. Is your Plex server up to date?")
-            return set(), 0
-        
-        print(f"🎯 Found {len(liked_items):,} liked tracks, extracting artists...")
-        
-        # Extract artists with progress display
-        for i, track in enumerate(liked_items, 1):
-            artist_name = get_artist_name(track)
-            if artist_name:
-                liked_artists.add(artist_name)
-            
-            # Show progress every 100 tracks or at the end
-            if i % 100 == 0 or i == len(liked_items):
-                progress_percent = (i / len(liked_items)) * 100
-                print(f"Artist extraction: {i:,}/{len(liked_items):,} tracks ({progress_percent:.1f}%) - Found {len(liked_artists):,} unique artists so far", end='\r')
-        
-        print(f"\n🎉 Found {len(liked_artists):,} unique liked artists from {len(liked_items):,} liked tracks")
-        return liked_artists, len(liked_items)
-        
-    except Exception as e:
-        print(f"❌ Error fetching liked artists: {e}")
-        return set(), 0
 
 # Filter tracks by minimum duration
 def filter_by_minimum_duration(tracks, min_duration_seconds=90):
@@ -861,16 +803,43 @@ def prefer_liked_artists(songs, liked_artists, target_count, max_liked_percentag
 
 # Load liked artists from cache file
 def load_liked_artists_cache():
-    """Load liked artists and track count from cache file."""
+    """Load liked artists and track count from cache file.
+    Supports both old format (list of strings) and new format (list of dicts with 'id' and 'name').
+    Returns (liked_artists_set, track_count, cache_timestamp)"""
     print("🔍 Checking liked artists cache...")
     if not os.path.exists(LIKED_ARTISTS_CACHE_FILE):
         print("❌ No liked artists cache found.")
         return None, 0, None
     
     try:
-        with open(LIKED_ARTISTS_CACHE_FILE, "r") as file:
+        with open(LIKED_ARTISTS_CACHE_FILE, "r", encoding='utf-8') as file:
             cache_data = json.load(file)
-            liked_artists = set(cache_data.get("liked_artists", []))
+            
+            # Try new format first (detailed with IDs)
+            detailed_artists = cache_data.get("liked_artists_detailed", [])
+            # Fallback to old format
+            raw_artists = cache_data.get("liked_artists", [])
+            
+            liked_artists = set()
+            
+            # Process detailed format (new format with IDs)
+            if detailed_artists and isinstance(detailed_artists[0], dict):
+                print("📊 Loading artists from detailed format (with IDs)...")
+                for artist_info in detailed_artists:
+                    artist_name = artist_info.get('name', '')
+                    if artist_name:
+                        normalized = normalize_artist_name(artist_name)
+                        if normalized:
+                            liked_artists.add(normalized)
+            # Fallback to old format (just names)
+            elif raw_artists:
+                print("📊 Loading artists from legacy format (names only)...")
+                for artist in raw_artists:
+                    if isinstance(artist, str):
+                        normalized = normalize_artist_name(artist)
+                        if normalized:
+                            liked_artists.add(normalized)
+            
             cached_track_count = cache_data.get("liked_track_count", 0)
             cache_timestamp = cache_data.get("cache_timestamp", None)
             
@@ -890,40 +859,74 @@ def load_liked_artists_cache():
         return None, 0, None
 
 
-# Save liked artists to cache file
-def save_liked_artists_cache(liked_artists, track_count):
-    """Save liked artists and track count to cache file."""
-    print("💾 Saving liked artists to cache...")
+# Fetch Spotify poster image
+def fetch_spotify_poster(mood_mix_name):
+    """Fetch poster image from Spotify using the mood mix name exactly as provided."""
     try:
-        from datetime import datetime
-        cache_data = {
-            "liked_artists": list(liked_artists),
-            "liked_track_count": track_count,
-            "cache_timestamp": datetime.now().isoformat()
-        }
-        with open(LIKED_ARTISTS_CACHE_FILE, "w") as file:
-            json.dump(cache_data, file, indent=2)
-        print(f"✅ Saved {len(liked_artists):,} liked artists to cache (from {track_count:,} tracks)")
-        print(f"📅 Cache timestamp: {cache_data['cache_timestamp']}")
+        # Use the mood mix name exactly as-is (capital letters and spaces preserved)
+        # URL-encode only special characters that need encoding
+        url_encoded_name = quote(mood_mix_name.strip(), safe=' ')
+        
+        # Construct Spotify poster URL
+        url = f"https://seed-mix-image.spotifycdn.com/v6/img/desc/{url_encoded_name}/en/default"
+        
+        log_debug(f"🎨 Fetching Spotify poster from: {url}")
+        response = requests.get(url, timeout=10, allow_redirects=True)
+        
+        if response.status_code == 200 and response.content:
+            # Check if it's actually an image (not HTML error page)
+            content_type = response.headers.get('content-type', '').lower()
+            if 'image' in content_type or response.content.startswith(b'\xff\xd8') or response.content.startswith(b'\x89PNG'):
+                log_info(f"✅ Successfully fetched Spotify poster for '{mood_mix_name}'")
+                return response.content
+            else:
+                log_debug(f"⚠️  Response is not an image (content-type: {content_type})")
+                return None
+        else:
+            log_debug(f"⚠️  Failed to fetch poster (status: {response.status_code})")
+            return None
     except Exception as e:
-        print(f"❌ Error saving liked artists cache: {e}")
+        log_debug(f"⚠️  Error fetching Spotify poster for '{mood_mix_name}': {e}")
+        return None
 
-
-# Check if cache is older than configured days
-def is_cache_old(cache_timestamp):
-    """Check if cache is older than configured days."""
-    if not cache_timestamp:
-        return True
-    
+# Upload poster to a playlist
+def upload_playlist_poster(playlist, image_path):
+    """Upload a poster image to a Plex playlist."""
     try:
-        from datetime import datetime, timedelta
-        cache_date = datetime.fromisoformat(cache_timestamp)
-        days_old = (datetime.now() - cache_date).days
-        cache_days = CACHE_DAYS
-        return days_old >= cache_days
+        if image_path and os.path.exists(image_path):
+            playlist.uploadPoster(filepath=image_path)
+            log_info(f"✅ Uploaded poster: {os.path.basename(image_path)}")
+        else:
+            log_warning(f"⚠️  Poster file not found: {image_path}")
     except Exception as e:
-        print(f"Error checking cache age: {e}")
-        return True
+        log_warning(f"⚠️  Could not upload poster: {e}")
+
+# Upload poster from image data
+def upload_playlist_poster_from_data(playlist, image_data):
+    """Upload a poster image to a Plex playlist from image data bytes."""
+    try:
+        if not image_data:
+            return False
+        
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+            tmp_file.write(image_data)
+            tmp_path = tmp_file.name
+        
+        try:
+            upload_playlist_poster(playlist, tmp_path)
+            return True
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+        
+        return False
+    except Exception as e:
+        log_warning(f"⚠️  Could not upload poster from data: {e}")
+        return False
 
 
 # Load mood groups from JSON file
@@ -977,26 +980,22 @@ def generate_mood_playlists():
         print("❌ No mood groups available. Exiting.")
         return
 
-    # Get liked artists with weekly caching logic
-    print("🎵 Loading liked artists...")
+    # Load liked artists from cache
+    print("🎵 Loading liked artists from cache...")
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
     
-    if cached_artists is not None and not is_cache_old(cache_timestamp):
-        # We have fresh cached data (less than configured days old)
-        cache_days = CACHE_DAYS
-        print(f"✅ Using cached liked artists (cache is fresh, less than {cache_days} days old)")
+    if cached_artists is not None:
+        print(f"✅ Loaded {len(cached_artists):,} liked artists from cache")
         liked_artists = cached_artists
+        if cache_timestamp:
+            from datetime import datetime
+            cache_date = datetime.fromisoformat(cache_timestamp)
+            days_old = (datetime.now() - cache_date).days
+            print(f"📅 Cache is {days_old} days old")
     else:
-        # Cache is old or doesn't exist, refresh it
-        cache_days = CACHE_DAYS
-        if cached_artists is not None:
-            print(f"🔄 Cache is older than {cache_days} days. Refreshing liked artists data...")
-        else:
-            print("🆕 No cache available. Fetching fresh liked artists data...")
-        
-        print("🔄 Fetching liked artists with progress display...")
-        liked_artists, track_count = get_liked_artists()
-        save_liked_artists_cache(liked_artists, track_count)
+        print("⚠️ No liked artists cache found. Run fetch-liked-artists.py to create the cache.")
+        print("⚠️ Continuing without liked artists data.")
+        liked_artists = set()
 
     for group_name, group_data in mood_groups.items():
         playlist_name = f"{group_name} Mix"
@@ -1093,6 +1092,13 @@ def generate_mood_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 existing_playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(group_name)
+                    if poster_data:
+                        upload_playlist_poster_from_data(existing_playlist, poster_data)
+                playlist = existing_playlist
             else:
                 print(f"Creating new playlist: {playlist_name}")
                 playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
@@ -1102,6 +1108,12 @@ def generate_mood_playlists():
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 playlist.editSummary(f"{group_name}\nUpdated on: {timestamp}\nMoods used: {mood_description}")
+                
+                # Fetch and upload Spotify poster if enabled
+                if AUTO_REPLACE_POSTERS:
+                    poster_data = fetch_spotify_poster(group_name)
+                    if poster_data:
+                        upload_playlist_poster_from_data(playlist, poster_data)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
 
