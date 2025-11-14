@@ -938,6 +938,18 @@ def load_genre_mixes():
     try:
         with open(GENRE_MIXES_FILE, "r") as file:
             raw_data = json.load(file)
+            
+            # Handle case where JSON root is a list instead of a dict
+            if isinstance(raw_data, list):
+                print(f"⚠️  JSON file contains a list at root level, expected a dictionary. Converting...")
+                # Convert list to dict (use index as key, or skip if not applicable)
+                print(f"❌ Cannot convert list to dictionary format. Please ensure JSON root is a dictionary.")
+                return {}
+            
+            if not isinstance(raw_data, dict):
+                print(f"❌ Invalid JSON format: root must be a dictionary, got {type(raw_data).__name__}")
+                return {}
+            
             genre_mixes = {}
             
             # Handle both old format (key -> array) and new format (key -> object)
@@ -955,12 +967,14 @@ def load_genre_mixes():
                         'release_date_filter': value.get('release_date_filter', None)
                     }
                 else:
-                    print(f"⚠️  Invalid format for genre mix '{key}': expected array or object")
+                    print(f"⚠️  Invalid format for genre mix '{key}': expected array or object, got {type(value).__name__}")
             
-            print(f"Loaded genre mixes successfully!")
+            print(f"Loaded {len(genre_mixes)} genre mixes successfully!")
             return genre_mixes
     except Exception as e:
         print(f"Error loading genre mixes: {e}")
+        import traceback
+        traceback.print_exc()
         return {}
 
 # Generate playlists based on genre mixes
@@ -1002,7 +1016,23 @@ def generate_genre_playlists():
         log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
         playlist_songs = []
         try:
-            genres = group_data['genres']
+            # Defensive check: ensure group_data is a dictionary
+            # If it's still a list (shouldn't happen after load_genre_mixes, but handle it anyway)
+            if isinstance(group_data, list):
+                log_warning(f"⚠️  Genre mix '{genre_group}' has list format, converting to dict format...")
+                group_data = {
+                    'genres': group_data,
+                    'release_date_filter': None
+                }
+            elif not isinstance(group_data, dict):
+                log_error(f"❌ Invalid format for genre mix '{genre_group}': expected dict or list, got {type(group_data).__name__}")
+                continue
+            
+            genres = group_data.get('genres', [])
+            if not genres:
+                log_warning(f"⚠️  No genres found for '{genre_group}', skipping...")
+                continue
+            
             release_date_filter = group_data.get('release_date_filter', None)
             
             if release_date_filter:
