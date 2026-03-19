@@ -134,6 +134,8 @@ GENRE_GROUPS_FILE = os.getenv("WEEKLY_GENRE_GROUPS_FILE")
 WEEKLY_LOG_FILE = os.getenv("WEEKLY_LOG_FILE")
 MAX_LOG_ENTRIES = int(os.getenv("WEEKLY_MAX_LOG_ENTRIES"))
 MIN_SONGS_REQUIRED = float(os.getenv("WEEKLY_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
+# Max tracks to fetch per genre (default: 100)
+MAX_TRACKS_PER_GENRE = int(os.getenv("WEEKLY_MAX_TRACKS", "100"))
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -1057,8 +1059,8 @@ def generate_weekly_playlists():
                 def fetch_genre_tracks(genre):
                     """Fetch tracks for a single genre. Used for parallel execution."""
                     try:
-                        log_debug(f"Fetching tracks for genre: {genre}")
-                        tracks = music_library.search(genre=genre, libtype="track", limit=None)
+                        log_debug(f"Fetching tracks for genre: {genre} (max {MAX_TRACKS_PER_GENRE} tracks)")
+                        tracks = music_library.search(genre=genre, libtype="track", limit=MAX_TRACKS_PER_GENRE)
                         log_debug(f"Found {len(tracks)} tracks for genre: {genre}")
                         return (genre, tracks)
                     except Exception as e:
