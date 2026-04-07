@@ -928,8 +928,128 @@ def upload_playlist_poster_from_data(playlist, image_data):
         log_warning(f"⚠️  Could not upload poster from data: {e}")
         return False
 
+# Get artist country from a track
+def get_artist_country(track):
+    """Get the artist country from a track if available in Plex metadata."""
+    try:
+        artist_obj = None
+        if hasattr(track, 'artist') and track.artist:
+            artist_obj = track.artist() if callable(track.artist) else track.artist
+        elif hasattr(track, 'grandparentRatingKey') and track.grandparentRatingKey:
+            artist_obj = plex.fetchItem(track.grandparentRatingKey)
+
+        if not artist_obj:
+            return None
+
+        # Common Plex metadata patterns
+        if hasattr(artist_obj, 'country') and artist_obj.country:
+            if isinstance(artist_obj.country, list):
+                first = artist_obj.country[0] if artist_obj.country else None
+                if hasattr(first, 'tag'):
+                    return first.tag
+                return str(first) if first else None
+            if hasattr(artist_obj.country, 'tag'):
+                return artist_obj.country.tag
+            return str(artist_obj.country)
+
+        if hasattr(artist_obj, 'countries') and artist_obj.countries:
+            countries = artist_obj.countries
+            if isinstance(countries, list) and countries:
+                first = countries[0]
+                if hasattr(first, 'tag'):
+                    return first.tag
+                return str(first)
+            if hasattr(countries, 'tag'):
+                return countries.tag
+            return str(countries)
+
+        return None
+    except Exception:
+        return None
+
+# Filter tracks by artist country
+def filter_by_artist_country(tracks, country_filter):
+    """Filter tracks by artist country.
+    
+    country_filter supports:
+    - list: treated as include list
+    - dict: {"include": [...], "exclude": [...], "keep_unknown": bool}
+    """
+    if not country_filter:
+        return tracks
+
+    include = set()
+    exclude = set()
+    keep_unknown = False
+
+    if isinstance(country_filter, list):
+        include = {str(c).strip().lower() for c in country_filter if str(c).strip()}
+    elif isinstance(country_filter, dict):
+        include = {str(c).strip().lower() for c in country_filter.get("include", []) if str(c).strip()}
+        exclude = {str(c).strip().lower() for c in country_filter.get("exclude", []) if str(c).strip()}
+        keep_unknown = bool(country_filter.get("keep_unknown", False))
+    else:
+        log_warning(f"⚠️  Invalid artist country filter format: {type(country_filter).__name__}. Skipping country filter.")
+        return tracks
+
+    log_info(f"🌍 Filtering {len(tracks)} tracks by artist country (include={list(include) if include else 'any'}, exclude={list(exclude) if exclude else 'none'}, keep_unknown={keep_unknown})")
+
+    def process_country_batch(track_batch):
+        filtered_batch = []
+        artist_country_cache = {}
+
+        for track in track_batch:
+            artist_name = get_artist_name(track)
+            if not artist_name:
+                if keep_unknown:
+                    filtered_batch.append(track)
+                continue
+
+            if artist_name not in artist_country_cache:
+                country = get_artist_country(track)
+                artist_country_cache[artist_name] = country.strip().lower() if isinstance(country, str) and country.strip() else None
+
+            artist_country = artist_country_cache[artist_name]
+
+            if artist_country is None:
+                if keep_unknown:
+                    filtered_batch.append(track)
+                continue
+
+            if include and artist_country not in include:
+                continue
+            if exclude and artist_country in exclude:
+                continue
+
+            filtered_batch.append(track)
+
+        return filtered_batch
+
+    filtered = []
+    batch_size = max(50, len(tracks) // 20)
+    track_batches = [tracks[i:i + batch_size] for i in range(0, len(tracks), batch_size)]
+    num_workers = min(10, max(4, len(track_batches)))
+
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        future_to_batch = {executor.submit(process_country_batch, batch): batch for batch in track_batches}
+        with tqdm(total=len(track_batches), desc="Filtering by artist country", unit="batch", disable=(LOG_LEVEL in ["WARNING", "ERROR"])) as pbar:
+            for future in as_completed(future_to_batch):
+                try:
+                    filtered_batch = future.result()
+                    filtered.extend(filtered_batch)
+                except Exception as e:
+                    log_error(f"Error processing country filter batch: {e}")
+                finally:
+                    pbar.update(1)
+
+    if len(tracks) > 0:
+        log_info(f"✅ Artist country filter: {len(tracks)} tracks -> {len(filtered)} tracks ({len(filtered)/len(tracks)*100:.1f}% matched)")
+    else:
+        log_info(f"✅ Artist country filter: {len(tracks)} tracks -> {len(filtered)} tracks (no tracks to filter)")
+    return filtered
+
 # Load genre mixes from JSON file
-# Supports both old format (key -> array) and new format (key -> {genres: array, release_date_filter: {...}})
+# Supports both old format (key -> array) and new format (key -> {genres: array, release_date_filter: {...}, artist_country_filter: {...}})
 def load_genre_mixes():
     print("Loading genre mixes from file...")
     if not os.path.exists(GENRE_MIXES_FILE):
@@ -964,7 +1084,8 @@ def load_genre_mixes():
                     # New format: object with genres and optional release_date_filter
                     genre_mixes[key] = {
                         'genres': value.get('genres', []),
-                        'release_date_filter': value.get('release_date_filter', None)
+                        'release_date_filter': value.get('release_date_filter', None),
+                        'artist_country_filter': value.get('artist_country_filter', None)
                     }
                 else:
                     print(f"⚠️  Invalid format for genre mix '{key}': expected array or object, got {type(value).__name__}")
@@ -1034,6 +1155,7 @@ def generate_genre_playlists():
                 continue
             
             release_date_filter = group_data.get('release_date_filter', None)
+            artist_country_filter = group_data.get('artist_country_filter', None)
             
             if release_date_filter:
                 log_debug(f"Release date filter: {release_date_filter}")
@@ -1072,6 +1194,8 @@ def generate_genre_playlists():
             # Apply release date filter if specified
             if release_date_filter:
                 songs = filter_by_release_date(songs, release_date_filter)
+            if artist_country_filter:
+                songs = filter_by_artist_country(songs, artist_country_filter)
 
             total_songs = len(songs)
             print(f"Total songs after filtering: {total_songs}")
