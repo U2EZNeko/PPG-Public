@@ -695,12 +695,14 @@
   "Austrian Hip Hop": {
     "genres": [
       "Hip Hop",
+      "Hip-Hop",
       "Rap",
       "Alternative Hip Hop",
       "Trap",
       "Cloud rap",
       "Drill",
-      "Conscious Hip Hop"
+      "Conscious Hip Hop",
+      "slangsta"
     ],
     "artist_country_filter": [
       "Austria"
@@ -789,6 +791,18 @@
       "Electropop",
       "Pop Rock",
       "Indie Rock"
+    ],
+    "artist_country_filter": [
+      "Austria"
+    ]
+  },
+  "Austropop": {
+    "genres": [
+      "Austropop",
+      "Austrian Pop",
+      "Pop",
+      "Pop Rock",
+      "Indie Pop"
     ],
     "artist_country_filter": [
       "Austria"
