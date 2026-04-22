@@ -14,3 +14,6 @@ tqdm>=4.65.0
 # HTTP library for fetching Spotify posters
 requests>=2.31.0
 
+# Web UI to run scripts locally
+flask>=3.0.0
+

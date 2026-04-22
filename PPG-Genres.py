@@ -9,6 +9,7 @@ from tqdm import tqdm
 import requests
 from urllib.parse import quote
 import tempfile
+from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 
 # Load environment variables from .env file
 load_dotenv()
@@ -1048,10 +1049,11 @@ def filter_by_artist_country(tracks, country_filter):
         log_info(f"✅ Artist country filter: {len(tracks)} tracks -> {len(filtered)} tracks (no tracks to filter)")
     return filtered
 
-# Load genre mixes from JSON file
+# Load named genre mix playlists from JSON (GENRE_MIXES_FILE).
+# Each top-level key becomes one Plex playlist titled "{key} Mix".
 # Supports both old format (key -> array) and new format (key -> {genres: array, release_date_filter: {...}, artist_country_filter: {...}})
 def load_genre_mixes():
-    print("Loading genre mixes from file...")
+    print("Loading named genre mix playlists from file...")
     if not os.path.exists(GENRE_MIXES_FILE):
         print(f"Error: {GENRE_MIXES_FILE} not found.")
         return {}
@@ -1090,10 +1092,10 @@ def load_genre_mixes():
                 else:
                     print(f"⚠️  Invalid format for genre mix '{key}': expected array or object, got {type(value).__name__}")
             
-            print(f"Loaded {len(genre_mixes)} genre mixes successfully!")
+            print(f"Loaded {len(genre_mixes)} named genre mix playlist(s).")
             return genre_mixes
     except Exception as e:
-        print(f"Error loading genre mixes: {e}")
+        print(f"Error loading named genre mix playlists: {e}")
         import traceback
         traceback.print_exc()
         return {}
@@ -1106,12 +1108,14 @@ def generate_genre_playlists():
         print("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
         print(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
         return
 
     # Load genre mixes
     genre_mixes = load_genre_mixes()
     if not genre_mixes:
-        print("❌ No genre mixes available. Exiting.")
+        print("❌ No named genre mix entries in JSON. Exiting.")
+        fail_playlist("(setup)", "No genre mixes available")
         return
 
     # Load liked artists from cache
@@ -1134,6 +1138,7 @@ def generate_genre_playlists():
     for i, (genre_group, group_data) in enumerate(genre_mixes.items()):
         playlist_name = f"{genre_group} Mix"
         playlist_start_time = time.time()
+        playlist_result_note = ""
         log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
         playlist_songs = []
         try:
@@ -1147,11 +1152,18 @@ def generate_genre_playlists():
                 }
             elif not isinstance(group_data, dict):
                 log_error(f"❌ Invalid format for genre mix '{genre_group}': expected dict or list, got {type(group_data).__name__}")
+                fail_playlist(
+                    playlist_name,
+                    f"Invalid group data format ({type(group_data).__name__})",
+                )
+                playlist_result_note = f"Invalid group data format ({type(group_data).__name__})"
                 continue
             
             genres = group_data.get('genres', [])
             if not genres:
                 log_warning(f"⚠️  No genres found for '{genre_group}', skipping...")
+                fail_playlist(playlist_name, "No genres in group")
+                playlist_result_note = "No genres in group"
                 continue
             
             release_date_filter = group_data.get('release_date_filter', None)
@@ -1205,6 +1217,8 @@ def generate_genre_playlists():
                 print(f"Found sufficient songs ({total_songs}) for Playlist '{playlist_name}'. Creating playlist.")
             else:
                 print(f"Not enough songs for Playlist '{playlist_name}', skipping.")
+                fail_playlist(playlist_name, "Not enough songs (below minimum)")
+                playlist_result_note = "Not enough songs (below minimum)"
                 continue
 
             # Select the required number of songs (up to SONGS_PER_PLAYLIST)
@@ -1268,25 +1282,45 @@ def generate_genre_playlists():
                         upload_playlist_poster_from_data(playlist, poster_data)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+            playlist_succeeded()
 
         except Exception as e:
             log_error(f"❌ Error during playlist generation for Playlist '{playlist_name}': {e}")
-        
-        # Always output the time taken for this playlist, even if there was an error
-        playlist_end_time = time.time()
-        elapsed_time = playlist_end_time - playlist_start_time
-        if playlist_songs and len(playlist_songs) > 0:
-            log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
-        else:
-            log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
-        log_info("---------------------------------------------")
+            fail_playlist(playlist_name, str(e))
+            playlist_result_note = str(e)[:400]
+        finally:
+            playlist_end_time = time.time()
+            elapsed_time = playlist_end_time - playlist_start_time
+            ok = bool(playlist_songs and len(playlist_songs) > 0)
+            if not ok and not (playlist_result_note or "").strip():
+                playlist_result_note = "Failed or skipped"
+            if ok:
+                log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
+            else:
+                log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
+            log_info("---------------------------------------------")
+            record_playlist_result(
+                playlist_name,
+                elapsed_time,
+                ok,
+                "" if ok else playlist_result_note,
+            )
 
 # Run the script
 if __name__ == "__main__":
-    script_start_time = time.time()
-    log_info("🚀 Starting the Genre playlist generation process...")
-    generate_genre_playlists()
-    script_end_time = time.time()
-    total_elapsed_time = script_end_time - script_start_time
-    log_info("\n✅ Genre playlists updated successfully.")
-    log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    import sys
+    from ppg_run_logger import start_run, finish_run
+
+    start_run("PPG-Genres.py")
+    try:
+        script_start_time = time.time()
+        log_info("🚀 Starting the Genre playlist generation process...")
+        generate_genre_playlists()
+        script_end_time = time.time()
+        total_elapsed_time = script_end_time - script_start_time
+        log_info("\n✅ Genre playlists updated successfully.")
+        log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    finally:
+        exc = sys.exc_info()
+        crashed = exc[0] is not None and not issubclass(exc[0], SystemExit)
+        finish_run(had_exception=crashed)

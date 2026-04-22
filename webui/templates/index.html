@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PPG — Run scripts</title>
+  <style>
+    :root {
+      --bg: #0f1216;
+      --surface: #181c24;
+      --border: #2a3140;
+      --text: #e8eaef;
+      --muted: #8b93a7;
+      --accent: #6c9ef8;
+      --accent-dim: #4a7ad4;
+      --danger: #e06c75;
+      --ok: #7fd99a;
+      --font: "Segoe UI", system-ui, sans-serif;
+      --mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .tabs button.tab {
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      color: var(--muted);
+      padding: 0.5rem 1rem 0.65rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: -1px;
+    }
+    .tabs button.tab:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+    .tabs button.tab.active {
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--border);
+      border-bottom-color: var(--surface);
+    }
+    .tabs button.tab .tab-badge {
+      display: inline-block;
+      margin-left: 0.35rem;
+      padding: 0.08rem 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1.2;
+      border-radius: 999px;
+      background: rgba(224, 108, 117, 0.25);
+      color: var(--danger);
+      vertical-align: middle;
+    }
+    .tabs button.tab .tab-badge.hidden {
+      display: none;
+    }
+    .errors-hint {
+      margin: 0 0 0.65rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .errors-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0 0 1rem;
+    }
+    .errors-toolbar button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .errors-toolbar button:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    .json-explainer {
+      margin: 0 0 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--muted);
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .json-explainer strong {
+      color: var(--text);
+    }
+    .json-explainer code {
+      font-size: 0.78em;
+    }
+    .json-explainer ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.2rem;
+    }
+    .json-explainer li {
+      margin: 0.35rem 0;
+    }
+    .errors-placeholder {
+      margin: 0;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.15);
+    }
+    .errors-placeholder.hidden {
+      display: none;
+    }
+    #panel-errors .run-failures-detail {
+      max-height: none;
+    }
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+    .json-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+    .json-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .json-toolbar select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      min-width: 12rem;
+    }
+    .json-toolbar button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .json-toolbar button:hover {
+      border-color: var(--muted);
+    }
+    .json-toolbar button.json-primary {
+      background: var(--accent);
+      color: #0a0c10;
+      border-color: transparent;
+    }
+    .json-toolbar button.json-primary:hover {
+      background: var(--accent-dim);
+    }
+    .json-toolbar button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .json-toolbar .json-view-toggle button {
+      border-radius: 0;
+      padding: 0.35rem 0.75rem;
+    }
+    .json-toolbar .json-view-toggle button:first-child {
+      border-right: 1px solid var(--border);
+    }
+    #json-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0 0 0.5rem;
+    }
+    #json-meta.warn { color: var(--danger); }
+    #json-editor {
+      width: 100%;
+      min-height: min(70vh, 720px);
+      max-height: 85vh;
+      resize: vertical;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.45;
+      background: #0a0b0e;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin: 0;
+      tab-size: 2;
+    }
+    #json-editor:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+    }
+    #env-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0 0 0.5rem;
+    }
+    #env-meta.warn { color: var(--danger); }
+    #env-filter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      min-width: 14rem;
+      margin-left: auto;
+    }
+    #panel-configs .json-toolbar.json-toolbar-top {
+      width: 100%;
+    }
+    .env-form-wrap {
+      max-height: min(75vh, 820px);
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0a0b0e;
+      padding: 0.85rem 1rem 1.1rem;
+    }
+    .env-row {
+      display: grid;
+      grid-template-columns: minmax(11rem, 26%) 1fr;
+      gap: 0.45rem 1rem;
+      align-items: start;
+      margin-bottom: 0.45rem;
+    }
+    .env-row.hidden-by-filter {
+      display: none;
+    }
+    .env-row label {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      padding-top: 0.38rem;
+      word-break: break-word;
+    }
+    .env-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 0;
+    }
+    .env-row input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.38rem 0.55rem;
+    }
+    .env-row input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+    }
+    .env-inline-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .env-line-comment {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin: 0.2rem 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .env-line-blank {
+      height: 0.4rem;
+    }
+    .env-line-raw {
+      margin: 0.35rem 0;
+      padding: 0.45rem 0.55rem;
+      background: rgba(224, 108, 117, 0.06);
+      border: 1px dashed rgba(224, 108, 117, 0.35);
+      border-radius: 6px;
+    }
+    .env-raw-label {
+      font-size: 0.68rem;
+      color: var(--danger);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .env-raw-pre {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+    .sub code {
+      background: var(--surface);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    .grid {
+      display: grid;
+      gap: 0.65rem;
+    }
+    @media (min-width: 560px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 0.75rem;
+    }
+    .card-body {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.2rem;
+      flex-shrink: 0;
+    }
+    .script-last-run {
+      font-size: 0.62rem;
+      line-height: 1.15;
+      color: var(--muted);
+      white-space: nowrap;
+      max-width: 9.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: right;
+    }
+    .script-last-run.script-last-run--empty {
+      opacity: 0.42;
+    }
+    .card-text {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .card h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .card .file {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+    .card .note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 0.1rem 0 0;
+      line-height: 1.3;
+    }
+    .card .card-meta {
+      font-size: 0.78rem;
+      color: var(--ok);
+      font-weight: 600;
+      margin: 0.35rem 0 0;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.3;
+    }
+    .card .card-meta[hidden] {
+      display: none;
+    }
+    button.run {
+      flex-shrink: 0;
+      margin: 0;
+      background: var(--accent);
+      color: #0a0c10;
+      border: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    button.run:hover:not(:disabled) {
+      background: var(--accent-dim);
+    }
+    button.run:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .status-bar {
+      margin: 1.75rem 0 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.88rem;
+    }
+    .status-bar.idle { color: var(--muted); }
+    .status-bar.busy { border-color: var(--accent-dim); color: var(--text); }
+    .status-bar strong { color: var(--accent); }
+    .run-failures {
+      margin: 0 0 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(224, 108, 117, 0.08);
+      border: 1px solid rgba(224, 108, 117, 0.35);
+      border-radius: 10px;
+      font-size: 0.84rem;
+    }
+    .run-failures-title {
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+      color: var(--danger);
+    }
+    .run-failures-list {
+      margin: 0;
+      padding-left: 1.15rem;
+      color: var(--text);
+    }
+    .run-failures-list li {
+      margin: 0.35rem 0;
+    }
+    .run-failures-pl {
+      font-weight: 600;
+    }
+    .run-failures-detail {
+      display: block;
+      margin-top: 0.2rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 5.5em;
+      overflow: auto;
+    }
+    .run-outputs-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 0.5rem;
+      padding: 0 0.1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .run-outputs-head button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.25rem 0.6rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .run-outputs-head button:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    .run-outputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .run-output-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0a0b0e;
+    }
+    .run-output-card-title {
+      padding: 0.45rem 0.85rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .run-output-card-title .run-job-id {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.72rem;
+      margin-left: 0.5rem;
+      font-family: var(--mono);
+    }
+    pre.run-output-log {
+      margin: 0;
+      padding: 1rem;
+      min-height: 140px;
+      max-height: 42vh;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .line-exit-ok { color: var(--ok); }
+    .line-exit-fail { color: var(--danger); }
+    .toast {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      max-width: 320px;
+      z-index: 20;
+      display: none;
+    }
+    .toast.show { display: block; }
+    .toast.err { border-color: var(--danger); }
+
+    .hidden { display: none !important; }
+
+    .json-toolbar-top {
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .json-toolbar-sub {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+      margin-bottom: 0.65rem;
+      gap: 0.5rem;
+    }
+    .json-toolbar-sub input[type="search"] {
+      flex: 1;
+      min-width: 12rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .json-view-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    button.json-view-btn {
+      background: var(--surface);
+      border: none;
+      color: var(--muted);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.json-view-btn:hover {
+      color: var(--text);
+    }
+    button.json-view-btn.active {
+      background: var(--accent);
+      color: #0a0c10;
+    }
+    #json-add-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #json-add-group:hover:not(:disabled) {
+      border-color: var(--muted);
+    }
+    #json-add-group:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #json-visual {
+      max-height: min(78vh, 900px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      align-items: stretch;
+    }
+    /* Prevent flex items from shrinking to strips when the list is taller than max-height */
+    #json-visual > * {
+      flex-shrink: 0;
+    }
+    .parse-error {
+      color: var(--danger);
+      font-size: 0.88rem;
+      margin: 0;
+      padding: 0.75rem;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .group-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .group-card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.55rem;
+      background: rgba(0,0,0,0.15);
+    }
+    button.group-card-expand {
+      flex-shrink: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.65rem;
+      line-height: 1;
+      border-radius: 4px;
+    }
+    button.group-card-expand:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+    }
+    .group-card-name {
+      flex: 1;
+      min-width: 0;
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .group-card-badge {
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    button.group-card-remove {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    button.group-card-remove:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+    .group-card-body {
+      padding: 0.65rem 0.75rem 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.5rem;
+      min-height: 1.5rem;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.35rem 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+    }
+    .tag-chip.tag-chip-unknown {
+      border-color: #c9a227;
+      color: #edd894;
+    }
+    .plex-genres-status {
+      font-size: 0.78rem;
+      color: var(--muted);
+      flex: 1;
+      min-width: 8rem;
+    }
+    button.tag-remove {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0 0.15rem;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    button.tag-remove:hover {
+      color: var(--danger);
+    }
+    .tag-add-row {
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 0.65rem;
+    }
+    .tag-add-row .tag-input {
+      flex: 1;
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    button.tag-add {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .filter-block {
+      margin-top: 0.5rem;
+      padding-top: 0.65rem;
+      border-top: 1px dashed var(--border);
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .filter-row select.filter-condition {
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.3rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    .filter-row input {
+      width: 5rem;
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 0.25rem;
+    }
+    .prefer-row {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .prefer-row select.prefer-liked {
+      margin-left: 0.35rem;
+      background: #0a0b0e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.3rem 0.45rem;
+      border-radius: 6px;
+    }
+    .promote-row {
+      margin-top: 0.35rem;
+    }
+    button.promote-rich {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    button.promote-rich:hover {
+      color: var(--accent);
+      border-color: var(--accent-dim);
+    }
+
+    .playlist-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .playlist-toolbar input[type="search"] {
+      flex: 1;
+      min-width: 10rem;
+      max-width: 20rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .playlist-toolbar button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .playlist-toolbar button:hover {
+      border-color: var(--muted);
+    }
+    .playlist-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .playlist-meta.warn {
+      color: var(--danger);
+    }
+    .playlists-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: min(75vh, 720px);
+      background: var(--surface);
+    }
+    table.playlists-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    table.playlists-table th {
+      text-align: left;
+      padding: 0.45rem 0.65rem;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    table.playlists-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    table.playlists-table th.sortable:hover {
+      color: var(--text);
+      background: rgba(108, 158, 248, 0.08);
+    }
+    table.playlists-table th .sort-ind {
+      font-size: 0.72em;
+      margin-left: 0.3rem;
+      opacity: 0.85;
+      font-weight: 700;
+    }
+    table.playlists-table th.pl-num {
+      text-align: right;
+    }
+    table.playlists-table td {
+      padding: 0.38rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.playlists-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.playlists-table td.pl-title {
+      font-weight: 500;
+      color: var(--text);
+    }
+    table.playlists-table td.pl-updated {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    table.playlists-table td.pl-count {
+      text-align: right;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .playlist-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+      background: rgba(108, 158, 248, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .playlist-badge--ppg {
+      background: rgba(127, 217, 154, 0.18);
+      color: var(--ok);
+    }
+    .playlist-empty,
+    .playlist-error {
+      padding: 1rem 1.25rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .playlist-error {
+      color: var(--danger);
+    }
+    .stats-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .stats-toolbar button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .stats-toolbar button:hover {
+      border-color: var(--muted);
+    }
+    #stats-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      flex: 1;
+      min-width: 12rem;
+    }
+    #stats-meta.warn {
+      color: var(--danger);
+    }
+    .stats-section {
+      margin-bottom: 2rem;
+    }
+    .stats-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.65rem;
+      color: var(--text);
+    }
+    table.stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    table.stats-table th,
+    table.stats-table td {
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.stats-table th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+    }
+    table.stats-table td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    table.stats-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .stats-empty {
+      color: var(--muted);
+      padding: 0.5rem 0;
+      font-size: 0.88rem;
+    }
+    .stats-sub {
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: block;
+      margin-top: 0.2rem;
+    }
+    .stats-tag {
+      font-size: 0.68rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(224, 108, 117, 0.15);
+      color: var(--danger);
+      font-weight: 600;
+      margin-left: 0.35rem;
+    }
+    tr.stats-row-live td {
+      background: rgba(127, 217, 154, 0.07);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Plex Playlist Generator</h1>
+    <p class="sub">Run scripts from the project root <code>{{ repo_root }}</code></p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="run">Scripts</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="errors" id="tab-errors" aria-label="Errors from the last run">Errors<span class="tab-badge hidden" id="errors-tab-badge" aria-hidden="true"></span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="json">Group JSON</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="configs">Configs</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="playlists">Playlists</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="stats">Statistics</button>
+    </div>
+
+    <div id="panel-run" class="panel active" role="tabpanel" data-panel="run">
+      <div class="grid" id="script-grid">
+        {% for s in scripts %}
+        <div class="card" data-script="{{ s.id }}">
+          <div class="card-body">
+            <div class="card-text">
+              <h2>{{ s.label }}</h2>
+              <span class="file">{{ s.file }}</span>
+              <p class="card-meta" data-script-meta="{{ s.id }}"{% if not script_meta or not script_meta.get(s.id) %} hidden{% endif %}>{% if script_meta and script_meta.get(s.id) %}{{ script_meta[s.id] }}{% endif %}</p>
+              {% if s.note %}<p class="note">{{ s.note }}</p>{% endif %}
+            </div>
+            <div class="card-actions">
+              <span class="script-last-run script-last-run--empty" data-script="{{ s.id }}" title="Last successful run (this browser)"></span>
+              <button type="button" class="run" data-script="{{ s.id }}">Run</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div id="status" class="status-bar idle">No job running.</div>
+
+      <div class="run-outputs-head">
+        <span>Output (one panel per script)</span>
+        <button type="button" id="clear-log">Clear all</button>
+      </div>
+      <div id="run-outputs" class="run-outputs" aria-live="polite"></div>
+    </div>
+
+    <div id="panel-errors" class="panel" role="tabpanel" data-panel="errors" aria-label="Playlist errors">
+      <p class="errors-hint">Playlist-level failures reported by script runs are saved in this browser. They stay after refresh or stopping a run; use Clear when you want an empty list.</p>
+      <div class="errors-toolbar">
+        <button type="button" id="errors-clear">Clear saved list</button>
+      </div>
+      <p id="errors-placeholder" class="errors-placeholder">No playlist errors to show yet.</p>
+      <div id="run-failures" class="run-failures hidden" role="region" aria-label="Saved playlist generation issues"></div>
+    </div>
+
+    <div id="panel-json" class="panel" role="tabpanel" data-panel="json">
+      <div class="json-explainer" role="note">
+        <strong>Genre JSON vs mix JSON</strong>
+        <ul>
+          <li><code>daily_weekly_genre_pools.json</code> → <strong>PPG-Daily &amp; PPG-Weekly only.</strong> Each key is a <em>pool</em> of Plex genres (plus optional filters). Each new daily/weekly playlist randomly picks <em>one</em> pool; playlist titles stay “Daily/Weekly Playlist N”. Nothing creates a Plex playlist named after each pool key.</li>
+          <li><code>named_genre_mix_playlists.json</code> → <strong>PPG-Genres only.</strong> Each key becomes <strong>one</strong> Plex playlist named <code>{key} Mix</code>.</li>
+          <li><code>mood_groups.json</code> → <strong>PPG-Moods only</strong> — same “one <code>{key} Mix</code> playlist per entry” pattern as Genres.</li>
+        </ul>
+        The object structure is the same across these files; <strong>which script reads the file</strong> is what changes the behavior.
+      </div>
+      <div class="json-toolbar json-toolbar-top">
+        <label>
+          File
+          <select id="json-file-select" aria-label="JSON file">
+            {% for g in json_groups %}
+            <option value="{{ g.id }}" data-file="{{ g.file }}" data-label="{{ g.label }}">{{ g.label }} ({{ g.file }}) — {{ g.group_count }} group{% if g.group_count != 1 %}s{% endif %}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <span class="json-view-toggle" role="group" aria-label="Editor view">
+          <button type="button" class="json-view-btn active" id="json-view-form">Form</button>
+          <button type="button" class="json-view-btn" id="json-view-raw">Raw JSON</button>
+        </span>
+        <button type="button" id="json-reload">Reload</button>
+        <button type="button" id="json-format">Format</button>
+        <button type="button" id="json-save" class="json-primary">Save</button>
+      </div>
+      <div class="json-toolbar json-toolbar-sub">
+        <input type="search" id="json-group-filter" placeholder="Filter groups by name…" autocomplete="off" />
+        <button type="button" id="json-fetch-genres">Fetch Plex genres</button>
+        <span id="plex-genres-status" class="plex-genres-status"></span>
+        <button type="button" id="json-fetch-moods">Fetch Plex moods</button>
+        <span id="plex-moods-status" class="plex-genres-status"></span>
+        <button type="button" id="json-sort-groups" title="Reorder groups A–Z in the JSON (save to apply)">Sort A–Z</button>
+        <button type="button" id="json-add-group">Add group</button>
+      </div>
+      <p id="json-meta" class="json-meta"></p>
+      <datalist id="plex-genres-datalist"></datalist>
+      <datalist id="plex-moods-datalist"></datalist>
+      <div id="json-visual"></div>
+      <textarea id="json-editor" class="hidden" spellcheck="false" autocomplete="off" aria-label="JSON content"></textarea>
+    </div>
+
+    <div id="panel-configs" class="panel" role="tabpanel" data-panel="configs">
+      <div class="json-toolbar json-toolbar-top">
+        <button type="button" id="env-reload">Reload</button>
+        <button type="button" id="env-save" class="json-primary">Save</button>
+        <input
+          type="search"
+          id="env-filter"
+          placeholder="Filter by variable name…"
+          autocomplete="off"
+          aria-label="Filter env variables"
+        />
+      </div>
+      <p id="env-meta" class="json-meta"></p>
+      <div class="env-form-wrap">
+        <div id="env-form"></div>
+      </div>
+    </div>
+
+    <div id="panel-playlists" class="panel" role="tabpanel" data-panel="playlists">
+      <div class="playlist-toolbar">
+        <button type="button" id="playlists-refresh">Refresh</button>
+        <input type="search" id="playlists-filter" placeholder="Filter by name…" autocomplete="off" aria-label="Filter playlists" />
+        <span id="playlists-meta" class="playlist-meta"></span>
+      </div>
+      <div id="playlists-container" class="playlists-table-wrap" aria-live="polite"></div>
+    </div>
+
+    <div id="panel-stats" class="panel" role="tabpanel" data-panel="stats">
+      <div class="stats-toolbar">
+        <button type="button" id="stats-refresh">Refresh</button>
+        <span id="stats-meta" class="stats-meta"></span>
+      </div>
+      <section class="stats-section" id="stats-current-section" hidden aria-labelledby="stats-current-heading">
+        <h2 id="stats-current-heading">Current run (live)</h2>
+        <p id="stats-current-meta" class="stats-empty"></p>
+        <div id="stats-current" class="playlists-table-wrap"></div>
+      </section>
+      <section class="stats-section" aria-labelledby="stats-slowest-heading">
+        <h2 id="stats-slowest-heading">Slowest successful playlist builds</h2>
+        <p class="stats-empty" id="stats-slowest-hint">
+          Based on per-playlist timing lines in <code>log.txt</code> (recent runs only).
+        </p>
+        <div id="stats-slowest" class="playlists-table-wrap"></div>
+      </section>
+      <section class="stats-section" aria-labelledby="stats-failed-heading">
+        <h2 id="stats-failed-heading">Failed playlists</h2>
+        <p class="stats-empty" id="stats-failed-hint">
+          Aggregated from timing rows marked <code>failed</code> and from <code>Failures:</code> blocks in the log.
+        </p>
+        <div id="stats-failed" class="playlists-table-wrap"></div>
+      </section>
+      <section class="stats-section" aria-labelledby="stats-scripts-heading">
+        <h2 id="stats-scripts-heading">Runs per script</h2>
+        <div id="stats-scripts" class="playlists-table-wrap"></div>
+      </section>
+      <section class="stats-section" aria-labelledby="stats-recent-heading">
+        <h2 id="stats-recent-heading">Recent runs</h2>
+        <div id="stats-recent" class="playlists-table-wrap"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    (function () {
+      const statusEl = document.getElementById("status");
+      const toastEl = document.getElementById("toast");
+      const runButtons = document.querySelectorAll("#panel-run button.run");
+
+      /** @type {Map<string, { es: EventSource, pre: HTMLElement, scriptId: string, label: string }>} */
+      const jobStreams = new Map();
+      const runningScriptIds = new Set();
+      let statsPollTimer = null;
+
+      const LAST_RUN_STORAGE = "ppg_webui_script_last_run_v1";
+      let runFailureItems = [];
+      const runFailureSeen = new Set();
+      const FAILURES_STORAGE_KEY = "ppg_webui_run_failures_v1";
+      const MAX_STORED_FAILURES = 400;
+
+      function formatLastRun(iso) {
+        try {
+          const d = new Date(iso);
+          if (isNaN(d.getTime())) return "";
+          const now = new Date();
+          const opts = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+          if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";
+          return "Last run " + d.toLocaleString(undefined, opts);
+        } catch (e) {
+          return "";
+        }
+      }
+
+      function updateLastRunLabel(scriptId) {
+        const el = document.querySelector(
+          '#panel-run .script-last-run[data-script="' + scriptId + '"]'
+        );
+        if (!el) return;
+        let iso = "";
+        try {
+          const o = JSON.parse(localStorage.getItem(LAST_RUN_STORAGE) || "{}");
+          iso = o[scriptId] || "";
+        } catch (e) {
+          iso = "";
+        }
+        const text = iso ? formatLastRun(iso) : "—";
+        el.textContent = text;
+        el.classList.toggle("script-last-run--empty", !iso);
+        el.title = iso
+          ? "Last successful run (exit code 0), stored in this browser"
+          : "No successful run recorded yet in this browser";
+      }
+
+      function refreshAllLastRunLabels() {
+        document.querySelectorAll("#panel-run .script-last-run").forEach((el) => {
+          const id = el.getAttribute("data-script");
+          if (id) updateLastRunLabel(id);
+        });
+      }
+
+      async function refreshScriptCardMeta() {
+        try {
+          const r = await fetch("/api/script-meta");
+          const j = await r.json();
+          if (!r.ok || !j) return;
+          document.querySelectorAll(".card-meta[data-script-meta]").forEach(function (el) {
+            const id = el.getAttribute("data-script-meta");
+            const text = id && j[id] != null && j[id] !== "" ? String(j[id]) : "";
+            if (text) {
+              el.textContent = text;
+              el.removeAttribute("hidden");
+            } else {
+              el.textContent = "";
+              el.setAttribute("hidden", "");
+            }
+          });
+        } catch (e) {
+          /* ignore */
+        }
+      }
+
+      window.__ppgRefreshScriptCardMeta = refreshScriptCardMeta;
+
+      function recordSuccessfulRun(scriptId) {
+        try {
+          const o = JSON.parse(localStorage.getItem(LAST_RUN_STORAGE) || "{}");
+          o[scriptId] = new Date().toISOString();
+          localStorage.setItem(LAST_RUN_STORAGE, JSON.stringify(o));
+        } catch (e) {
+          /* ignore */
+        }
+        updateLastRunLabel(scriptId);
+      }
+
+      document.querySelectorAll(".tabs .tab").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tab = btn.getAttribute("data-tab");
+          const goingJson = tab === "json";
+          const activeId = document.querySelector(".tabs .tab.active")?.getAttribute("data-tab");
+          const fromJson = activeId === "json";
+          const fromConfigs = activeId === "configs";
+          if (
+            fromJson &&
+            tab !== "json" &&
+            window.__ppgJsonIsDirty &&
+            window.__ppgJsonIsDirty()
+          ) {
+            if (!window.confirm("Discard unsaved JSON changes and leave this tab?")) return;
+            if (window.__ppgJsonMarkClean) window.__ppgJsonMarkClean();
+          }
+          if (
+            fromConfigs &&
+            tab !== "configs" &&
+            window.__ppgEnvIsDirty &&
+            window.__ppgEnvIsDirty()
+          ) {
+            if (!window.confirm("Discard unsaved .env changes and leave this tab?")) return;
+            if (window.__ppgEnvRevertDiscard) window.__ppgEnvRevertDiscard();
+          }
+          document.querySelectorAll(".tabs .tab").forEach((b) => {
+            const on = b.getAttribute("data-tab") === tab;
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          document.querySelectorAll(".panel").forEach((p) => {
+            p.classList.toggle("active", p.getAttribute("data-panel") === tab);
+          });
+          if (goingJson && window.__ppgLoadJsonGroups) window.__ppgLoadJsonGroups();
+          if (
+            tab === "configs" &&
+            (!window.__ppgEnvIsDirty || !window.__ppgEnvIsDirty())
+          ) {
+            if (window.__ppgLoadEnvConfigs) window.__ppgLoadEnvConfigs();
+          }
+          if (tab === "playlists") loadPlaylists();
+          if (tab === "stats") {
+            loadStats();
+            if (statsPollTimer) clearInterval(statsPollTimer);
+            statsPollTimer = setInterval(function () {
+              loadStats({ silent: true });
+            }, 2500);
+          } else if (statsPollTimer) {
+            clearInterval(statsPollTimer);
+            statsPollTimer = null;
+          }
+        });
+      });
+
+      function showToast(msg, isErr) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        toastEl.classList.toggle("err", !!isErr);
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toastEl.classList.remove("show"), 4500);
+      }
+
+      window.__ppgShowToast = showToast;
+
+      function updateErrorsTabBadge(count) {
+        const badge = document.getElementById("errors-tab-badge");
+        const tabBtn = document.getElementById("tab-errors");
+        if (badge) {
+          if (!count) {
+            badge.textContent = "";
+            badge.classList.add("hidden");
+          } else {
+            badge.textContent = String(count);
+            badge.classList.remove("hidden");
+          }
+        }
+        if (tabBtn) {
+          const base = "Saved playlist errors";
+          tabBtn.setAttribute(
+            "aria-label",
+            count ? base + ", " + count + " issue" + (count === 1 ? "" : "s") : base
+          );
+        }
+      }
+
+      function persistFailures() {
+        try {
+          if (!runFailureItems.length) {
+            localStorage.removeItem(FAILURES_STORAGE_KEY);
+            return;
+          }
+          const trimmed =
+            runFailureItems.length > MAX_STORED_FAILURES
+              ? runFailureItems.slice(-MAX_STORED_FAILURES)
+              : runFailureItems;
+          const serializable = trimmed.map(function (x) {
+            return {
+              playlist: x.playlist != null ? String(x.playlist) : "",
+              details: x.details != null ? String(x.details) : "",
+            };
+          });
+          localStorage.setItem(FAILURES_STORAGE_KEY, JSON.stringify(serializable));
+        } catch (e) {
+          /* quota / private mode */
+        }
+      }
+
+      function loadFailuresFromStorage() {
+        try {
+          const raw = localStorage.getItem(FAILURES_STORAGE_KEY);
+          if (!raw) return;
+          let arr = JSON.parse(raw);
+          if (!Array.isArray(arr)) return;
+          if (arr.length > MAX_STORED_FAILURES) {
+            arr = arr.slice(-MAX_STORED_FAILURES);
+          }
+          runFailureItems = [];
+          runFailureSeen.clear();
+          for (let i = 0; i < arr.length; i++) {
+            const row = arr[i];
+            if (!row || typeof row !== "object") continue;
+            const pl = row.playlist != null ? String(row.playlist) : "";
+            const det = row.details != null ? String(row.details) : "";
+            const k = pl + "\0" + det;
+            if (runFailureSeen.has(k)) continue;
+            runFailureSeen.add(k);
+            runFailureItems.push({ playlist: pl, details: det });
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
+
+      function renderRunFailuresDOM() {
+        const el = document.getElementById("run-failures");
+        const ph = document.getElementById("errors-placeholder");
+        if (!el) return;
+        if (!runFailureItems.length) {
+          el.classList.add("hidden");
+          el.innerHTML = "";
+          if (ph) ph.classList.remove("hidden");
+          updateErrorsTabBadge(0);
+          persistFailures();
+          return;
+        }
+        if (ph) ph.classList.add("hidden");
+        let h =
+          '<p class="run-failures-title">Some playlists were not updated</p><ul class="run-failures-list">';
+        for (let i = 0; i < runFailureItems.length; i++) {
+          const x = runFailureItems[i];
+          h += "<li><span class=\"run-failures-pl\">" + escapeHtml(x.playlist || "") + "</span>";
+          if (x.details) {
+            h +=
+              '<span class="run-failures-detail">' + escapeHtml(x.details) + "</span>";
+          }
+          h += "</li>";
+        }
+        h += "</ul>";
+        el.innerHTML = h;
+        el.classList.remove("hidden");
+        updateErrorsTabBadge(runFailureItems.length);
+        persistFailures();
+      }
+
+      function clearRunFailures() {
+        runFailureItems = [];
+        runFailureSeen.clear();
+        renderRunFailuresDOM();
+      }
+
+      function showRunFailures(items) {
+        if (!items || !items.length) return;
+        let added = 0;
+        for (let i = 0; i < items.length; i++) {
+          const x = items[i];
+          const k = (x.playlist || "") + "\0" + (x.details || "");
+          if (runFailureSeen.has(k)) continue;
+          runFailureSeen.add(k);
+          runFailureItems.push(x);
+          added++;
+        }
+        if (added) renderRunFailuresDOM();
+      }
+
+      const LOG_AUTOSCROLL_PX = 120;
+
+      function ensureOutputPanel(scriptId, label, jobId) {
+        const host = document.getElementById("run-outputs");
+        if (!host) return null;
+        let card = host.querySelector('.run-output-card[data-script="' + scriptId + '"]');
+        if (!card) {
+          card = document.createElement("div");
+          card.className = "run-output-card";
+          card.setAttribute("data-script", scriptId);
+          card.innerHTML =
+            '<div class="run-output-card-title"><span class="run-output-label"></span><span class="run-job-id" hidden></span></div><pre class="run-output-log"></pre>';
+          host.appendChild(card);
+        }
+        card.querySelector(".run-output-label").textContent = label || scriptId;
+        const idSpan = card.querySelector(".run-job-id");
+        if (jobId) {
+          idSpan.textContent = jobId.slice(0, 8) + "…";
+          idSpan.removeAttribute("hidden");
+          idSpan.title = jobId;
+        } else {
+          idSpan.textContent = "";
+          idSpan.setAttribute("hidden", "");
+        }
+        return card.querySelector("pre.run-output-log");
+      }
+
+      function scrollPreToBottomIfPinned(pre, jobId) {
+        if (!pre) return;
+        requestAnimationFrame(() => {
+          const streaming = jobId && jobStreams.has(jobId);
+          if (streaming) {
+            pre.scrollTop = pre.scrollHeight;
+            return;
+          }
+          const dist = pre.scrollHeight - pre.scrollTop - pre.clientHeight;
+          if (dist <= LOG_AUTOSCROLL_PX) {
+            pre.scrollTop = pre.scrollHeight;
+          }
+        });
+      }
+
+      function appendLogToPre(pre, text, cls, jobId) {
+        const span = document.createElement("span");
+        if (cls) span.className = cls;
+        span.textContent = text;
+        pre.appendChild(span);
+        scrollPreToBottomIfPinned(pre, jobId);
+      }
+
+      function updateRunButtonsState() {
+        runButtons.forEach((b) => {
+          const id = b.getAttribute("data-script");
+          b.disabled = !!(id && runningScriptIds.has(id));
+        });
+      }
+
+      function updateStatusBar() {
+        if (!statusEl) return;
+        const ids = Array.from(runningScriptIds);
+        if (!ids.length) {
+          statusEl.textContent = "No job running.";
+          statusEl.classList.add("idle");
+          statusEl.classList.remove("busy");
+          return;
+        }
+        statusEl.classList.remove("idle");
+        statusEl.classList.add("busy");
+        const labels = ids.map(function (sid) {
+          const card = document.querySelector('#panel-run .card[data-script="' + sid + '"] h2');
+          return card ? card.textContent.trim() : sid;
+        });
+        statusEl.innerHTML =
+          "Running (" +
+          ids.length +
+          "): " +
+          labels
+            .map(function (lb) {
+              return "<strong>" + escapeHtml(lb) + "</strong>";
+            })
+            .join(", ");
+      }
+
+      function escapeHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function escapeAttr(s) {
+        if (s == null || s === "") return "";
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/\r?\n/g, " ");
+      }
+
+      let allPlaylistsCache = [];
+      let playlistSortKey = "title";
+      let playlistSortDir = "asc";
+
+      function _playlistSortIndicator(colKey) {
+        if (colKey !== playlistSortKey) return "";
+        return playlistSortDir === "asc" ? " ▲" : " ▼";
+      }
+
+      function _comparePlaylists(a, b, key, dir) {
+        const m = dir === "asc" ? 1 : -1;
+        if (key === "title") {
+          const ca = (a.title || "").toLocaleLowerCase();
+          const cb = (b.title || "").toLocaleLowerCase();
+          if (ca < cb) return -1 * m;
+          if (ca > cb) return 1 * m;
+          return 0;
+        }
+        if (key === "updated") {
+          const ta = a.updatedOn
+            ? Date.parse(String(a.updatedOn).replace(" ", "T"))
+            : NaN;
+          const tb = b.updatedOn
+            ? Date.parse(String(b.updatedOn).replace(" ", "T"))
+            : NaN;
+          const na = isNaN(ta) ? 0 : ta;
+          const nb = isNaN(tb) ? 0 : tb;
+          if (na < nb) return -1 * m;
+          if (na > nb) return 1 * m;
+          return 0;
+        }
+        if (key === "items") {
+          const na =
+            a.leafCount != null && a.leafCount !== ""
+              ? Number(a.leafCount)
+              : NaN;
+          const nb =
+            b.leafCount != null && b.leafCount !== ""
+              ? Number(b.leafCount)
+              : NaN;
+          const va = isNaN(na) ? -1 : na;
+          const vb = isNaN(nb) ? -1 : nb;
+          if (va < vb) return -1 * m;
+          if (va > vb) return 1 * m;
+          return 0;
+        }
+        return 0;
+      }
+
+      function renderPlaylistsTable() {
+        const container = document.getElementById("playlists-container");
+        const filterEl = document.getElementById("playlists-filter");
+        if (!container) return;
+        const q = ((filterEl && filterEl.value) || "").trim().toLowerCase();
+        let rows = !q
+          ? allPlaylistsCache.slice()
+          : allPlaylistsCache.filter((p) =>
+              (p.title || "").toLowerCase().includes(q)
+            );
+        if (allPlaylistsCache.length === 0) {
+          container.innerHTML = '<p class="playlist-empty">No playlists loaded.</p>';
+          return;
+        }
+        if (rows.length === 0) {
+          container.innerHTML =
+            '<p class="playlist-empty">No playlists match this filter.</p>';
+          return;
+        }
+        rows.sort(function (a, b) {
+          return _comparePlaylists(a, b, playlistSortKey, playlistSortDir);
+        });
+        function ariaSort(col) {
+          if (playlistSortKey !== col) return "none";
+          return playlistSortDir === "asc" ? "ascending" : "descending";
+        }
+        let html =
+          '<table class="playlists-table"><thead><tr>' +
+          '<th class="sortable" scope="col" data-sort="title" aria-sort="' +
+          ariaSort("title") +
+          '">Title<span class="sort-ind" aria-hidden="true">' +
+          escapeHtml(_playlistSortIndicator("title")) +
+          "</span></th>" +
+          '<th class="sortable" scope="col" data-sort="updated" aria-sort="' +
+          ariaSort("updated") +
+          '">Updated<span class="sort-ind" aria-hidden="true">' +
+          escapeHtml(_playlistSortIndicator("updated")) +
+          "</span></th>" +
+          '<th class="sortable pl-num" scope="col" data-sort="items" aria-sort="' +
+          ariaSort("items") +
+          '">Items<span class="sort-ind" aria-hidden="true">' +
+          escapeHtml(_playlistSortIndicator("items")) +
+          "</span></th></tr></thead><tbody>";
+        for (let i = 0; i < rows.length; i++) {
+          const p = rows[i];
+          const smart = p.smart
+            ? '<span class="playlist-badge">Smart</span>'
+            : "";
+          const ppg = p.ppg
+            ? '<span class="playlist-badge playlist-badge--ppg" title="Created or updated by PPG generator scripts">PPG</span>'
+            : "";
+          const cnt =
+            p.leafCount != null && p.leafCount !== "" ? String(p.leafCount) : "—";
+          const upd = p.updatedOn ? escapeHtml(p.updatedOn) : "—";
+          const sumTip = p.summary ? escapeAttr(p.summary) : "";
+          const tipAttr = sumTip ? ' title="' + sumTip + '"' : "";
+          html +=
+            "<tr><td class=\"pl-title\">" +
+            escapeHtml(p.title || "") +
+            smart +
+            ppg +
+            '</td><td class="pl-updated"' +
+            tipAttr +
+            ">" +
+            upd +
+            '</td><td class="pl-count">' +
+            escapeHtml(cnt) +
+            "</td></tr>";
+        }
+        html += "</tbody></table>";
+        container.innerHTML = html;
+      }
+
+      function renderStatsSlowest(rows) {
+        const el = document.getElementById("stats-slowest");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML = '<p class="stats-empty">No successful per-playlist timings in the scanned log range.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Playlist</th><th class="num">Duration</th><th>Script</th><th>Finished</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const sec = r.seconds != null ? Number(r.seconds) : null;
+          const dur =
+            r.duration_label ||
+            (sec != null && !isNaN(sec) ? sec.toFixed(1) + "s" : "—");
+          h +=
+            "<tr><td>" +
+            escapeHtml(r.playlist || "") +
+            '</td><td class="num">' +
+            escapeHtml(dur) +
+            "</td><td>" +
+            escapeHtml(r.script || "") +
+            "</td><td>" +
+            escapeHtml(r.finished || "") +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
+      function renderStatsFailed(rows) {
+        const el = document.getElementById("stats-failed");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML = '<p class="stats-empty">No failures recorded in the scanned log range.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Playlist</th><th class="num">Times</th><th>Recent examples</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const ex = (r.examples || []).slice(0, 5);
+          let exHtml = "";
+          for (let j = 0; j < ex.length; j++) {
+            const e = ex[j];
+            exHtml +=
+              "<div><strong>" +
+              escapeHtml(e.script || "") +
+              "</strong> · " +
+              escapeHtml(e.finished || "") +
+              ' <span class="stats-tag">' +
+              escapeHtml(e.source || "") +
+              "</span><br/>" +
+              escapeHtml(e.reason || "") +
+              "</div>";
+          }
+          h +=
+            "<tr><td>" +
+            escapeHtml(r.playlist || "") +
+            '</td><td class="num">' +
+            String(r.count || 0) +
+            "</td><td>" +
+            exHtml +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
+      function renderStatsScripts(rows) {
+        const el = document.getElementById("stats-scripts");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML = '<p class="stats-empty">No script runs parsed.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Script</th><th class="num">Runs</th><th class="num">Timing rows</th><th class="num">Failed rows</th><th>Last finished</th><th>Last result</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          h +=
+            "<tr><td>" +
+            escapeHtml(r.script || "") +
+            '</td><td class="num">' +
+            String(r.runs || 0) +
+            '</td><td class="num">' +
+            String(r.total_timing_rows || 0) +
+            '</td><td class="num">' +
+            String(r.failed_timing_rows || 0) +
+            "</td><td>" +
+            escapeHtml(r.last_finished || "") +
+            "</td><td>" +
+            escapeHtml(r.last_result || "") +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
+      function renderStatsRecent(rows) {
+        const el = document.getElementById("stats-recent");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML = '<p class="stats-empty">No runs in the log.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Script</th><th>Finished</th><th class="num">Run duration</th><th>Result</th><th class="num">OK count</th><th class="num">Failed</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const failN = r.failures_distinct != null ? r.failures_distinct : 0;
+          const dur =
+            r.duration_label ||
+            (r.duration_seconds != null
+              ? String(r.duration_seconds) + "s"
+              : "—");
+          const prog = (r.result || "").toLowerCase() === "in progress";
+          const rowCls = prog ? ' class="stats-row-live"' : "";
+          h +=
+            "<tr" +
+            rowCls +
+            "><td>" +
+            escapeHtml(r.script || "") +
+            "</td><td>" +
+            escapeHtml(r.finished || r.started || "") +
+            '</td><td class="num">' +
+            escapeHtml(dur) +
+            "</td><td>" +
+            escapeHtml(r.result || "") +
+            '</td><td class="num">' +
+            String(r.playlists_ok != null ? r.playlists_ok : "—") +
+            '</td><td class="num">' +
+            String(failN) +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
+      function renderStatsCurrentRun(cr) {
+        const sec = document.getElementById("stats-current-section");
+        const el = document.getElementById("stats-current");
+        const sm = document.getElementById("stats-current-meta");
+        if (!sec || !el) return;
+        if (!cr || !cr.active) {
+          sec.hidden = true;
+          el.innerHTML = "";
+          if (sm) sm.textContent = "";
+          return;
+        }
+        sec.hidden = false;
+        const n = (cr.playlist_timing && cr.playlist_timing.length) || 0;
+        const upd = (cr.updated_at || "").replace("T", " ");
+        if (sm) {
+          sm.textContent =
+            (upd ? "Last playlist update " + upd + " · " : "") +
+            n +
+            " playlist row(s) so far (updates when each playlist finishes).";
+        }
+        const rows = cr.playlist_timing || [];
+        if (!rows.length) {
+          el.innerHTML =
+            '<p class="stats-empty">No playlist timings yet — the first will appear when a playlist completes.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Playlist</th><th class="num">Duration</th><th>Result</th><th>Note</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const st = r.ok ? "ok" : "failed";
+          h +=
+            "<tr><td>" +
+            escapeHtml(r.playlist || "") +
+            '</td><td class="num">' +
+            escapeHtml(r.duration_label || "") +
+            "</td><td>" +
+            escapeHtml(st) +
+            "</td><td>" +
+            escapeHtml(r.note || "") +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
+      async function loadStats(opts) {
+        opts = opts || {};
+        const silent = !!opts.silent;
+        const meta = document.getElementById("stats-meta");
+        if (!meta) return;
+        if (!silent) {
+          meta.classList.remove("warn");
+          meta.textContent = "Loading…";
+          document.getElementById("stats-slowest").innerHTML = "";
+          document.getElementById("stats-failed").innerHTML = "";
+          document.getElementById("stats-scripts").innerHTML = "";
+          document.getElementById("stats-recent").innerHTML = "";
+        }
+        try {
+          const r = await fetch("/api/stats");
+          const j = await r.json();
+          if (!r.ok || !j.ok) {
+            if (!silent) {
+              meta.textContent = j.error || "Request failed";
+              meta.classList.add("warn");
+            }
+            return;
+          }
+          if (!j.log_exists && !j.current_run && !j.events_exists) {
+            if (!silent) {
+              meta.textContent =
+                "No log.txt or ppg_events.jsonl yet — run a generator (cron or web UI) to record stats.";
+              meta.classList.add("warn");
+              renderStatsSlowest([]);
+              renderStatsFailed([]);
+              renderStatsScripts([]);
+              renderStatsRecent([]);
+              renderStatsCurrentRun(null);
+            }
+            return;
+          }
+          const kb = j.log_bytes != null ? (j.log_bytes / 1024).toFixed(1) + " KB" : "";
+          if (!silent) meta.classList.remove("warn");
+          const evKb =
+            j.events_bytes != null ? (j.events_bytes / 1024).toFixed(1) + " KB" : "";
+          const evNote =
+            j.events_exists && evKb
+              ? " · webui/data/ppg_events.jsonl (" + evKb + ", " + (j.runs_from_events || 0) + " runs from events)"
+              : "";
+          if (j.current_run && j.current_run.active) {
+            meta.textContent = j.log_exists
+              ? "log.txt (" +
+                kb +
+                ") · " +
+                (j.runs_parsed || 0) +
+                " run block(s); live run in progress — tables refresh every few seconds." +
+                evNote
+              : "Live run in progress — log.txt is written when the script exits. Auto-refreshing…" +
+                evNote;
+          } else if (!j.log_exists && j.events_exists) {
+            meta.textContent =
+              "Statistics from webui/data/ppg_events.jsonl (" +
+              evKb +
+              ") — " +
+              (j.runs_from_events || 0) +
+              " runs recorded (cron/CLI). log.txt will appear after the next full run writes it.";
+          } else {
+            meta.textContent =
+              "log.txt (" +
+              kb +
+              ") · " +
+              (j.runs_parsed || 0) +
+              " run block(s) parsed (of " +
+              (j.runs_in_log || 0) +
+              " in file, last " +
+              (j.recent_runs && j.recent_runs.length ? j.recent_runs.length : 0) +
+              " shown below)" +
+              evNote;
+          }
+          renderStatsCurrentRun(j.current_run || null);
+          renderStatsSlowest(j.slowest_ok || []);
+          renderStatsFailed(j.failed_playlists || []);
+          renderStatsScripts(j.by_script || []);
+          renderStatsRecent(j.recent_runs || []);
+        } catch (e) {
+          if (!silent) {
+            meta.textContent = String(e);
+            meta.classList.add("warn");
+          }
+        }
+      }
+
+      const statsRefreshBtn = document.getElementById("stats-refresh");
+      if (statsRefreshBtn) {
+        statsRefreshBtn.addEventListener("click", () => loadStats());
+      }
+
+      async function loadPlaylists() {
+        const meta = document.getElementById("playlists-meta");
+        const container = document.getElementById("playlists-container");
+        if (!meta || !container) return;
+        meta.classList.remove("warn");
+        meta.textContent = "Loading…";
+        container.innerHTML = '<p class="playlist-empty">Loading playlists…</p>';
+        try {
+          const r = await fetch("/api/plex/playlists");
+          const j = await r.json();
+          if (!r.ok) {
+            meta.textContent = "Error";
+            meta.classList.add("warn");
+            container.innerHTML =
+              '<p class="playlist-error">' +
+              escapeHtml(j.error || "Request failed") +
+              "</p>";
+            return;
+          }
+          allPlaylistsCache = j.playlists || [];
+          const n = allPlaylistsCache.length;
+          meta.textContent =
+            n + " audio playlist" + (n === 1 ? "" : "s") + " from Plex";
+          renderPlaylistsTable();
+        } catch (e) {
+          meta.textContent = "Error";
+          meta.classList.add("warn");
+          container.innerHTML =
+            '<p class="playlist-error">' + escapeHtml(String(e)) + "</p>";
+        }
+      }
+
+      const playlistsRefreshBtn = document.getElementById("playlists-refresh");
+      const playlistsFilterEl = document.getElementById("playlists-filter");
+      if (playlistsRefreshBtn) {
+        playlistsRefreshBtn.addEventListener("click", () => {
+          loadPlaylists();
+        });
+      }
+      if (playlistsFilterEl) {
+        playlistsFilterEl.addEventListener("input", () => {
+          renderPlaylistsTable();
+        });
+      }
+      const playlistsPanel = document.getElementById("panel-playlists");
+      if (playlistsPanel) {
+        playlistsPanel.addEventListener("click", function (ev) {
+          const th = ev.target.closest("th[data-sort]");
+          if (!th) return;
+          const key = th.getAttribute("data-sort");
+          if (!key || !["title", "updated", "items"].includes(key)) return;
+          if (key === playlistSortKey) {
+            playlistSortDir = playlistSortDir === "asc" ? "desc" : "asc";
+          } else {
+            playlistSortKey = key;
+            playlistSortDir = key === "title" ? "asc" : "desc";
+          }
+          renderPlaylistsTable();
+        });
+      }
+
+      function closeStreamForJob(jobId) {
+        const rec = jobStreams.get(jobId);
+        if (!rec) return;
+        jobStreams.delete(jobId);
+        if (rec.es) {
+          try {
+            rec.es.close();
+          } catch (e) {
+            /* ignore */
+          }
+        }
+      }
+
+      function attachStream(jobId, label, scriptId, pre) {
+        closeStreamForJob(jobId);
+        const es = new EventSource("/api/stream/" + encodeURIComponent(jobId));
+        jobStreams.set(jobId, { es: es, pre: pre, scriptId: scriptId, label: label });
+        pre._ppgJobId = jobId;
+        es.onmessage = function (ev) {
+          let data;
+          try {
+            data = JSON.parse(ev.data);
+          } catch (e) {
+            return;
+          }
+          if (!jobStreams.has(jobId)) return;
+          if (data.type === "line" && data.text) {
+            appendLogToPre(pre, data.text, "", jobId);
+          }
+          if (data.type === "error" && data.message) {
+            appendLogToPre(pre, data.message + "\n", "line-exit-fail", jobId);
+          }
+          if (data.type === "run_summary" && data.failed_playlists && data.failed_playlists.length) {
+            showRunFailures(data.failed_playlists);
+            const n = data.failed_playlists.length;
+            showToast(
+              n +
+                " playlist" +
+                (n === 1 ? "" : "s") +
+                " had problems — open the Errors tab to review.",
+              true
+            );
+          }
+          if (data.type === "result") {
+            const code = data.exit_code;
+            const cls = code === 0 ? "line-exit-ok" : "line-exit-fail";
+            appendLogToPre(pre, "\n--- Finished with exit code " + code + " ---\n", cls, jobId);
+            closeStreamForJob(jobId);
+            runningScriptIds.delete(scriptId);
+            pre._ppgJobId = null;
+            updateRunButtonsState();
+            updateStatusBar();
+            if (code === 0) {
+              recordSuccessfulRun(scriptId);
+              refreshScriptCardMeta();
+            }
+            if (code !== 0) showToast("Script exited with code " + code, true);
+          }
+          if (data.type === "heartbeat") {
+            /* keep-alive */
+          }
+        };
+        es.onerror = function () {
+          if (!jobStreams.has(jobId)) return;
+          closeStreamForJob(jobId);
+          if (runningScriptIds.has(scriptId)) {
+            runningScriptIds.delete(scriptId);
+            updateRunButtonsState();
+            updateStatusBar();
+          }
+          appendLogToPre(pre, "\n[Stream disconnected]\n", "line-exit-fail", null);
+          pre._ppgJobId = null;
+        };
+      }
+
+      const clearLogBtn = document.getElementById("clear-log");
+      if (clearLogBtn) {
+        clearLogBtn.addEventListener("click", () => {
+          document.querySelectorAll("#run-outputs pre.run-output-log").forEach((pre) => {
+            pre.textContent = "";
+          });
+        });
+      }
+
+      async function resumeActiveJob(job) {
+        if (!job || !job.id) return;
+        const jobId = job.id;
+        if (jobStreams.has(jobId)) return;
+        const label = job.label || "";
+        const sid = job.script_id;
+        if (!sid) return;
+        runningScriptIds.add(sid);
+        updateRunButtonsState();
+        updateStatusBar();
+        const pre = ensureOutputPanel(sid, label, jobId);
+        if (!pre) return;
+        pre.textContent = "";
+        let restored = "";
+        try {
+          const outR = await fetch("/api/job/" + encodeURIComponent(jobId) + "/output");
+          const outJ = await outR.json();
+          if (outR.ok && outJ.text) restored = outJ.text;
+        } catch (e) {
+          /* ignore */
+        }
+        appendLogToPre(
+          pre,
+          "… Page reloaded — restored output from the server buffer (live stream resumes below).\n\n",
+          "line-exit-ok",
+          jobId
+        );
+        if (restored) appendLogToPre(pre, restored, "", jobId);
+        attachStream(jobId, label, sid, pre);
+      }
+
+      async function pollStatus() {
+        try {
+          const r = await fetch("/api/status");
+          const j = await r.json();
+          const jobs = j.active_jobs || [];
+          for (let i = 0; i < jobs.length; i++) {
+            await resumeActiveJob(jobs[i]);
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      pollStatus();
+
+      async function runScript(scriptId, label) {
+        if (runningScriptIds.has(scriptId)) {
+          showToast("This script is already running.", true);
+          return;
+        }
+        const pre = ensureOutputPanel(scriptId, label, null);
+        if (!pre) return;
+        pre.textContent = "";
+        pre._ppgJobId = null;
+        try {
+          const r = await fetch("/api/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ script: scriptId }),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (r.status === 409) {
+            showToast(j.error || "Already running", true);
+            return;
+          }
+          if (!r.ok) {
+            showToast(j.error || ("HTTP " + r.status), true);
+            appendLogToPre(pre, (j.error || "Request failed") + "\n", "line-exit-fail", null);
+            return;
+          }
+          ensureOutputPanel(scriptId, label, j.job_id);
+          runningScriptIds.add(scriptId);
+          updateRunButtonsState();
+          updateStatusBar();
+          pre._ppgJobId = j.job_id;
+          attachStream(j.job_id, label, scriptId, pre);
+        } catch (e) {
+          showToast(String(e), true);
+          appendLogToPre(pre, String(e) + "\n", "line-exit-fail", null);
+        }
+      }
+
+      runButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-script");
+          const card = btn.closest(".card");
+          const title = card ? card.querySelector("h2").textContent : id;
+          runScript(id, title);
+        });
+      });
+
+      const errorsClearBtn = document.getElementById("errors-clear");
+      if (errorsClearBtn) {
+        errorsClearBtn.addEventListener("click", function () {
+          clearRunFailures();
+        });
+      }
+
+      loadFailuresFromStorage();
+      renderRunFailuresDOM();
+      refreshAllLastRunLabels();
+      refreshScriptCardMeta();
+    })();
+  </script>
+  <script src="{{ url_for('static', filename='env_editor.js') }}"></script>
+  <script src="{{ url_for('static', filename='group_editor.js') }}"></script>
+</body>
+</html>

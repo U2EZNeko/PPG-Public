@@ -19,7 +19,7 @@ I'm more than happy to extend the scripts myself and through your Pull Requests.
 
 The .json files can easily be extended, you can find a list of genres and moods in the .idea folder -> Usefulstuff Folder contains genres.txt it's a list of all unique genres on MY server. You may have a genre on your server that I do not have.
 
-I used AI to generate the genre_groups, you can do the same by feeding it both files or at least the json formatting and genres. Make sure the "name" of the genre_group is unique and avoid creating groups that are too similar to each other. 
+**Genre JSON — two files:** `daily_weekly_genre_pools.json` is only for **PPG-Daily / PPG-Weekly** (each entry is a *pool*; each playlist randomly uses one pool). `named_genre_mix_playlists.json` is only for **PPG-Genres** (each entry becomes a Plex playlist `{name} Mix`). Same JSON shape; different scripts. I used AI to help author these; keep pool/mix *names* distinct so logs and playlists stay readable.
 
 ### Content table
 
@@ -43,7 +43,7 @@ I used AI to generate the genre_groups, you can do the same by feeding it both f
   - Python3
 
 ### Setup:
-  1. Grab your Plex Token and IP and put it into the .env (remove the example from the file name)
+  1. Grab your Plex Token and IP and put it into the .env (remove the example from the file name). If you are upgrading from an older tree, rename `genre_groups.json` → `daily_weekly_genre_pools.json` and `genre_mixes.json` → `named_genre_mix_playlists.json` (or set `DAILY_GENRE_GROUPS_FILE`, `WEEKLY_GENRE_GROUPS_FILE`, and `GENRE_MIXES_FILE` to your old paths).
   2. Install plexapi through Python. (python -m pip install plexapi)
   3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
@@ -66,9 +66,9 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   These are there to replace Spotify's Daily Mixes and Weekly Mixes
 
-  They will randomly select from genre_groups.json to create playlists.
+  They randomly pick **one entry** from `daily_weekly_genre_pools.json` for each new playlist (each entry is a *pool* of Plex genres, not a separate Plex playlist name).
 
-  It will write the used genre's to a log file to avoid duplicates.
+  It writes used pools to a log file to avoid repeating the same pool too soon.
 
   JSON example
 ```
@@ -97,7 +97,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   
   Creates or updates "genre Mix" playlists, similar to Spotify.
 
-  This will create or update playlists containing multiple genres, defined in genre_mixes.json
+  Definitions live in `named_genre_mix_playlists.json`: one Plex playlist per key, named `{key} Mix`.
 
   This allows you to select multiple similar genres and pick random songs from those. You can also extend the json entry with a date filter, you can chose before, after or between release years. 
 
@@ -171,7 +171,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   - Removed caching code from scripts
 
 ### 29.10.2025:
-  - Date filters for genre_groups
+  - Date filters for genre pools / named mixes (JSON entries)
   - Multithreading!
   - Log levels
   - Moved everything to .env (scripts check for all values)
@@ -216,7 +216,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 - If you run the script through cronjobs, use full paths to the jsons and log files!
 
-- If you add genre_groups or mood_groups, make their name unique!
+- If you add genre pools, named genre mixes, or mood_groups, make each top-level key unique (it identifies the pool or the `{name} Mix` playlist).
 
 - Because sometimes the scripts cannot find enough songs to fill a playlist, it will try again if it cannot find at least 80% (can be defined in the script) of the SONGS_PER_PLAYLIST. It will retry this 10 times.
 
@@ -239,7 +239,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   (or add the link directly in Plex)
 
   Update:
-  - Date filters for genre_groups
+  - Date filters for genre pools / named mixes (JSON entries)
   - Multithreading! - For fetching operations and filtering
   - Log levels
   - Moved everything to .env (scripts check for all values)

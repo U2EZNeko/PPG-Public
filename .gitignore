@@ -1,2 +1,15 @@
 .env
 *.bat
+log.txt
+.ppg_run_state.json
+.ppg_run_state.json.tmp
+webui/.live/
+webui/data/ppg_events.jsonl
+webui/data/ppg_events.jsonl.bak
+
+# Local caches (regenerate with scripts; override paths in .env if needed)
+liked_artists_cache.json
+liked_artists_cache.jsonbak
+
+__pycache__/
+*.py[cod]

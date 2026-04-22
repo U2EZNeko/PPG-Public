@@ -9,6 +9,7 @@ from tqdm import tqdm
 import requests
 from urllib.parse import quote
 import tempfile
+from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 
 # Load environment variables from .env file
 load_dotenv()
@@ -972,12 +973,14 @@ def generate_mood_playlists():
         print("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
         print(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
         return
 
     # Load mood groups
     mood_groups = load_mood_groups()
     if not mood_groups:
         print("❌ No mood groups available. Exiting.")
+        fail_playlist("(setup)", "No mood groups available")
         return
 
     # Load liked artists from cache
@@ -1000,6 +1003,7 @@ def generate_mood_playlists():
     for group_name, group_data in mood_groups.items():
         playlist_name = f"{group_name} Mix"
         playlist_start_time = time.time()
+        playlist_result_note = ""
         log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
         playlist_songs = []
         try:
@@ -1053,6 +1057,8 @@ def generate_mood_playlists():
                 print(f"Found sufficient songs ({total_songs}) for Playlist '{playlist_name}'. Creating playlist.")
             else:
                 print(f"Not enough songs for Playlist '{playlist_name}', skipping.")
+                fail_playlist(playlist_name, "Not enough songs (below minimum threshold)")
+                playlist_result_note = "Not enough songs (below minimum threshold)"
                 continue
 
             # Select the required number of songs (up to SONGS_PER_PLAYLIST)
@@ -1116,25 +1122,45 @@ def generate_mood_playlists():
                         upload_playlist_poster_from_data(playlist, poster_data)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+            playlist_succeeded()
 
         except Exception as e:
             log_error(f"❌ Error during playlist generation for Playlist '{playlist_name}': {e}")
-        
-        # Always output the time taken for this playlist, even if there was an error
-        playlist_end_time = time.time()
-        elapsed_time = playlist_end_time - playlist_start_time
-        if playlist_songs and len(playlist_songs) > 0:
-            log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
-        else:
-            log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
-        log_info("---------------------------------------------")
+            fail_playlist(playlist_name, str(e))
+            playlist_result_note = str(e)[:400]
+        finally:
+            playlist_end_time = time.time()
+            elapsed_time = playlist_end_time - playlist_start_time
+            ok = bool(playlist_songs and len(playlist_songs) > 0)
+            if not ok and not (playlist_result_note or "").strip():
+                playlist_result_note = "Failed or skipped"
+            if ok:
+                log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
+            else:
+                log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
+            log_info("---------------------------------------------")
+            record_playlist_result(
+                playlist_name,
+                elapsed_time,
+                ok,
+                "" if ok else playlist_result_note,
+            )
 
 # Run the script
 if __name__ == "__main__":
-    script_start_time = time.time()
-    log_info("🚀 Starting the Mood playlist generation process...")
-    generate_mood_playlists()
-    script_end_time = time.time()
-    total_elapsed_time = script_end_time - script_start_time
-    log_info("\n✅ Mood playlists updated successfully.")
-    log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    import sys
+    from ppg_run_logger import start_run, finish_run
+
+    start_run("PPG-Moods.py")
+    try:
+        script_start_time = time.time()
+        log_info("🚀 Starting the Mood playlist generation process...")
+        generate_mood_playlists()
+        script_end_time = time.time()
+        total_elapsed_time = script_end_time - script_start_time
+        log_info("\n✅ Mood playlists updated successfully.")
+        log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    finally:
+        exc = sys.exc_info()
+        crashed = exc[0] is not None and not issubclass(exc[0], SystemExit)
+        finish_run(had_exception=crashed)

@@ -10,6 +10,7 @@ from tqdm import tqdm
 from urllib.parse import quote
 import urllib.request
 import tempfile
+from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 
 # Load environment variables from .env file
 load_dotenv()
@@ -1224,6 +1225,7 @@ def generate_liked_artists_playlists():
         log_info("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
         log_error(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
         return
 
     # Load liked artists and track keys from cache
@@ -1231,6 +1233,7 @@ def generate_liked_artists_playlists():
     cache_result = load_liked_artists_cache()
     if cache_result[0] is None:
         log_error("❌ No liked artists cache found. Run fetch-liked-artists.py to create the cache.")
+        fail_playlist("(setup)", "No liked artists cache — run fetch-liked-artists.py")
         return
     
     liked_artists, cached_track_count, cache_timestamp, artist_name_map, liked_track_keys, artist_id_map = cache_result
@@ -1264,6 +1267,8 @@ def generate_liked_artists_playlists():
     
     for i in range(PLAYLIST_COUNT):
         playlist_start_time = time.time()
+        playlist_name = f"Artist Mix ({i + 1})"
+        playlist_result_note = ""
         playlist_songs = []
         
         selected_method = "similar_artists"
@@ -1273,6 +1278,8 @@ def generate_liked_artists_playlists():
                 # Artist-based playlist: use similar artists
                 if not available_artists:
                     log_warning(f"⚠️  No available artists. Skipping playlist {i + 1}.")
+                    fail_playlist(playlist_name, "No available artists (pool empty)")
+                    playlist_result_note = "No available artists (pool empty)"
                     continue
                 
                 # Select a random artist
@@ -1289,6 +1296,11 @@ def generate_liked_artists_playlists():
                 
                 if not artist_tracks:
                     log_warning(f"⚠️  No tracks found for artist '{artist_original}'. Skipping playlist {i + 1}.")
+                    fail_playlist(
+                        playlist_name,
+                        f"No tracks for artist '{artist_original}'",
+                    )
+                    playlist_result_note = f"No tracks for artist '{artist_original}'"[:400]
                     continue
                 
                 log_info(f"✅ Found {len(artist_tracks)} tracks by {artist_original}")
@@ -1389,7 +1401,6 @@ def generate_liked_artists_playlists():
             # Note: We rely on Spotify posters only, no local fallback needed
             
             # Create or update the playlist
-            playlist_name = f"Artist Mix ({i + 1})"
             existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in plex.playlists()] else None
             
             if existing_playlist:
@@ -1426,6 +1437,7 @@ def generate_liked_artists_playlists():
                     upload_playlist_poster(playlist, poster_image)
             
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+            playlist_succeeded()
             
             # Add the artist to the log (only for artist-based playlists)
             if selected_method == "similar_artists":
@@ -1436,28 +1448,48 @@ def generate_liked_artists_playlists():
                 log_entries = log_entries[-MAX_LOG_ENTRIES:]
         
         except Exception as e:
-            log_error(f"❌ Error during playlist generation for Playlist {i + 1}: {e}")
+            log_error(f"❌ Error during playlist generation for {playlist_name}: {e}")
+            fail_playlist(playlist_name, str(e))
+            playlist_result_note = str(e)[:400]
             import traceback
             traceback.print_exc()
-        
-        playlist_end_time = time.time()
-        elapsed_time = playlist_end_time - playlist_start_time
-        if playlist_songs and len(playlist_songs) > 0:
-            log_info(f"⏱️  Generation time for Playlist {i + 1}: {format_duration(elapsed_time)}")
-        else:
-            log_info(f"⏱️  Time taken for Playlist {i + 1} (failed): {format_duration(elapsed_time)}")
-        log_info("---------------------------------------------")
+        finally:
+            playlist_end_time = time.time()
+            elapsed_time = playlist_end_time - playlist_start_time
+            ok = bool(playlist_songs and len(playlist_songs) > 0)
+            if not ok and not (playlist_result_note or "").strip():
+                playlist_result_note = "Failed or skipped"
+            if ok:
+                log_info(f"⏱️  Generation time for {playlist_name}: {format_duration(elapsed_time)}")
+            else:
+                log_info(f"⏱️  Time taken for {playlist_name} (failed): {format_duration(elapsed_time)}")
+            log_info("---------------------------------------------")
+            record_playlist_result(
+                playlist_name,
+                elapsed_time,
+                ok,
+                "" if ok else playlist_result_note,
+            )
     
     # Write the updated log back to the file
     write_log(log_entries)
 
 # Run the script
 if __name__ == "__main__":
-    script_start_time = time.time()
-    log_info("🚀 Starting the Liked Artists playlist generation process...")
-    generate_liked_artists_playlists()
-    script_end_time = time.time()
-    total_elapsed_time = script_end_time - script_start_time
-    log_info("\n✅ Liked Artists playlists updated successfully.")
-    log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    import sys
+    from ppg_run_logger import start_run, finish_run
+
+    start_run("PPG-LikedArtists.py")
+    try:
+        script_start_time = time.time()
+        log_info("🚀 Starting the Liked Artists playlist generation process...")
+        generate_liked_artists_playlists()
+        script_end_time = time.time()
+        total_elapsed_time = script_end_time - script_start_time
+        log_info("\n✅ Liked Artists playlists updated successfully.")
+        log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    finally:
+        exc = sys.exc_info()
+        crashed = exc[0] is not None and not issubclass(exc[0], SystemExit)
+        finish_run(had_exception=crashed)
 

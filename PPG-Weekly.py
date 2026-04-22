@@ -6,6 +6,7 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 
 # Load environment variables from .env file
 load_dotenv()
@@ -852,10 +853,11 @@ def prefer_liked_artists(songs, liked_artists, target_count, max_liked_percentag
     
     return selected_songs
 
-# Load genre groups from JSON file
+# Load genre pools from JSON (WEEKLY_GENRE_GROUPS_FILE — same file as Daily by default).
+# Each entry is a pool of genres; one pool is chosen at random per playlist.
 # Supports both old format (key -> array) and new format (key -> {genres: array, release_date_filter: {...}})
 def load_genre_groups():
-    log_debug("Loading genre groups from file...")
+    log_debug("Loading daily/weekly genre pools from file...")
     if not os.path.exists(GENRE_GROUPS_FILE):
         log_error(f"Error: {GENRE_GROUPS_FILE} not found.")
         return {}
@@ -881,10 +883,10 @@ def load_genre_groups():
                 else:
                     log_warning(f"⚠️  Invalid format for genre group '{key}': expected array or object")
             
-            log_info(f"✅ Loaded {len(genre_groups)} genre groups successfully!")
+            log_info(f"✅ Loaded {len(genre_groups)} genre pools successfully!")
             return genre_groups
     except Exception as e:
-        log_error(f"Error loading genre groups: {e}")
+        log_error(f"Error loading genre pools: {e}")
         return {}
 
 
@@ -982,12 +984,14 @@ def generate_weekly_playlists():
         log_info("✅ Successfully connected to Plex server and accessed 'Music' library.")
     except Exception as e:
         log_error(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
         return
 
     # Load genre groups
     genre_groups = load_genre_groups()
     if not genre_groups:
         log_error("❌ No genre groups available. Exiting.")
+        fail_playlist("(setup)", "No genre groups available")
         return
 
     # Get available poster images
@@ -1034,6 +1038,9 @@ def generate_weekly_playlists():
 
     for i in range(PLAYLIST_COUNT):
         playlist_start_time = time.time()
+        playlist_name = f"Weekly Playlist {i + 1}"
+        playlist_result_note = ""
+        playlist_songs = []
         log_info(f"\n🎵 Starting generation for Playlist {i + 1}...")
         try:
             # Retry logic if not enough songs are found
@@ -1104,11 +1111,18 @@ def generate_weekly_playlists():
 
             if total_songs < MIN_SONGS_REQUIRED:
                 log_error(f"❌ Error: Could not find enough songs after 10 attempts. Skipping playlist {i + 1}.")
+                fail_playlist(
+                    playlist_name,
+                    "Could not find enough songs after 10 attempts",
+                )
+                playlist_result_note = "Not enough songs after retries"
                 continue  # Skip this playlist if we couldn't find enough songs
             
             # Safety check: if we somehow still have 0 songs, skip this playlist
             if total_songs == 0:
                 log_error(f"❌ Error: No songs found after retries. Skipping playlist {i + 1}.")
+                fail_playlist(playlist_name, "No songs found after retries")
+                playlist_result_note = "No songs found after retries"
                 continue
 
             # Select the required number of songs (up to SONGS_PER_PLAYLIST)
@@ -1145,7 +1159,6 @@ def generate_weekly_playlists():
                     log_debug(f"📸 Selected poster: {selected_image_name}")
 
             # Create or update the playlist
-            playlist_name = f"Weekly Playlist {i + 1}"
             existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in
                                                                                   plex.playlists()] else None
 
@@ -1183,6 +1196,7 @@ def generate_weekly_playlists():
                     upload_playlist_poster(playlist, poster_image)
 
             log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+            playlist_succeeded()
 
             # Add the selected genre group to the log
             weekly_log.append(selected_group)
@@ -1192,16 +1206,26 @@ def generate_weekly_playlists():
                 weekly_log = weekly_log[-MAX_LOG_ENTRIES:]
 
         except Exception as e:
-            log_error(f"❌ Error during playlist generation for Playlist {i + 1}: {e}")
-        
-        # Always output the time taken for this playlist, even if there was an error
-        playlist_end_time = time.time()
-        elapsed_time = playlist_end_time - playlist_start_time
-        if playlist_songs and len(playlist_songs) > 0:
-            log_info(f"⏱️  Generation time for Playlist {i + 1}: {format_duration(elapsed_time)}")
-        else:
-            log_info(f"⏱️  Time taken for Playlist {i + 1} (failed): {format_duration(elapsed_time)}")
-        log_info("---------------------------------------------")
+            log_error(f"❌ Error during playlist generation for {playlist_name}: {e}")
+            fail_playlist(playlist_name, str(e))
+            playlist_result_note = str(e)[:400]
+        finally:
+            playlist_end_time = time.time()
+            elapsed_time = playlist_end_time - playlist_start_time
+            ok = bool(playlist_songs and len(playlist_songs) > 0)
+            if not ok and not (playlist_result_note or "").strip():
+                playlist_result_note = "Failed or skipped"
+            if ok:
+                log_info(f"⏱️  Generation time for {playlist_name}: {format_duration(elapsed_time)}")
+            else:
+                log_info(f"⏱️  Time taken for {playlist_name} (failed): {format_duration(elapsed_time)}")
+            log_info("---------------------------------------------")
+            record_playlist_result(
+                playlist_name,
+                elapsed_time,
+                ok,
+                "" if ok else playlist_result_note,
+            )
 
     # Write the updated log back to the file
     write_weekly_log(weekly_log)
@@ -1209,10 +1233,19 @@ def generate_weekly_playlists():
 
 # Run the script
 if __name__ == "__main__":
-    script_start_time = time.time()
-    log_info("🚀 Starting the Weekly playlist generation process...")
-    generate_weekly_playlists()
-    script_end_time = time.time()
-    total_elapsed_time = script_end_time - script_start_time
-    log_info("\n✅ Weekly playlists updated successfully.")
-    log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    import sys
+    from ppg_run_logger import start_run, finish_run
+
+    start_run("PPG-Weekly.py")
+    try:
+        script_start_time = time.time()
+        log_info("🚀 Starting the Weekly playlist generation process...")
+        generate_weekly_playlists()
+        script_end_time = time.time()
+        total_elapsed_time = script_end_time - script_start_time
+        log_info("\n✅ Weekly playlists updated successfully.")
+        log_info(f"⏱️  Total script execution time: {format_duration(total_elapsed_time)}")
+    finally:
+        exc = sys.exc_info()
+        crashed = exc[0] is not None and not issubclass(exc[0], SystemExit)
+        finish_run(had_exception=crashed)
