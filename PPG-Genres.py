@@ -9,7 +9,16 @@ from tqdm import tqdm
 import requests
 from urllib.parse import quote
 import tempfile
-from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+import threading
+from contextlib import nullcontext
+from typing import Optional
+from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
+from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_track_filters import (
+    filter_playlist_and_pool_for_quality,
+    load_skip_title_album_regexes,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -50,12 +59,14 @@ REQUIRED_ENV_VARS = [
     # Logging
     "LOG_LEVEL",
     # Genres-specific
-    "GENRES_MIN_SONGS_REQUIRED",
-    "GENRE_MIXES_FILE"
+    "GENRE_MIXES_FILE",
 ]
+if not (os.getenv("PPG_MIN_SONGS_REQUIRED_PERCENT") or "").strip():
+    REQUIRED_ENV_VARS.insert(-1, "GENRES_MIN_SONGS_REQUIRED")
 
 # Validate environment variables before proceeding
 validate_env_vars(REQUIRED_ENV_VARS, "PPG-Genres.py")
+validate_min_songs_env("GENRES_MIN_SONGS_REQUIRED", "PPG-Genres.py")
 
 # Fetch all configuration from environment variables (no defaults)
 PLEX_URL = os.getenv("PLEX_URL")
@@ -73,6 +84,8 @@ MIN_SONG_DURATION_SECONDS = int(os.getenv("MIN_SONG_DURATION_SECONDS"))
 MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
 MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
+
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
 
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
@@ -126,7 +139,7 @@ def format_duration(seconds):
         return f"{hours} hour{'s' if hours != 1 else ''} {minutes} minute{'s' if minutes != 1 else ''} {secs} second{'s' if secs != 1 else ''}"
 
 # Genres-specific configuration
-MIN_SONGS_REQUIRED = float(os.getenv("GENRES_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
+MIN_SONGS_REQUIRED = resolve_min_songs_fraction("GENRES_MIN_SONGS_REQUIRED") * SONGS_PER_PLAYLIST
 GENRE_MIXES_FILE = os.getenv("GENRE_MIXES_FILE")
 GENRES_REPLACE_POSTERS = os.getenv("GENRES_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
@@ -260,6 +273,15 @@ def filter_track_batch_by_date(track_batch, condition, start_year, end_year):
     return filtered_batch
 
 # Filter tracks by release date
+def _audio_playlists_by_title(plex) -> dict:
+    """Single Plex API pass: title -> playlist object (audio only)."""
+    return {
+        pl.title: pl
+        for pl in plex.playlists(playlistType="audio")
+        if getattr(pl, "title", None)
+    }
+
+
 def filter_by_release_date(tracks, date_filter):
     """Filter tracks based on their album's release date.
     
@@ -602,8 +624,15 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
                           max_songs_per_album=1, prevent_consecutive=True, 
                           mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
+    playlist_songs, all_available_songs = filter_playlist_and_pool_for_quality(
+        playlist_songs,
+        all_available_songs,
+        _SKIP_SONG_TITLE_RE,
+        _SKIP_ALBUM_TITLE_RE,
+        log_info,
+    )
     original_count = len(playlist_songs)
-    
+
     # 1. Filter by minimum duration
     if min_duration_seconds > 0:
         playlist_songs = filter_by_minimum_duration(playlist_songs, min_duration_seconds)
@@ -1100,28 +1129,16 @@ def load_genre_mixes():
         traceback.print_exc()
         return {}
 
-# Generate playlists based on genre mixes
-def generate_genre_playlists():
-    print("🔌 Connecting to Plex server...")
-    try:
-        music_library = plex.library.section("Music")  # Adjust if your music library name differs
-        print("✅ Successfully connected to Plex server and accessed 'Music' library.")
-    except Exception as e:
-        print(f"❌ Error connecting to Plex server or accessing library: {e}")
-        fail_playlist("(setup/plex)", str(e))
-        return
+def _log_sync_cm(lock: Optional[threading.Lock]):
+    if lock is None:
+        return nullcontext()
+    return lock
 
-    # Load genre mixes
-    genre_mixes = load_genre_mixes()
-    if not genre_mixes:
-        print("❌ No named genre mix entries in JSON. Exiting.")
-        fail_playlist("(setup)", "No genre mixes available")
-        return
 
-    # Load liked artists from cache
+def _load_liked_artists_for_genres():
     print("🎵 Loading liked artists from cache...")
     cached_artists, cached_track_count, cache_timestamp = load_liked_artists_cache()
-    
+
     if cached_artists is not None:
         print(f"✅ Loaded {len(cached_artists):,} liked artists from cache")
         liked_artists = cached_artists
@@ -1134,171 +1151,201 @@ def generate_genre_playlists():
         print("⚠️ No liked artists cache found. Run fetch-liked-artists.py to create the cache.")
         print("⚠️ Continuing without liked artists data.")
         liked_artists = set()
+    return liked_artists
 
-    for i, (genre_group, group_data) in enumerate(genre_mixes.items()):
-        playlist_name = f"{genre_group} Mix"
-        playlist_start_time = time.time()
-        playlist_result_note = ""
-        log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
-        playlist_songs = []
-        try:
-            # Defensive check: ensure group_data is a dictionary
-            # If it's still a list (shouldn't happen after load_genre_mixes, but handle it anyway)
-            if isinstance(group_data, list):
-                log_warning(f"⚠️  Genre mix '{genre_group}' has list format, converting to dict format...")
-                group_data = {
-                    'genres': group_data,
-                    'release_date_filter': None
-                }
-            elif not isinstance(group_data, dict):
-                log_error(f"❌ Invalid format for genre mix '{genre_group}': expected dict or list, got {type(group_data).__name__}")
+
+def _process_single_genre_mix(
+    plex,
+    music_library,
+    genre_group,
+    group_data,
+    liked_artists,
+    *,
+    sync_log: Optional[threading.Lock] = None,
+    disable_inner_tqdm: bool = False,
+    outer_parallel_degree: int = 1,
+) -> None:
+    playlist_name = f"{genre_group} Mix"
+    playlist_start_time = time.time()
+    playlist_result_note = ""
+    log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
+    playlist_songs = []
+    try:
+        gd = group_data
+        if isinstance(gd, list):
+            log_warning(f"⚠️  Genre mix '{genre_group}' has list format, converting to dict format...")
+            gd = {
+                "genres": gd,
+                "release_date_filter": None,
+            }
+        elif not isinstance(gd, dict):
+            log_error(
+                f"❌ Invalid format for genre mix '{genre_group}': expected dict or list, got {type(gd).__name__}"
+            )
+            with _log_sync_cm(sync_log):
                 fail_playlist(
                     playlist_name,
-                    f"Invalid group data format ({type(group_data).__name__})",
+                    f"Invalid group data format ({type(gd).__name__})",
                 )
-                playlist_result_note = f"Invalid group data format ({type(group_data).__name__})"
-                continue
-            
-            genres = group_data.get('genres', [])
-            if not genres:
-                log_warning(f"⚠️  No genres found for '{genre_group}', skipping...")
+            playlist_result_note = f"Invalid group data format ({type(gd).__name__})"
+            return
+
+        genres = gd.get("genres", [])
+        if not genres:
+            log_warning(f"⚠️  No genres found for '{genre_group}', skipping...")
+            with _log_sync_cm(sync_log):
                 fail_playlist(playlist_name, "No genres in group")
-                playlist_result_note = "No genres in group"
-                continue
-            
-            release_date_filter = group_data.get('release_date_filter', None)
-            artist_country_filter = group_data.get('artist_country_filter', None)
-            
-            if release_date_filter:
-                log_debug(f"Release date filter: {release_date_filter}")
-            
-            # Collect all tracks for the selected genres (multi-threaded)
-            songs = []
-            def fetch_genre_tracks(genre):
-                """Fetch tracks for a single genre. Used for parallel execution."""
-                try:
-                    log_debug(f"Fetching tracks for genre: {genre}")
-                    tracks = music_library.search(genre=genre, libtype="track", limit=None)
-                    log_debug(f"Found {len(tracks)} tracks for genre: {genre}")
-                    return (genre, tracks)
-                except Exception as e:
-                    log_error(f"Error fetching tracks for genre '{genre}': {e}")
-                    return (genre, [])
-            
-            # Fetch all genres in parallel with progress bar
-            log_info(f"🔄 Fetching tracks for {len(genres)} genre(s)...")
-            with ThreadPoolExecutor(max_workers=len(genres)) as executor:
-                future_to_genre = {executor.submit(fetch_genre_tracks, genre): genre for genre in genres}
-                # Use tqdm to show progress
-                with tqdm(total=len(genres), desc="Fetching genres", unit="genre", disable=(LOG_LEVEL in ["WARNING", "ERROR"])) as pbar:
-                    for future in as_completed(future_to_genre):
-                        genre = future_to_genre[future]
-                        try:
-                            genre_name, tracks = future.result()
-                            songs.extend(tracks)
-                            pbar.update(1)
-                            pbar.set_postfix({"current": genre_name, "total_tracks": len(songs)})
-                        except Exception as e:
-                            log_error(f"Error processing results for genre '{genre}': {e}")
-                            pbar.update(1)
-            log_info(f"✅ Fetched {len(songs)} total tracks from {len(genres)} genre(s)")
+            playlist_result_note = "No genres in group"
+            return
 
-            # Apply release date filter if specified
-            if release_date_filter:
-                songs = filter_by_release_date(songs, release_date_filter)
-            if artist_country_filter:
-                songs = filter_by_artist_country(songs, artist_country_filter)
+        release_date_filter = gd.get("release_date_filter", None)
+        artist_country_filter = gd.get("artist_country_filter", None)
 
-            total_songs = len(songs)
-            print(f"Total songs after filtering: {total_songs}")
+        if release_date_filter:
+            log_debug(f"Release date filter: {release_date_filter}")
 
-            # Check if the number of songs is >= MIN_SONGS_REQUIRED
-            if total_songs >= MIN_SONGS_REQUIRED:
-                print(f"Found sufficient songs ({total_songs}) for Playlist '{playlist_name}'. Creating playlist.")
-            else:
-                print(f"Not enough songs for Playlist '{playlist_name}', skipping.")
+        songs = []
+        use_isolated_genre_clients = outer_parallel_degree > 1
+
+        def fetch_genre_tracks(genre):
+            try:
+                log_debug(f"Fetching tracks for genre: {genre}")
+                if use_isolated_genre_clients:
+                    pl_g = PlexServer(PLEX_URL, PLEX_TOKEN)
+                    ml_use = pl_g.library.section("Music")
+                else:
+                    ml_use = music_library
+                tracks = ml_use.search(genre=genre, libtype="track", limit=None)
+                log_debug(f"Found {len(tracks)} tracks for genre: {genre}")
+                return (genre, tracks)
+            except Exception as e:
+                log_error(f"Error fetching tracks for genre '{genre}': {e}")
+                return (genre, [])
+
+        log_info(f"🔄 Fetching tracks for {len(genres)} genre(s)...")
+        inner_pbar_disable = disable_inner_tqdm or (LOG_LEVEL in ["WARNING", "ERROR"])
+        with ThreadPoolExecutor(max_workers=len(genres)) as executor:
+            future_to_genre = {executor.submit(fetch_genre_tracks, genre): genre for genre in genres}
+            with tqdm(
+                total=len(genres),
+                desc="Fetching genres",
+                unit="genre",
+                disable=inner_pbar_disable,
+            ) as pbar:
+                for future in as_completed(future_to_genre):
+                    genre = future_to_genre[future]
+                    try:
+                        genre_name, tracks = future.result()
+                        songs.extend(tracks)
+                        pbar.update(1)
+                        pbar.set_postfix({"current": genre_name, "total_tracks": len(songs)})
+                    except Exception as e:
+                        log_error(f"Error processing results for genre '{genre}': {e}")
+                        pbar.update(1)
+        log_info(f"✅ Fetched {len(songs)} total tracks from {len(genres)} genre(s)")
+
+        if release_date_filter:
+            songs = filter_by_release_date(songs, release_date_filter)
+        if artist_country_filter:
+            songs = filter_by_artist_country(songs, artist_country_filter)
+
+        total_songs = len(songs)
+        print(f"Total songs after filtering: {total_songs}")
+
+        if total_songs >= MIN_SONGS_REQUIRED:
+            print(f"Found sufficient songs ({total_songs}) for Playlist '{playlist_name}'. Creating playlist.")
+        else:
+            print(f"Not enough songs for Playlist '{playlist_name}', skipping.")
+            with _log_sync_cm(sync_log):
                 fail_playlist(playlist_name, "Not enough songs (below minimum)")
-                playlist_result_note = "Not enough songs (below minimum)"
-                continue
+            playlist_result_note = "Not enough songs (below minimum)"
+            return
 
-            # Select the required number of songs (up to SONGS_PER_PLAYLIST)
-            if liked_artists:
-                playlist_songs = prefer_liked_artists(songs, liked_artists, min(len(songs), SONGS_PER_PLAYLIST), 
-                                                    MAX_LIKED_ARTISTS_PERCENTAGE, MIN_VARIETY_PERCENTAGE)
-                print(f"Selected {len(playlist_songs)} songs (preferring liked artists) for Playlist '{playlist_name}'.")
-            else:
-                playlist_songs = random.sample(songs, min(len(songs), SONGS_PER_PLAYLIST))
-                print(f"Selected {len(playlist_songs)} random songs for Playlist '{playlist_name}'.")
-
-            # Balance artist representation to ensure no single artist exceeds the configured limit
-            print(f"Checking artist distribution for Playlist '{playlist_name}'...")
-            playlist_songs = balance_artist_representation(playlist_songs, songs, MAX_ARTIST_PERCENTAGE)
-
-            # Apply quality filters (duration, album variety, consecutive artists, mood grouping)
-            log_debug(f"Applying quality filters for Playlist '{playlist_name}'...")
-            playlist_songs = apply_quality_filters(
-                playlist_songs, 
+        if liked_artists:
+            playlist_songs = prefer_liked_artists(
                 songs,
-                min_duration_seconds=MIN_SONG_DURATION_SECONDS,
-                max_songs_per_album=MAX_SONGS_PER_ALBUM,
-                prevent_consecutive=PREVENT_CONSECUTIVE_ARTISTS,
-                mood_grouping=MOOD_GROUPING_ENABLED
+                liked_artists,
+                min(len(songs), SONGS_PER_PLAYLIST),
+                MAX_LIKED_ARTISTS_PERCENTAGE,
+                MIN_VARIETY_PERCENTAGE,
+            )
+            print(
+                f"Selected {len(playlist_songs)} songs (preferring liked artists) for Playlist '{playlist_name}'."
+            )
+        else:
+            playlist_songs = random.sample(songs, min(len(songs), SONGS_PER_PLAYLIST))
+            print(f"Selected {len(playlist_songs)} random songs for Playlist '{playlist_name}'.")
+
+        print(f"Checking artist distribution for Playlist '{playlist_name}'...")
+        playlist_songs = balance_artist_representation(playlist_songs, songs, MAX_ARTIST_PERCENTAGE)
+
+        log_debug(f"Applying quality filters for Playlist '{playlist_name}'...")
+        playlist_songs = apply_quality_filters(
+            playlist_songs,
+            songs,
+            min_duration_seconds=MIN_SONG_DURATION_SECONDS,
+            max_songs_per_album=MAX_SONGS_PER_ALBUM,
+            prevent_consecutive=PREVENT_CONSECUTIVE_ARTISTS,
+            mood_grouping=MOOD_GROUPING_ENABLED,
+        )
+
+        audio_pl = _audio_playlists_by_title(plex)
+        existing_playlist = audio_pl.get(playlist_name)
+
+        if existing_playlist:
+            print(f"Updating existing playlist: {playlist_name}")
+            existing_playlist.removeItems(existing_playlist.items())
+            existing_playlist.addItems(playlist_songs)
+
+            genre_description = ", ".join(genres)
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            existing_playlist.editSummary(
+                f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}"
             )
 
-            # Create or update the playlist
-            existing_playlist = plex.playlist(playlist_name) if playlist_name in [pl.title for pl in plex.playlists()] else None
+            if GENRES_REPLACE_POSTERS:
+                poster_data = fetch_spotify_poster(genre_group)
+                if poster_data:
+                    upload_playlist_poster_from_data(existing_playlist, poster_data)
+            playlist = existing_playlist
+        else:
+            print(f"Creating new playlist: {playlist_name}")
+            playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
 
-            if existing_playlist:
-                print(f"Updating existing playlist: {playlist_name}")
-                existing_playlist.removeItems(existing_playlist.items())
-                existing_playlist.addItems(playlist_songs)
-                
-                # Update the description with the selected genres and timestamp
-                genre_description = ", ".join(genres)
-                from datetime import datetime
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                existing_playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
-                
-                # Fetch and upload Spotify poster if enabled
-                if GENRES_REPLACE_POSTERS:
-                    poster_data = fetch_spotify_poster(genre_group)
-                    if poster_data:
-                        upload_playlist_poster_from_data(existing_playlist, poster_data)
-                playlist = existing_playlist
-            else:
-                print(f"Creating new playlist: {playlist_name}")
-                playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
-                
-                # Set the description with the selected genres and timestamp
-                genre_description = ", ".join(genres)
-                from datetime import datetime
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                playlist.editSummary(f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}")
-                
-                # Fetch and upload Spotify poster if enabled
-                if GENRES_REPLACE_POSTERS:
-                    poster_data = fetch_spotify_poster(genre_group)
-                    if poster_data:
-                        upload_playlist_poster_from_data(playlist, poster_data)
+            genre_description = ", ".join(genres)
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            playlist.editSummary(
+                f"{genre_group}\nUpdated on: {timestamp}\nGenres used: {genre_description}"
+            )
 
-            log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+            if GENRES_REPLACE_POSTERS:
+                poster_data = fetch_spotify_poster(genre_group)
+                if poster_data:
+                    upload_playlist_poster_from_data(playlist, poster_data)
+
+        log_info(f"✅ Playlist '{playlist_name}' successfully created/updated with {len(playlist_songs)} songs.")
+        with _log_sync_cm(sync_log):
             playlist_succeeded()
 
-        except Exception as e:
-            log_error(f"❌ Error during playlist generation for Playlist '{playlist_name}': {e}")
+    except Exception as e:
+        log_error(f"❌ Error during playlist generation for Playlist '{playlist_name}': {e}")
+        with _log_sync_cm(sync_log):
             fail_playlist(playlist_name, str(e))
-            playlist_result_note = str(e)[:400]
-        finally:
-            playlist_end_time = time.time()
-            elapsed_time = playlist_end_time - playlist_start_time
-            ok = bool(playlist_songs and len(playlist_songs) > 0)
-            if not ok and not (playlist_result_note or "").strip():
-                playlist_result_note = "Failed or skipped"
-            if ok:
-                log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
-            else:
-                log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
-            log_info("---------------------------------------------")
+        playlist_result_note = str(e)[:400]
+    finally:
+        playlist_end_time = time.time()
+        elapsed_time = playlist_end_time - playlist_start_time
+        ok = bool(playlist_songs and len(playlist_songs) > 0)
+        if not ok and not (playlist_result_note or "").strip():
+            playlist_result_note = "Failed or skipped"
+        if ok:
+            log_info(f"⏱️  Generation time for '{playlist_name}': {format_duration(elapsed_time)}")
+        else:
+            log_info(f"⏱️  Time taken for '{playlist_name}' (failed): {format_duration(elapsed_time)}")
+        log_info("---------------------------------------------")
+        with _log_sync_cm(sync_log):
             record_playlist_result(
                 playlist_name,
                 elapsed_time,
@@ -1306,10 +1353,91 @@ def generate_genre_playlists():
                 "" if ok else playlist_result_note,
             )
 
+
+# Generate playlists based on genre mixes
+def generate_genre_playlists():
+    print("🔌 Connecting to Plex server...")
+    try:
+        music_library = plex.library.section("Music")  # Adjust if your music library name differs
+        print("✅ Successfully connected to Plex server and accessed 'Music' library.")
+    except Exception as e:
+        print(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
+        return
+
+    genre_mixes = load_genre_mixes()
+    if not genre_mixes:
+        print("❌ No named genre mix entries in JSON. Exiting.")
+        fail_playlist("(setup)", "No genre mixes available")
+        return
+
+    liked_artists = _load_liked_artists_for_genres()
+
+    for i, (genre_group, group_data) in enumerate(genre_mixes.items()):
+        playlist_name = f"{genre_group} Mix"
+        if skip_unless_target_playlist(playlist_name):
+            continue
+        _process_single_genre_mix(plex, music_library, genre_group, group_data, liked_artists)
+
+
+def generate_genre_playlists_parallel(max_workers: int = 4) -> None:
+    """Run each genre-mix playlist in parallel using one PlexServer client per worker (experimental)."""
+    print("🔌 Connecting to Plex server...")
+    try:
+        plex.library.section("Music")
+        print("✅ Successfully connected to Plex server and accessed 'Music' library.")
+    except Exception as e:
+        print(f"❌ Error connecting to Plex server or accessing library: {e}")
+        fail_playlist("(setup/plex)", str(e))
+        return
+
+    genre_mixes = load_genre_mixes()
+    if not genre_mixes:
+        print("❌ No named genre mix entries in JSON. Exiting.")
+        fail_playlist("(setup)", "No genre mixes available")
+        return
+
+    liked_artists = _load_liked_artists_for_genres()
+    tasks = []
+    for genre_group, group_data in genre_mixes.items():
+        playlist_name = f"{genre_group} Mix"
+        if skip_unless_target_playlist(playlist_name):
+            continue
+        tasks.append((genre_group, group_data))
+
+    if not tasks:
+        log_info("No genre mix playlists to process after filters (PPG_ONLY_PLAYLIST_TITLE?).")
+        return
+
+    max_workers = max(1, min(max_workers, len(tasks)))
+    log_info(
+        f"🧪 Parallel mode: {len(tasks)} playlist(s), max_workers={max_workers} "
+        f"(compare wall time to sequential PPG-Genres.py)"
+    )
+    sync = threading.Lock()
+
+    def run_one(item) -> None:
+        genre_group, group_data = item
+        p2 = PlexServer(PLEX_URL, PLEX_TOKEN)
+        ml = p2.library.section("Music")
+        _process_single_genre_mix(
+            p2,
+            ml,
+            genre_group,
+            group_data,
+            liked_artists,
+            sync_log=sync,
+            disable_inner_tqdm=True,
+            outer_parallel_degree=max_workers,
+        )
+
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        list(ex.map(run_one, tasks))
+
 # Run the script
 if __name__ == "__main__":
     import sys
-    from ppg_run_logger import start_run, finish_run
+    from module.ppg_run_logger import start_run, finish_run
 
     start_run("PPG-Genres.py")
     try:

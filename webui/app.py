@@ -17,6 +17,7 @@ import os
 import queue
 import re
 from collections import defaultdict
+import signal
 import subprocess
 import sys
 import threading
@@ -134,6 +135,8 @@ def _failed_playlists_from_log(log_text: str, script_id: str) -> list[dict]:
 LOG_TXT_PATH = REPO_ROOT / "log.txt"
 RUN_STATE_PATH = REPO_ROOT / ".ppg_run_state.json"
 EVENTS_JSONL_PATH = REPO_ROOT / "webui" / "data" / "ppg_events.jsonl"
+# Survives web UI restarts: repo-root paths so the script subprocess cwd stays valid.
+WEB_ACTIVE_JOBS_PATH = REPO_ROOT / "webui" / "data" / "active_web_jobs.json"
 
 # Per-playlist timing lines use an em dash (—) before optional failure notes.
 _TIMING_LINE = re.compile(
@@ -270,6 +273,19 @@ def _load_active_run_state() -> dict | None:
     if not isinstance(data, dict) or not data.get("active"):
         return None
     return data
+
+
+def _web_script_id_for_runner_filename(filename: str | None) -> str | None:
+    """Map ppg_run_logger script_name (e.g. PPG-Moods.py) to web UI script id."""
+    if not filename:
+        return None
+    fn = str(filename).strip()
+    if not fn:
+        return None
+    for sid, script_fn in SCRIPTS.items():
+        if fn == script_fn:
+            return sid
+    return None
 
 
 def _event_ts_display(iso_val: str | None) -> str:
@@ -665,6 +681,18 @@ def _build_stats_payload(*, max_runs: int, max_slowest: int, max_recent: int) ->
         except OSError:
             events_exists = False
 
+    chronic_payload: dict = {
+        "threshold": 3,
+        "file": "webui/data/playlist_chronic_failures.json",
+        "playlists": [],
+    }
+    try:
+        from module.ppg_chronic_failures import read_chronic_failures_for_api
+
+        chronic_payload = read_chronic_failures_for_api()
+    except Exception:
+        pass
+
     return {
         "ok": True,
         "log_path": str(LOG_TXT_PATH),
@@ -681,6 +709,9 @@ def _build_stats_payload(*, max_runs: int, max_slowest: int, max_recent: int) ->
         "recent_runs": recent,
         "by_script": by_script,
         "current_run": current_run,
+        "chronic_failures": chronic_payload.get("playlists") or [],
+        "chronic_threshold": chronic_payload.get("threshold"),
+        "chronic_file": chronic_payload.get("file"),
     }
 
 
@@ -768,6 +799,49 @@ def _playlist_is_ppg_managed(title: str | None, mix_titles: set[str]) -> bool:
     ):
         return True
     return t in mix_titles
+
+
+def _mix_title_base_key(title: str) -> str | None:
+    t = (title or "").strip()
+    if len(t) < 5 or not t.endswith(" Mix"):
+        return None
+    return t[:-4].strip()
+
+
+def classify_regenerate_playlist(title: str) -> tuple[str | None, str | None]:
+    """Map a Plex playlist title to SCRIPTS id for single-playlist regeneration."""
+    t = (title or "").strip()
+    if not t:
+        return None, "Missing playlist title"
+    if t == "Liked Artists Collection":
+        return "liked_artists_collection", None
+    if _PPG_TITLE_DAILY.match(t):
+        return "daily", None
+    if _PPG_TITLE_WEEKLY.match(t):
+        return "weekly", None
+    if _PPG_TITLE_ARTIST_MIX.match(t):
+        return "liked_artists", None
+    mix_titles = _ppg_mix_playlist_titles_from_config()
+    if t not in mix_titles:
+        return (
+            None,
+            "Not a recognized PPG playlist title (daily, weekly, genre/mood mix, artist mix, or collection).",
+        )
+    key = _mix_title_base_key(t)
+    if not key:
+        return None, "Invalid mix title"
+    genre_keys = _json_top_level_string_keys(
+        REPO_ROOT / JSON_GROUP_FILES["named_genre_mix_playlists"]
+    )
+    mood_keys = _json_top_level_string_keys(REPO_ROOT / JSON_GROUP_FILES["mood_groups"])
+    if key in genre_keys:
+        return "genres", None
+    if key in mood_keys:
+        return "moods", None
+    return (
+        None,
+        "Mix name is not a key in named_genre_mix_playlists.json or mood_groups.json.",
+    )
 
 
 def _env_int(name: str) -> int | None:
@@ -869,6 +943,32 @@ def _invalidate_lac_leaf_cache_after_run(script_id: str, exit_code: int) -> None
     if script_id == "liked_artists_collection" and exit_code == 0:
         _LAC_LEAF_CACHE["ts"] = 0.0
         _LAC_LEAF_CACHE["n"] = None
+
+
+def _playlist_total_for_script(script_id: str) -> int | None:
+    """Expected Plex playlist builds per run (for web UI progress). None if not applicable."""
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(REPO_ROOT / ".env")
+    except ImportError:
+        pass
+
+    if script_id == "daily":
+        return _env_int("DAILY_PLAYLIST_COUNT")
+    if script_id == "weekly":
+        return _env_int("WEEKLY_PLAYLIST_COUNT")
+    if script_id == "liked_artists":
+        return _env_int("LIKED_ARTISTS_PLAYLIST_COUNT")
+    if script_id == "moods":
+        n = _count_top_level_keys(REPO_ROOT / JSON_GROUP_FILES["mood_groups"])
+        return n if n > 0 else None
+    if script_id == "genres":
+        n = _count_top_level_keys(
+            REPO_ROOT / JSON_GROUP_FILES["named_genre_mix_playlists"]
+        )
+        return n if n > 0 else None
+    return None
 
 
 def script_card_meta() -> dict[str, str | None]:
@@ -1110,6 +1210,8 @@ def _run_script_worker(
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
+    for _ek, _ev in (job_ref.get("env_overrides") or {}).items():
+        env[str(_ek)] = str(_ev)
 
     live_path: Path | None = None
     live_f = None
@@ -1251,15 +1353,23 @@ def api_status():
                 {
                     "id": j["id"],
                     "script_id": j["script_id"],
-                    "label": SCRIPT_LABELS.get(j["script_id"], j["script_id"]),
+                    "label": j.get("label_override")
+                    or SCRIPT_LABELS.get(j["script_id"], j["script_id"]),
+                    "playlist_total": j.get("playlist_total"),
                 }
             )
     first = active_jobs[0] if len(active_jobs) == 1 else None
+    ext_raw = _load_active_run_state()
+    ext_out: dict | None = None
+    if ext_raw:
+        sid = _web_script_id_for_runner_filename(ext_raw.get("script_name"))
+        ext_out = {**ext_raw, "web_script_id": sid}
     return jsonify(
         {
             "busy": len(active_jobs) > 0,
             "active_jobs": active_jobs,
             "job": first,
+            "external_run": ext_out,
         }
     )
 
@@ -1305,14 +1415,22 @@ def api_stats():
     return jsonify(payload)
 
 
-@app.route("/api/run", methods=["POST"])
-def api_run():
-    data = request.get_json(silent=True) or {}
-    script_id = data.get("script")
-    if not script_id or script_id not in SCRIPTS:
-        return jsonify({"error": "Invalid or missing script id"}), 400
+def _launch_script_job(
+    script_id: str,
+    *,
+    env_overrides: dict[str, str] | None = None,
+    label_override: str | None = None,
+):
+    """Start a generator subprocess job (full run or single-playlist via env)."""
     if not _script_path(script_id):
         return jsonify({"error": "Script file missing on disk"}), 404
+
+    overrides = dict(env_overrides or {})
+    is_single = bool(overrides.get("PPG_ONLY_PLAYLIST_TITLE"))
+    display_label = label_override or SCRIPT_LABELS.get(script_id, script_id)
+    playlist_total = (
+        1 if is_single else _playlist_total_for_script(script_id)
+    )
 
     with _job_lock:
         existing = _active_job_for_script_unlocked(script_id)
@@ -1343,10 +1461,13 @@ def api_run():
             "output_buffer": output_buf,
             "output_lock": output_lock,
             "completed_ts": 0.0,
+            "playlist_total": playlist_total,
+            "env_overrides": overrides,
+            "label_override": label_override,
         }
         _jobs[job_id] = job_ref
 
-        banner = f"=== Starting: {SCRIPT_LABELS.get(script_id, script_id)} ===\n"
+        banner = f"=== Starting: {display_label} ===\n"
         with output_lock:
             output_buf.append(banner)
             _trim_job_output_buffer(output_buf)
@@ -1363,8 +1484,42 @@ def api_run():
         {
             "job_id": job_id,
             "script_id": script_id,
-            "label": SCRIPT_LABELS.get(script_id, script_id),
+            "label": display_label,
+            "playlist_total": playlist_total,
         }
+    )
+
+
+@app.route("/api/run", methods=["POST"])
+def api_run():
+    data = request.get_json(silent=True) or {}
+    script_id = data.get("script")
+    if not script_id or script_id not in SCRIPTS:
+        return jsonify({"error": "Invalid or missing script id"}), 400
+    return _launch_script_job(script_id)
+
+
+@app.route("/api/regenerate-playlist", methods=["POST"])
+def api_regenerate_playlist():
+    """Regenerate one PPG-managed playlist (sets PPG_ONLY_PLAYLIST_TITLE for the child)."""
+    data = request.get_json(silent=True) or {}
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"error": "Missing title"}), 400
+    if data.get("smart"):
+        return jsonify(
+            {"error": "Smart playlists cannot be rebuilt with this action."}
+        ), 400
+
+    script_id, err = classify_regenerate_playlist(title)
+    if err or not script_id:
+        return jsonify({"error": err or "Unknown playlist"}), 400
+
+    label = f"{SCRIPT_LABELS.get(script_id, script_id)} — {title}"
+    return _launch_script_job(
+        script_id,
+        env_overrides={"PPG_ONLY_PLAYLIST_TITLE": title},
+        label_override=label,
     )
 
 
@@ -1595,6 +1750,83 @@ def api_plex_playlists():
                 continue
         items.sort(key=lambda x: (x["title"] or "").lower())
         return jsonify({"playlists": items, "count": len(items)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+
+_MAX_PLAYLIST_DELETE_BATCH = 500
+
+
+@app.route("/api/plex/playlists/delete", methods=["POST"])
+def api_plex_playlists_delete():
+    """Delete audio playlists on the Plex server by ratingKey (from /api/plex/playlists)."""
+    try:
+        from dotenv import load_dotenv
+        from plexapi.server import PlexServer
+
+        load_dotenv(REPO_ROOT / ".env")
+    except ImportError:
+        pass
+
+    url = (os.getenv("PLEX_URL") or "").strip()
+    token = (os.getenv("PLEX_TOKEN") or "").strip()
+    if not url or not token:
+        return jsonify(
+            {"error": "Set PLEX_URL and PLEX_TOKEN in .env to delete playlists."}
+        ), 400
+
+    body = request.get_json(force=True, silent=True) or {}
+    raw_keys = body.get("rating_keys")
+    if not isinstance(raw_keys, list) or not raw_keys:
+        return jsonify({"error": "Provide a non-empty rating_keys array."}), 400
+
+    try:
+        int_keys = [int(k) for k in raw_keys]
+    except (TypeError, ValueError):
+        return jsonify({"error": "rating_keys must be integers."}), 400
+
+    if len(int_keys) > _MAX_PLAYLIST_DELETE_BATCH:
+        return jsonify(
+            {
+                "error": f"Too many playlists in one request (max {_MAX_PLAYLIST_DELETE_BATCH})."
+            }
+        ), 400
+
+    seen: set[int] = set()
+    deduped: list[int] = []
+    for k in int_keys:
+        if k not in seen:
+            seen.add(k)
+            deduped.append(k)
+
+    deleted: list[int] = []
+    errors: list[dict] = []
+    try:
+        plex = PlexServer(url, token)
+        for rk in deduped:
+            try:
+                item = plex.fetchItem(rk)
+            except Exception as e:
+                errors.append({"rating_key": rk, "error": str(e)})
+                continue
+            if item is None:
+                errors.append({"rating_key": rk, "error": "Not found"})
+                continue
+            item_type = (getattr(item, "type", None) or getattr(item, "TYPE", None) or "")
+            if str(item_type).lower() != "playlist":
+                errors.append(
+                    {
+                        "rating_key": rk,
+                        "error": f"Not a playlist (type={item_type!r})",
+                    }
+                )
+                continue
+            try:
+                item.delete()
+                deleted.append(rk)
+            except Exception as e:
+                errors.append({"rating_key": rk, "error": str(e)})
+        return jsonify({"deleted": deleted, "errors": errors})
     except Exception as e:
         return jsonify({"error": str(e)}), 502
 

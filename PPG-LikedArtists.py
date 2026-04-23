@@ -10,7 +10,13 @@ from tqdm import tqdm
 from urllib.parse import quote
 import urllib.request
 import tempfile
-from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
+from module.ppg_track_filters import (
+    filter_playlist_and_pool_for_quality,
+    load_skip_title_album_regexes,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -52,13 +58,18 @@ REQUIRED_ENV_VARS = [
     "LOG_LEVEL",
     # Liked Artists-specific
     "LIKED_ARTISTS_PLAYLIST_COUNT",
-    "LIKED_ARTISTS_MIN_SONGS_REQUIRED",
     "LIKED_ARTISTS_LOG_FILE",
-    "LIKED_ARTISTS_MAX_LOG_ENTRIES"
+    "LIKED_ARTISTS_MAX_LOG_ENTRIES",
 ]
+if not (os.getenv("PPG_MIN_SONGS_REQUIRED_PERCENT") or "").strip():
+    REQUIRED_ENV_VARS.insert(
+        REQUIRED_ENV_VARS.index("LIKED_ARTISTS_PLAYLIST_COUNT") + 1,
+        "LIKED_ARTISTS_MIN_SONGS_REQUIRED",
+    )
 
 # Validate environment variables before proceeding
 validate_env_vars(REQUIRED_ENV_VARS, "PPG-LikedArtists.py")
+validate_min_songs_env("LIKED_ARTISTS_MIN_SONGS_REQUIRED", "PPG-LikedArtists.py")
 
 # Fetch all configuration from environment variables (no defaults)
 PLEX_URL = os.getenv("PLEX_URL")
@@ -80,6 +91,8 @@ MIN_SONG_DURATION_SECONDS = int(os.getenv("MIN_SONG_DURATION_SECONDS"))
 MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
 MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
+
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
 
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
@@ -134,7 +147,9 @@ def format_duration(seconds):
 
 # Liked Artists-specific configuration
 PLAYLIST_COUNT = int(os.getenv("LIKED_ARTISTS_PLAYLIST_COUNT"))
-MIN_SONGS_REQUIRED = float(os.getenv("LIKED_ARTISTS_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
+MIN_SONGS_REQUIRED = (
+    resolve_min_songs_fraction("LIKED_ARTISTS_MIN_SONGS_REQUIRED") * SONGS_PER_PLAYLIST
+)
 LOG_FILE = os.getenv("LIKED_ARTISTS_LOG_FILE")
 MAX_LOG_ENTRIES = int(os.getenv("LIKED_ARTISTS_MAX_LOG_ENTRIES"))
 
@@ -586,8 +601,15 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
                           max_songs_per_album=1, prevent_consecutive=True, 
                           mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
+    playlist_songs, all_available_songs = filter_playlist_and_pool_for_quality(
+        playlist_songs,
+        all_available_songs,
+        _SKIP_SONG_TITLE_RE,
+        _SKIP_ALBUM_TITLE_RE,
+        log_info,
+    )
     original_count = len(playlist_songs)
-    
+
     if min_duration_seconds > 0:
         log_info(f"🔄 Filtering by minimum duration ({min_duration_seconds}s)...")
         playlist_songs = filter_by_minimum_duration(playlist_songs, min_duration_seconds)
@@ -1268,6 +1290,8 @@ def generate_liked_artists_playlists():
     for i in range(PLAYLIST_COUNT):
         playlist_start_time = time.time()
         playlist_name = f"Artist Mix ({i + 1})"
+        if skip_unless_target_playlist(playlist_name):
+            continue
         playlist_result_note = ""
         playlist_songs = []
         
@@ -1477,7 +1501,7 @@ def generate_liked_artists_playlists():
 # Run the script
 if __name__ == "__main__":
     import sys
-    from ppg_run_logger import start_run, finish_run
+    from module.ppg_run_logger import start_run, finish_run
 
     start_run("PPG-LikedArtists.py")
     try:

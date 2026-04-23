@@ -44,7 +44,13 @@ The .json files can easily be extended, you can find a list of genres and moods 
 
 ### Setup:
   1. Grab your Plex Token and IP and put it into the .env (remove the example from the file name). If you are upgrading from an older tree, rename `genre_groups.json` → `daily_weekly_genre_pools.json` and `genre_mixes.json` → `named_genre_mix_playlists.json` (or set `DAILY_GENRE_GROUPS_FILE`, `WEEKLY_GENRE_GROUPS_FILE`, and `GENRE_MIXES_FILE` to your old paths).
-  2. Install plexapi through Python. (python -m pip install plexapi)
+  2. **Dependencies:** Use a virtual environment (required on Debian/Ubuntu and other distros that show `externally-managed-environment` / PEP 668):
+     ```bash
+     cd /path/to/PPG
+     python3 -m venv .venv
+     .venv/bin/pip install -r requirements.txt
+     ```
+     Run scripts with `.venv/bin/python PPG-Daily.py` (etc.) or activate the venv first. For the web UI systemd unit, point `ExecStart` at `.venv/bin/python webui/app.py`.
   3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
      I've included a few obviously self-drawn examples. ;)

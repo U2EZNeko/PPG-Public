@@ -1,0 +1,16 @@
+[Unit]
+Description=PPG Web UI (Flask)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/user/Scripts/PPG
+Environment=PYTHONUNBUFFERED=1
+# Create venv first: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+ExecStart=/home/user/Scripts/PPG/.venv/bin/python webui/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

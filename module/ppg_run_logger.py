@@ -3,7 +3,7 @@ Append a short run summary to log.txt in the repo root after each generator scri
 
 Also appends structured lines to webui/data/ppg_events.jsonl on every run_start,
 playlist timing, failure, and run_end so the web Statistics tab and /api/stats
-stay accurate for cron/CLI runs (paths are next to this file, not cwd-relative).
+stay accurate for cron/CLI runs (paths are repo-root, not cwd-relative).
 
 Used by PPG-*.py entry points: start_run() at startup, finish_run() in finally,
 fail_playlist() / playlist_succeeded() during the run.
@@ -36,7 +36,7 @@ def _ensure_utf8_stdio() -> None:
 
 _ensure_utf8_stdio()
 
-_REPO_ROOT = Path(__file__).resolve().parent
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 LOG_PATH = _REPO_ROOT / "log.txt"
 RUN_STATE_PATH = _REPO_ROOT / ".ppg_run_state.json"
 # Append-only machine log for the web UI / Statistics (cron-safe: paths not cwd-relative).
@@ -139,6 +139,7 @@ class RunRecorder:
         payload = {
             "version": 1,
             "active": active,
+            "run_id": self.run_id,
             "script_name": self.script_name,
             "started_at": datetime.fromtimestamp(self._t0).isoformat(timespec="seconds"),
             "updated_at": datetime.now().isoformat(timespec="seconds"),
@@ -261,6 +262,12 @@ def fail_playlist(playlist: str, reason: str = "") -> None:
                     "t": _now_iso(),
                 }
             )
+            try:
+                from .ppg_chronic_failures import record_playlist_failure
+
+                record_playlist_failure(pl, r, _current.script_name)
+            except Exception:
+                pass
         _sync_live_state()
 
 
@@ -294,6 +301,13 @@ def record_playlist_result(
                     "t": _now_iso(),
                 }
             )
+            if ok:
+                try:
+                    from .ppg_chronic_failures import record_playlist_success
+
+                    record_playlist_success(pl)
+                except Exception:
+                    pass
         _sync_live_state()
 
 
@@ -320,6 +334,14 @@ def finish_run(had_exception: bool = False) -> None:
         }
     )
     rec.append_to_file(had_exception=had_exception)
+    try:
+        from .ppg_telegram import maybe_notify_run_finished
+
+        maybe_notify_run_finished(rec, had_exception)
+    except ImportError:
+        pass
+    except Exception as e:
+        print(f"ppg_telegram: {e}", file=sys.stderr)
     try:
         RUN_STATE_PATH.unlink(missing_ok=True)
     except OSError:

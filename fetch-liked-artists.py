@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 from datetime import datetime
 
+from module.ppg_track_filters import filter_tracks_by_title_album_regex, load_skip_title_album_regexes
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -43,6 +45,8 @@ validate_env_vars(REQUIRED_ENV_VARS, "fetch-liked-artists.py")
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE")
+
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
 
 # Connect to the Plex server
 print("🔌 Connecting to Plex server...")
@@ -469,7 +473,17 @@ def get_liked_artists_from_tracks():
             print("2. Are you logged in as the correct user?")
             print("3. Is your Plex server up to date?")
             return [], 0, []
-        
+
+        n_li = len(liked_items)
+        liked_items = filter_tracks_by_title_album_regex(
+            liked_items, _SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE, None
+        )
+        dropped = n_li - len(liked_items)
+        if dropped:
+            print(
+                f"🚫 Title/album regex excluded {dropped:,} liked track(s) ({len(liked_items):,} remain for artist extraction)"
+            )
+
         print(f"🎯 Found {len(liked_items):,} liked tracks, extracting artists...")
         print()
         
@@ -646,5 +660,15 @@ def main():
 
 # Run the script
 if __name__ == "__main__":
-    main()
+    import sys
+
+    from module.ppg_run_logger import finish_run, start_run
+
+    start_run("fetch-liked-artists.py")
+    try:
+        main()
+    finally:
+        exc = sys.exc_info()
+        crashed = exc[0] is not None and not issubclass(exc[0], SystemExit)
+        finish_run(had_exception=crashed)
 

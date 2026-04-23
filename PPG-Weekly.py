@@ -6,7 +6,13 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
-from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
+from module.ppg_track_filters import (
+    filter_playlist_and_pool_for_quality,
+    load_skip_title_album_regexes,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -78,6 +84,8 @@ MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
 MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
 
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
+
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
 
@@ -134,7 +142,7 @@ PLAYLIST_COUNT = int(os.getenv("WEEKLY_PLAYLIST_COUNT"))
 GENRE_GROUPS_FILE = os.getenv("WEEKLY_GENRE_GROUPS_FILE")
 WEEKLY_LOG_FILE = os.getenv("WEEKLY_LOG_FILE")
 MAX_LOG_ENTRIES = int(os.getenv("WEEKLY_MAX_LOG_ENTRIES"))
-MIN_SONGS_REQUIRED = float(os.getenv("WEEKLY_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
+MIN_SONGS_REQUIRED = resolve_min_songs_fraction("WEEKLY_MIN_SONGS_REQUIRED") * SONGS_PER_PLAYLIST
 # Max tracks to fetch per genre (default: 100)
 MAX_TRACKS_PER_GENRE = int(os.getenv("WEEKLY_MAX_TRACKS", "100"))
 
@@ -653,8 +661,15 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
                           max_songs_per_album=1, prevent_consecutive=True, 
                           mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
+    playlist_songs, all_available_songs = filter_playlist_and_pool_for_quality(
+        playlist_songs,
+        all_available_songs,
+        _SKIP_SONG_TITLE_RE,
+        _SKIP_ALBUM_TITLE_RE,
+        log_info,
+    )
     original_count = len(playlist_songs)
-    
+
     # 1. Filter by minimum duration
     if min_duration_seconds > 0:
         playlist_songs = filter_by_minimum_duration(playlist_songs, min_duration_seconds)
@@ -1039,6 +1054,8 @@ def generate_weekly_playlists():
     for i in range(PLAYLIST_COUNT):
         playlist_start_time = time.time()
         playlist_name = f"Weekly Playlist {i + 1}"
+        if skip_unless_target_playlist(playlist_name):
+            continue
         playlist_result_note = ""
         playlist_songs = []
         log_info(f"\n🎵 Starting generation for Playlist {i + 1}...")
@@ -1234,7 +1251,7 @@ def generate_weekly_playlists():
 # Run the script
 if __name__ == "__main__":
     import sys
-    from ppg_run_logger import start_run, finish_run
+    from module.ppg_run_logger import start_run, finish_run
 
     start_run("PPG-Weekly.py")
     try:

@@ -1,4 +1,5 @@
 .env
+.venv/
 *.bat
 log.txt
 .ppg_run_state.json

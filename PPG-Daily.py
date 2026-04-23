@@ -7,7 +7,13 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
-from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
+from module.ppg_track_filters import (
+    filter_playlist_and_pool_for_quality,
+    load_skip_title_album_regexes,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -52,11 +58,13 @@ REQUIRED_ENV_VARS = [
     "DAILY_GENRE_GROUPS_FILE",
     "DAILY_LOG_FILE",
     "DAILY_MAX_LOG_ENTRIES",
-    "DAILY_MIN_SONGS_REQUIRED"
 ]
+if not (os.getenv("PPG_MIN_SONGS_REQUIRED_PERCENT") or "").strip():
+    REQUIRED_ENV_VARS.append("DAILY_MIN_SONGS_REQUIRED")
 
 # Validate environment variables before proceeding
 validate_env_vars(REQUIRED_ENV_VARS, "PPG-Daily.py")
+validate_min_songs_env("DAILY_MIN_SONGS_REQUIRED", "PPG-Daily.py")
 
 # Fetch all configuration from environment variables (no defaults)
 PLEX_URL = os.getenv("PLEX_URL")
@@ -78,6 +86,8 @@ MIN_SONG_DURATION_SECONDS = int(os.getenv("MIN_SONG_DURATION_SECONDS"))
 MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
 MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
+
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
 
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
@@ -135,7 +145,7 @@ PLAYLIST_COUNT = int(os.getenv("DAILY_PLAYLIST_COUNT"))
 GENRE_GROUPS_FILE = os.getenv("DAILY_GENRE_GROUPS_FILE")
 DAILY_LOG_FILE = os.getenv("DAILY_LOG_FILE")
 MAX_LOG_ENTRIES = int(os.getenv("DAILY_MAX_LOG_ENTRIES"))
-MIN_SONGS_REQUIRED = float(os.getenv("DAILY_MIN_SONGS_REQUIRED")) * SONGS_PER_PLAYLIST
+MIN_SONGS_REQUIRED = resolve_min_songs_fraction("DAILY_MIN_SONGS_REQUIRED") * SONGS_PER_PLAYLIST
 
 # Connect to the Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -656,8 +666,15 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
                           max_songs_per_album=1, prevent_consecutive=True, 
                           mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
+    playlist_songs, all_available_songs = filter_playlist_and_pool_for_quality(
+        playlist_songs,
+        all_available_songs,
+        _SKIP_SONG_TITLE_RE,
+        _SKIP_ALBUM_TITLE_RE,
+        log_info,
+    )
     original_count = len(playlist_songs)
-    
+
     # 1. Filter by minimum duration
     if min_duration_seconds > 0:
         log_info(f"🔄 Filtering by minimum duration ({min_duration_seconds}s)...")
@@ -1176,6 +1193,8 @@ def generate_daily_playlists():
     for i in range(PLAYLIST_COUNT):
         playlist_start_time = time.time()
         playlist_name = f"Daily Playlist {i + 1}"
+        if skip_unless_target_playlist(playlist_name):
+            continue
         playlist_result_note = ""
         log_info(f"\n🎵 Starting generation for Playlist {i + 1}...")
         playlist_songs = []
@@ -1374,7 +1393,7 @@ def generate_daily_playlists():
 # Run the script
 if __name__ == "__main__":
     import sys
-    from ppg_run_logger import start_run, finish_run
+    from module.ppg_run_logger import start_run, finish_run
 
     start_run("PPG-Daily.py")
     try:

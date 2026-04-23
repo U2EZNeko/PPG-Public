@@ -10,6 +10,9 @@
   const jsonMeta = document.getElementById("json-meta");
   const jsonReloadBtn = document.getElementById("json-reload");
   const jsonFormatBtn = document.getElementById("json-format");
+  const jsonDownloadBtn = document.getElementById("json-download");
+  const jsonUploadBtn = document.getElementById("json-upload");
+  const jsonUploadInput = document.getElementById("json-upload-input");
   const jsonSaveBtn = document.getElementById("json-save");
   const jsonViewFormBtn = document.getElementById("json-view-form");
   const jsonViewRawBtn = document.getElementById("json-view-raw");
@@ -339,6 +342,44 @@
     const fileId = jsonSelect.value;
     const text = JSON.stringify(serializeEntries(fileId), null, 2) + "\n";
     jsonEditor.value = text;
+  }
+
+  function selectedJsonDiskFilename() {
+    const opt = jsonSelect.options[jsonSelect.selectedIndex];
+    return (opt && opt.getAttribute("data-file")) || "export.json";
+  }
+
+  /** Same bytes the user would save: raw buffer in raw/parse-error mode, else serialized form. */
+  function getJsonTextForExport() {
+    const id = jsonSelect.value;
+    if (!id) return null;
+    if (viewMode === "raw" || parseError) {
+      return jsonEditor.value;
+    }
+    try {
+      return JSON.stringify(serializeEntries(id), null, 2) + "\n";
+    } catch (e) {
+      showToast(e.message, true);
+      return null;
+    }
+  }
+
+  function downloadCurrentJson() {
+    const id = jsonSelect.value;
+    if (!id) return;
+    const text = getJsonTextForExport();
+    if (text == null) return;
+    const name = selectedJsonDiskFilename();
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Downloaded " + name);
   }
 
   function applyFilter() {
@@ -850,6 +891,60 @@
   });
 
   jsonFormatBtn.addEventListener("click", formatJson);
+  if (jsonDownloadBtn) {
+    jsonDownloadBtn.addEventListener("click", downloadCurrentJson);
+  }
+
+  if (jsonUploadBtn && jsonUploadInput) {
+    jsonUploadBtn.addEventListener("click", () => {
+      if (jsonDirty && !window.confirm("Discard unsaved changes and import a file?")) {
+        return;
+      }
+      jsonUploadInput.click();
+    });
+    jsonUploadInput.addEventListener("change", () => {
+      const f = jsonUploadInput.files && jsonUploadInput.files[0];
+      jsonUploadInput.value = "";
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        let text = typeof reader.result === "string" ? reader.result : "";
+        if (!text.trim()) {
+          showToast("File is empty", true);
+          return;
+        }
+        if (!text.endsWith("\n")) {
+          text += "\n";
+        }
+        jsonEditor.value = text;
+        const id = jsonSelect.value;
+        if (!id) return;
+        parseError = null;
+        try {
+          ingestJsonText(text, id);
+          setViewMode("form");
+          setJsonDirty(true);
+          updateJsonFileOptionLabel(id, entries.length);
+          updateJsonMeta("Imported from " + f.name + " (unsaved — Save writes to " + selectedJsonDiskFilename() + ")");
+          showToast("Imported " + f.name);
+        } catch (err) {
+          parseError = err;
+          entries = [];
+          jsonVisual.innerHTML =
+            '<p class="parse-error">Cannot show form view: ' +
+            escapeHtml(err.message) +
+            ". Fix JSON in raw view or reload.</p>";
+          setViewMode("raw");
+          setJsonDirty(true);
+          updateJsonMeta("Invalid JSON from file — raw editor", true);
+          showToast(err.message, true);
+        }
+      };
+      reader.onerror = () => showToast("Could not read file", true);
+      reader.readAsText(f, "UTF-8");
+    });
+  }
+
   jsonSaveBtn.addEventListener("click", saveJsonFile);
 
   if (jsonViewFormBtn) {

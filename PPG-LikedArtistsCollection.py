@@ -3,13 +3,15 @@ import json
 import os
 import time
 from tqdm import tqdm
-from ppg_run_logger import (
+from module.ppg_run_logger import (
     fail_playlist,
     finish_run,
     playlist_succeeded,
     record_playlist_result,
     start_run,
 )
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_track_filters import filter_tracks_by_title_album_regex, load_skip_title_album_regexes
 
 try:
     from dotenv import load_dotenv
@@ -46,6 +48,8 @@ PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")
 LIKED_ARTISTS_CACHE_FILE = os.getenv("LIKED_ARTISTS_CACHE_FILE")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
 
 
 LOG_LEVELS = {"DEBUG": 0, "INFO": 1, "WARNING": 2, "ERROR": 3}
@@ -182,6 +186,9 @@ def track_sort_key(track):
 def build_liked_artists_collection():
     playlist_title = "Liked Artists Collection"
     build_start = time.time()
+    if skip_unless_target_playlist(playlist_title):
+        log("INFO", "Skipping — single-playlist target does not match Liked Artists Collection.")
+        return
 
     log("INFO", "🔌 Connecting to Plex server...")
     plex = PlexServer(PLEX_URL, PLEX_TOKEN)
@@ -222,6 +229,13 @@ def build_liked_artists_collection():
 
             all_tracks_ordered.extend(tracks)
             total_tracks += len(tracks)
+
+        all_tracks_ordered = filter_tracks_by_title_album_regex(
+            all_tracks_ordered,
+            _SKIP_SONG_TITLE_RE,
+            _SKIP_ALBUM_TITLE_RE,
+            lambda msg: log("INFO", msg),
+        )
 
         if not all_tracks_ordered:
             log("ERROR", "❌ No tracks collected. Playlist not updated.")

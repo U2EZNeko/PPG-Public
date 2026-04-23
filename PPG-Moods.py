@@ -9,7 +9,13 @@ from tqdm import tqdm
 import requests
 from urllib.parse import quote
 import tempfile
-from ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
+from module.ppg_single_playlist import skip_unless_target_playlist
+from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
+from module.ppg_track_filters import (
+    filter_playlist_and_pool_for_quality,
+    load_skip_title_album_regexes,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -74,6 +80,8 @@ MAX_SONGS_PER_ALBUM = int(os.getenv("MAX_SONGS_PER_ALBUM"))
 PREVENT_CONSECUTIVE_ARTISTS = os.getenv("PREVENT_CONSECUTIVE_ARTISTS").lower() == "true"
 MOOD_GROUPING_ENABLED = os.getenv("MOOD_GROUPING_ENABLED").lower() == "true"
 
+_SKIP_SONG_TITLE_RE, _SKIP_ALBUM_TITLE_RE = load_skip_title_album_regexes()
+
 # Logging configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL").upper()
 
@@ -126,7 +134,7 @@ def format_duration(seconds):
         return f"{hours} hour{'s' if hours != 1 else ''} {minutes} minute{'s' if minutes != 1 else ''} {secs} second{'s' if secs != 1 else ''}"
 
 # Moods-specific configuration
-MIN_TRACK_PERCENT = float(os.getenv("MOODS_MIN_TRACK_PERCENT"))
+MIN_TRACK_PERCENT = resolve_min_songs_fraction("MOODS_MIN_TRACK_PERCENT")
 MOOD_GROUPS_FILE = os.getenv("MOOD_GROUPS_FILE")
 AUTO_REPLACE_POSTERS = os.getenv("MOODS_AUTO_REPLACE_POSTERS", "false").lower() == "true"
 
@@ -602,8 +610,15 @@ def apply_quality_filters(playlist_songs, all_available_songs, min_duration_seco
                           max_songs_per_album=1, prevent_consecutive=True, 
                           mood_grouping=False):
     """Apply all quality and variety filters to a playlist."""
+    playlist_songs, all_available_songs = filter_playlist_and_pool_for_quality(
+        playlist_songs,
+        all_available_songs,
+        _SKIP_SONG_TITLE_RE,
+        _SKIP_ALBUM_TITLE_RE,
+        log_info,
+    )
     original_count = len(playlist_songs)
-    
+
     # 1. Filter by minimum duration
     if min_duration_seconds > 0:
         playlist_songs = filter_by_minimum_duration(playlist_songs, min_duration_seconds)
@@ -1002,6 +1017,8 @@ def generate_mood_playlists():
 
     for group_name, group_data in mood_groups.items():
         playlist_name = f"{group_name} Mix"
+        if skip_unless_target_playlist(playlist_name):
+            continue
         playlist_start_time = time.time()
         playlist_result_note = ""
         log_info(f"\n🎵 Starting generation for Playlist '{playlist_name}'...")
@@ -1149,7 +1166,7 @@ def generate_mood_playlists():
 # Run the script
 if __name__ == "__main__":
     import sys
-    from ppg_run_logger import start_run, finish_run
+    from module.ppg_run_logger import start_run, finish_run
 
     start_run("PPG-Moods.py")
     try:
