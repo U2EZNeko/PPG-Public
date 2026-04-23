@@ -91,7 +91,7 @@
       min-width: 0;
       border-bottom: 1px solid var(--border);
       padding-bottom: 0;
-      overflow-x: scroll;
+      overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
@@ -99,11 +99,14 @@
       touch-action: pan-x pan-y;
     }
     .tabs-scroll::-webkit-scrollbar {
-      height: 5px;
+      height: 6px;
     }
     .tabs-scroll::-webkit-scrollbar-thumb {
       background: var(--border);
       border-radius: 4px;
+    }
+    .tabs-scroll::-webkit-scrollbar-track {
+      background: transparent;
     }
     .tabs {
       display: inline-block;
@@ -1945,6 +1948,8 @@
 
       /** @type {Map<string, { es: EventSource, pre: HTMLElement, scriptId: string, label: string }>} */
       const jobStreams = new Map();
+      /** @type {Map<string, number>} */
+      const streamReconnectTimers = new Map();
       const runningScriptIds = new Set();
       let statsPollTimer = null;
 
@@ -3268,11 +3273,56 @@
         }
       }
 
-      function attachStream(jobId, label, scriptId, pre) {
+      function applyJobFinished(pre, scriptId, jobId, exitCode) {
+        const code = Number(exitCode);
+        const marker = "--- Finished with exit code";
+        if (pre.textContent.indexOf(marker) < 0) {
+          const cls = code === 0 ? "line-exit-ok" : "line-exit-fail";
+          appendLogToPre(pre, "\n--- Finished with exit code " + code + " ---\n", cls, jobId);
+        }
+        const cardDone = pre.closest(".run-output-card");
+        if (cardDone) setRunOutputProgressFinished(cardDone, code);
         closeStreamForJob(jobId);
+        runningScriptIds.delete(scriptId);
+        pre._ppgJobId = null;
+        updateRunButtonsState();
+        updateStatusBar();
+        if (code === 0) {
+          recordSuccessfulRun(scriptId);
+          refreshScriptCardMeta();
+        }
+        if (code !== 0) showToast("Script exited with code " + code, true);
+      }
+
+      async function attachStream(jobId, label, scriptId, pre, options) {
+        const opts = options || {};
+        const pendingRt = streamReconnectTimers.get(jobId);
+        if (pendingRt) {
+          clearTimeout(pendingRt);
+          streamReconnectTimers.delete(jobId);
+        }
+        closeStreamForJob(jobId);
+        let restored = "";
+        try {
+          const outR = await fetch("/api/job/" + encodeURIComponent(jobId) + "/output");
+          const outJ = await outR.json().catch(() => ({}));
+          if (outR.ok && outJ.text) restored = outJ.text;
+        } catch (e) {
+          /* ignore */
+        }
+        pre.textContent = "";
+        if (opts.banner) {
+          appendLogToPre(pre, opts.banner, "line-exit-ok", jobId);
+        }
+        if (restored) appendLogToPre(pre, restored, "", jobId);
+        const cardRes = pre.closest(".run-output-card");
+        if (cardRes && cardRes._ppgProgress && pre.textContent) {
+          cardRes._ppgProgress.completed = countPlaylistSuccessesInText(pre.textContent);
+          renderRunOutputProgress(cardRes);
+        }
+        pre._ppgJobId = jobId;
         const es = new EventSource("/api/stream/" + encodeURIComponent(jobId));
         jobStreams.set(jobId, { es: es, pre: pre, scriptId: scriptId, label: label });
-        pre._ppgJobId = jobId;
         es.onmessage = function (ev) {
           let data;
           try {
@@ -3301,21 +3351,7 @@
             );
           }
           if (data.type === "result") {
-            const code = data.exit_code;
-            const cls = code === 0 ? "line-exit-ok" : "line-exit-fail";
-            appendLogToPre(pre, "\n--- Finished with exit code " + code + " ---\n", cls, jobId);
-            const cardDone = pre.closest(".run-output-card");
-            if (cardDone) setRunOutputProgressFinished(cardDone, code);
-            closeStreamForJob(jobId);
-            runningScriptIds.delete(scriptId);
-            pre._ppgJobId = null;
-            updateRunButtonsState();
-            updateStatusBar();
-            if (code === 0) {
-              recordSuccessfulRun(scriptId);
-              refreshScriptCardMeta();
-            }
-            if (code !== 0) showToast("Script exited with code " + code, true);
+            applyJobFinished(pre, scriptId, jobId, data.exit_code);
           }
           if (data.type === "heartbeat") {
             /* keep-alive */
@@ -3323,15 +3359,61 @@
         };
         es.onerror = function () {
           if (!jobStreams.has(jobId)) return;
+          if (es.readyState !== EventSource.CLOSED) return;
           closeStreamForJob(jobId);
-          if (runningScriptIds.has(scriptId)) {
-            runningScriptIds.delete(scriptId);
-            updateRunButtonsState();
-            updateStatusBar();
-          }
-          appendLogToPre(pre, "\n[Stream disconnected]\n", "line-exit-fail", null);
-          pre._ppgJobId = null;
+          if (!runningScriptIds.has(scriptId)) return;
+          if (streamReconnectTimers.has(jobId)) return;
+          streamReconnectTimers.set(
+            jobId,
+            window.setTimeout(function () {
+              streamReconnectTimers.delete(jobId);
+              if (!runningScriptIds.has(scriptId)) return;
+              void attachStream(jobId, label, scriptId, pre, {
+                banner: "\n… Stream reconnecting (output synced from server) …\n\n",
+              });
+            }, 650)
+          );
         };
+      }
+
+      async function reconcileStaleRunningJobs(activeJobIdList) {
+        const activeSet = new Set(activeJobIdList || []);
+        for (const sid of Array.from(runningScriptIds)) {
+          const card = document.querySelector(
+            '#run-outputs .run-output-card[data-script="' + sid + '"]'
+          );
+          const pre = card ? card.querySelector("pre.run-output-log") : null;
+          const jid = pre && pre._ppgJobId;
+          if (!pre || !jid) continue;
+          if (activeSet.has(jid)) continue;
+          try {
+            const ir = await fetch("/api/job/" + encodeURIComponent(jid) + "/info");
+            const ij = await ir.json().catch(() => ({}));
+            if (!ir.ok || !ij.ok) {
+              runningScriptIds.delete(sid);
+              updateRunButtonsState();
+              updateStatusBar();
+              continue;
+            }
+            if (!ij.done) continue;
+            closeStreamForJob(jid);
+            let restored = "";
+            try {
+              const outR = await fetch("/api/job/" + encodeURIComponent(jid) + "/output");
+              const outJ = await outR.json().catch(() => ({}));
+              if (outR.ok && outJ.text) restored = outJ.text;
+            } catch (e) {
+              /* ignore */
+            }
+            pre.textContent = "";
+            if (restored) appendLogToPre(pre, restored, "", jid);
+            let code = ij.exit_code;
+            if (code === undefined || code === null) code = -1;
+            applyJobFinished(pre, sid, jid, code);
+          } catch (e) {
+            /* ignore */
+          }
+        }
       }
 
       const clearLogBtn = document.getElementById("clear-log");
@@ -3371,32 +3453,13 @@
         updateStatusBar();
         const pre = ensureOutputPanel(sid, label, jobId);
         if (!pre) return;
-        pre.textContent = "";
         pre._ppgExternalPoll = false;
-        let restored = "";
-        try {
-          const outR = await fetch("/api/job/" + encodeURIComponent(jobId) + "/output");
-          const outJ = await outR.json();
-          if (outR.ok && outJ.text) restored = outJ.text;
-        } catch (e) {
-          /* ignore */
-        }
-        appendLogToPre(
-          pre,
-          "… Page reloaded — restored output from the server buffer (live stream resumes below).\n\n",
-          "line-exit-ok",
-          jobId
-        );
-        if (restored) appendLogToPre(pre, restored, "", jobId);
         const cardRes = pre.closest(".run-output-card");
-        if (cardRes) {
-          showRunOutputProgress(cardRes, job.playlist_total);
-          if (cardRes._ppgProgress) {
-            cardRes._ppgProgress.completed = countPlaylistSuccessesInText(restored);
-            renderRunOutputProgress(cardRes);
-          }
-        }
-        attachStream(jobId, label, sid, pre);
+        if (cardRes) showRunOutputProgress(cardRes, job.playlist_total);
+        await attachStream(jobId, label, sid, pre, {
+          banner:
+            "… Page reloaded — restored output from the server buffer (live stream resumes below). …\n\n",
+        });
       }
 
       let lastExternalScriptId = null;
@@ -3495,9 +3558,13 @@
           const r = await fetch("/api/status");
           const j = await r.json();
           const jobs = j.active_jobs || [];
+          const activeIds = jobs.map(function (x) {
+            return x.id;
+          });
           for (let i = 0; i < jobs.length; i++) {
             await resumeActiveJob(jobs[i]);
           }
+          await reconcileStaleRunningJobs(activeIds);
           applyExternalRun(j.external_run || null, jobs);
         } catch (e) {
           /* ignore */
@@ -3551,7 +3618,7 @@
           pre._ppgJobId = jobId;
           const cardRun = pre.closest(".run-output-card");
           if (cardRun) showRunOutputProgress(cardRun, j.playlist_total);
-          attachStream(jobId, displayLabel, sid, pre);
+          await attachStream(jobId, displayLabel, sid, pre, null);
           activateMainTab("run");
           showToast("Started: " + displayLabel);
         } catch (e) {
@@ -3602,7 +3669,7 @@
           pre._ppgJobId = j.job_id;
           const cardRun = pre.closest(".run-output-card");
           if (cardRun) showRunOutputProgress(cardRun, j.playlist_total);
-          attachStream(j.job_id, label, scriptId, pre);
+          await attachStream(j.job_id, label, scriptId, pre, null);
         } catch (e) {
           runningScriptIds.delete(scriptId);
           updateRunButtonsState();

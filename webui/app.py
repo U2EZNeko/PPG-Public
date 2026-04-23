@@ -13,11 +13,11 @@ from __future__ import annotations
 import codecs
 import contextlib
 import json
+import logging
 import os
 import queue
 import re
-from collections import defaultdict
-import signal
+from collections import defaultdict, deque
 import subprocess
 import sys
 import threading
@@ -1018,13 +1018,252 @@ app = Flask(
     static_url_path="/static",
 )
 
+_CONSOLE_DASHBOARD_LOCK = threading.Lock()
+_CONSOLE_DASHBOARD_LINES: deque[str] = deque(maxlen=10)
+_CONSOLE_DASHBOARD_HEADER: list[str] = []
+
+
+def _console_dashboard_enabled() -> bool:
+    return bool(sys.stdout and sys.stdout.isatty())
+
+
+def _render_console_dashboard() -> None:
+    if not _console_dashboard_enabled():
+        return
+    header = _CONSOLE_DASHBOARD_HEADER or ["PPG Web UI"]
+    body = list(_CONSOLE_DASHBOARD_LINES)
+    while len(body) < 10:
+        body.append("")
+    sep = "-" * 72
+    frame: list[str] = []
+    frame.extend(header)
+    frame.append(sep)
+    frame.append("Last 10 messages (live)")
+    frame.append(sep)
+    frame.extend(body)
+    out = "\x1b[2J\x1b[H" + "\n".join(frame) + "\n"
+    try:
+        sys.stdout.write(out)
+        sys.stdout.flush()
+    except OSError:
+        pass
+
+
+def _console_dashboard_push(msg: str) -> None:
+    text = (msg or "").strip()
+    if not text:
+        return
+    with _CONSOLE_DASHBOARD_LOCK:
+        _CONSOLE_DASHBOARD_LINES.append(text)
+        _render_console_dashboard()
+
 _job_lock = threading.Lock()
 # job_id -> job record (active and recently finished; pruned after completion)
 _jobs: dict[str, dict] = {}
 _MAX_COMPLETED_JOBS_KEPT = 40
+WEB_JOBS_REHYDRATE_DONE = False
 
 # Cap lines kept for “refresh while running” log replay (each line ends with \n).
 MAX_JOB_OUTPUT_LINES = 12_000
+
+
+def _live_log_path_for_job(job_id: str) -> Path:
+    return _WEB_DIR / ".live" / f"{job_id}.log"
+
+
+def _pid_still_running(pid: int) -> bool:
+    """True if a process with this pid exists (best-effort, cross-platform)."""
+    if pid is None or pid <= 0:
+        return False
+    if sys.platform == "win32":
+        import ctypes
+
+        k = ctypes.windll.kernel32
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        h = k.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+        if not h:
+            return False
+        k.CloseHandle(int(h))
+        return True
+    try:
+        os.kill(int(pid), 0)
+    except OSError:
+        return False
+    else:
+        return True
+
+
+def _read_active_web_jobs() -> list[dict]:
+    if not WEB_ACTIVE_JOBS_PATH.is_file():
+        return []
+    try:
+        raw = json.loads(WEB_ACTIVE_JOBS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        return []
+    if not isinstance(raw, dict):
+        return []
+    jobs = raw.get("jobs")
+    if not isinstance(jobs, list):
+        return []
+    out: list[dict] = []
+    for j in jobs:
+        if not isinstance(j, dict):
+            continue
+        jid = j.get("id")
+        sid = j.get("script_id")
+        pid = j.get("pid")
+        if (
+            not isinstance(jid, str)
+            or not isinstance(sid, str)
+            or not isinstance(pid, (int, float))
+        ):
+            continue
+        out.append(
+            {
+                "id": str(jid),
+                "script_id": str(sid),
+                "pid": int(pid),
+                "recovered": bool(j.get("recovered")),
+            }
+        )
+    return out
+
+
+def _write_active_web_jobs(jobs: list[dict]) -> None:
+    try:
+        WEB_ACTIVE_JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        WEB_ACTIVE_JOBS_PATH.write_text(
+            json.dumps({"jobs": jobs}, indent=0, ensure_ascii=True) + "\n",
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
+def _register_active_web_job(
+    job_id: str, script_id: str, pid: int, *, recovered: bool
+) -> None:
+    with _job_lock:
+        current = [j for j in _read_active_web_jobs() if j.get("id") != job_id]
+        current.append(
+            {
+                "id": job_id,
+                "script_id": script_id,
+                "pid": int(pid),
+                "recovered": recovered,
+            }
+        )
+        _write_active_web_jobs(current)
+
+
+def _unregister_active_web_job(job_id: str) -> None:
+    with _job_lock:
+        current = [j for j in _read_active_web_jobs() if j.get("id") != job_id]
+        _write_active_web_jobs(current)
+
+
+def _read_live_log_to_buffer_list(job_id: str) -> list[str]:
+    p = _live_log_path_for_job(job_id)
+    if not p.is_file():
+        return []
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    if not text:
+        return []
+    return text.splitlines(keepends=True)
+
+
+def _watch_recovered_subprocess(
+    job_id: str, pid: int, out_q: queue.Queue, job_ref: dict
+) -> None:
+    """After UI restart, wait until pid exits; then emit result and mark job done."""
+    while _pid_still_running(pid):
+        time.sleep(0.45)
+    note = "\n[Web UI reconnected: subprocess has exited. Exit code is unknown.]\n"
+    lock = job_ref.get("output_lock")
+    if lock is not None:
+        with lock:
+            buf: list = job_ref["output_buffer"]
+            buf.append(note)
+            _trim_job_output_buffer(buf)
+    out_q.put({"type": "line", "text": note})
+    out_q.put({"type": "result", "exit_code": -1})
+    _mark_job_completed(job_ref)
+    job_ref["done"].set()
+    _unregister_active_web_job(job_id)
+
+
+def _rehydrate_web_jobs() -> None:
+    """Re-register jobs that were still running when the last web UI process died."""
+    global WEB_JOBS_REHYDRATE_DONE
+    if WEB_JOBS_REHYDRATE_DONE:
+        return
+    WEB_JOBS_REHYDRATE_DONE = True
+
+    saved = _read_active_web_jobs()
+    if not saved:
+        return
+    pruned: list[dict] = []
+    for ent in saved:
+        jid = ent["id"]
+        sid = ent["script_id"]
+        pid = int(ent["pid"])
+        if not _pid_still_running(pid) or sid not in SCRIPTS:
+            continue
+        pruned.append(
+            {
+                "id": jid,
+                "script_id": sid,
+                "pid": pid,
+                "recovered": True,
+            }
+        )
+    if len(pruned) != len(saved):
+        _write_active_web_jobs(pruned)
+    for ent in pruned:
+        jid = ent["id"]
+        sid = ent["script_id"]
+        pid = int(ent["pid"])
+        out_q: queue.Queue = queue.Queue()
+        done = threading.Event()
+        log_lines = _read_live_log_to_buffer_list(jid)
+        if log_lines:
+            head = f"… Log restored from {_live_log_path_for_job(jid).name} …\n\n"
+            output_buf: list[str] = [head] + log_lines
+        else:
+            output_buf = [
+                f"… Recovered {SCRIPT_LABELS.get(sid, sid)} (pid {pid}) after web UI "
+                f"restart. The on-disk log is empty; stream updates when the process exits.\n"
+            ]
+        output_lock = threading.Lock()
+        job_ref = {
+            "id": jid,
+            "script_id": sid,
+            "queue": out_q,
+            "done": done,
+            "output_buffer": output_buf,
+            "output_lock": output_lock,
+            "completed_ts": 0.0,
+            "recovered": True,
+            "pid": pid,
+            "proc": None,
+            "playlist_total": None,
+            "env_overrides": {},
+            "label_override": None,
+        }
+        t = threading.Thread(
+            target=_watch_recovered_subprocess,
+            args=(jid, pid, out_q, job_ref),
+            name=f"ppg-recover-{jid[:8]}",
+            daemon=True,
+        )
+        with _job_lock:
+            if jid in _jobs:
+                continue
+            _jobs[jid] = job_ref
+        t.start()
 
 
 def _trim_job_output_buffer(buf: list[str]) -> None:
@@ -1193,6 +1432,7 @@ def _run_script_worker(
     job_ref: dict,
 ) -> None:
     def finish() -> None:
+        _unregister_active_web_job(job_id)
         _mark_job_completed(job_ref)
         done.set()
 
@@ -1213,28 +1453,32 @@ def _run_script_worker(
     for _ek, _ev in (job_ref.get("env_overrides") or {}).items():
         env[str(_ek)] = str(_ev)
 
-    live_path: Path | None = None
     live_f = None
-    if sys.platform == "win32":
-        _cleanup_stale_live_logs()
-        live_path = _WEB_DIR / ".live" / f"{job_id}.log"
-        live_path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            live_path.write_text("", encoding="utf-8")
-            live_f = open(live_path, "a", encoding="utf-8", newline="")
-        except OSError:
-            live_f = None
-        if live_f is not None:
-            _win_launch_live_log_tailer(live_path)
-            time.sleep(0.25)
-            live_msg = (
-                "Opened a separate console window with the same live output "
-                f"(mirrors below; temp file {live_path.name}).\n\n"
-            )
-            with output_lock:
-                output_buf.append(live_msg)
-                _trim_job_output_buffer(output_buf)
-            out_q.put({"type": "line", "text": live_msg})
+    _cleanup_stale_live_logs()
+    live_path = _live_log_path_for_job(job_id)
+    live_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        live_path.write_text("", encoding="utf-8")
+        live_f = open(live_path, "a", encoding="utf-8", newline="")
+    except OSError:
+        live_f = None
+    if live_f is not None and sys.platform == "win32":
+        _win_launch_live_log_tailer(live_path)
+        time.sleep(0.25)
+        live_msg = (
+            "Opened a separate console window with the same live output "
+            f"(mirrors below; temp file {live_path.name}).\n\n"
+        )
+        with output_lock:
+            output_buf.append(live_msg)
+            _trim_job_output_buffer(output_buf)
+        out_q.put({"type": "line", "text": live_msg})
+    elif live_f is not None:
+        rec_msg = f"On-disk log for recovery: {live_path.name}\n\n"
+        with output_lock:
+            output_buf.append(rec_msg)
+            _trim_job_output_buffer(output_buf)
+        out_q.put({"type": "line", "text": rec_msg})
 
     try:
         proc = subprocess.Popen(
@@ -1259,6 +1503,10 @@ def _run_script_worker(
             except OSError:
                 pass
         return
+
+    job_ref["pid"] = proc.pid
+    job_ref["proc"] = proc
+    _register_active_web_job(job_id, script_id, proc.pid, recovered=False)
 
     exit_code = -1
     buf = output_buf
@@ -1356,6 +1604,7 @@ def api_status():
                     "label": j.get("label_override")
                     or SCRIPT_LABELS.get(j["script_id"], j["script_id"]),
                     "playlist_total": j.get("playlist_total"),
+                    "recovered": bool(j.get("recovered")),
                 }
             )
     first = active_jobs[0] if len(active_jobs) == 1 else None
@@ -1461,6 +1710,9 @@ def _launch_script_job(
             "output_buffer": output_buf,
             "output_lock": output_lock,
             "completed_ts": 0.0,
+            "proc": None,
+            "pid": None,
+            "recovered": False,
             "playlist_total": playlist_total,
             "env_overrides": overrides,
             "label_override": label_override,
@@ -1870,6 +2122,19 @@ def api_stream(job_id: str):
     )
 
 
+@app.after_request
+def _console_log_recent_requests(response):
+    # Polling endpoint hits every second; keep dashboard focused on useful events.
+    path = request.path or ""
+    method = request.method or ""
+    status = int(getattr(response, "status_code", 0) or 0)
+    skip = path == "/api/status" and method == "GET" and 200 <= status < 400
+    if not skip:
+        remote = request.remote_addr or "-"
+        _console_dashboard_push(f"{method} {path} -> {status} ({remote})")
+    return response
+
+
 def _load_bind_config() -> tuple[str, int]:
     """host, port — webui/config.json first, then .env (PPG_WEB_HOST / PPG_WEB_PORT)."""
     host = "127.0.0.1"
@@ -1896,11 +2161,27 @@ def _load_bind_config() -> tuple[str, int]:
     return host, port
 
 
+# Restore in-memory job tracking (and stream queue) if web UI exited while a
+# subprocess from /api/run was still alive (e.g. service restart, crash).
+_rehydrate_web_jobs()
+
+
 def main():
     host, port = _load_bind_config()
-    print(f"PPG Web UI: http://{host}:{port}/")
-    print(f"Config: {_WEB_CONFIG_PATH} (env PPG_WEB_HOST / PPG_WEB_PORT override)")
-    print(f"Repo root (script cwd): {REPO_ROOT}")
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
+    with _CONSOLE_DASHBOARD_LOCK:
+        _CONSOLE_DASHBOARD_HEADER.clear()
+        _CONSOLE_DASHBOARD_HEADER.extend(
+            [
+                f"PPG Web UI: http://{host}:{port}/",
+                f"Config: {_WEB_CONFIG_PATH} (env PPG_WEB_HOST / PPG_WEB_PORT override)",
+                f"Repo root (script cwd): {REPO_ROOT}",
+                "HTTP request line logging is compact mode (polling suppressed).",
+            ]
+        )
+        _CONSOLE_DASHBOARD_LINES.clear()
+        _CONSOLE_DASHBOARD_LINES.append("Server starting...")
+        _render_console_dashboard()
     app.run(host=host, port=port, threaded=True, use_reloader=False)
 
 
