@@ -123,14 +123,14 @@ When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** 
 
 | Suggested file | What to show |
 | --- | --- |
-| `<img width="2544" height="650" alt="image" src="https://github.com/user-attachments/assets/5e07730b-0ad7-4303-9c49-562c26848932" />
-` | **Scripts** — grid of generators + live log / progress |
-| `<img width="2534" height="557" alt="image" src="https://github.com/user-attachments/assets/86e32d1e-dc4a-4c00-8f2f-7ff75f98e2c6" />
-` | **Playlists** — list, search, selection, delete/regenerate |
-| `<img width="2535" height="603" alt="image" src="https://github.com/user-attachments/assets/7ba6c6ed-57af-45a9-a985-2bc86bcaa483" />
-` | **Statistics** — slowest builds, failures, **Playlists needing attention** |
-| `<img width="2525" height="721" alt="image" src="https://github.com/user-attachments/assets/543778f9-474f-46c2-9c60-cd56bb861eee" />
-` | **Group JSON** editor (optional) |
+| <img width="2544" height="650" alt="image" src="https://github.com/user-attachments/assets/5e07730b-0ad7-4303-9c49-562c26848932" />
+ | **Scripts** — grid of generators + live log / progress |
+| <img width="2534" height="557" alt="image" src="https://github.com/user-attachments/assets/86e32d1e-dc4a-4c00-8f2f-7ff75f98e2c6" />
+ | **Playlists** — list, search, selection, delete/regenerate |
+| <img width="2535" height="603" alt="image" src="https://github.com/user-attachments/assets/7ba6c6ed-57af-45a9-a985-2bc86bcaa483" />
+| **Statistics** — slowest builds, failures, **Playlists needing attention** |
+| <img width="2525" height="721" alt="image" src="https://github.com/user-attachments/assets/543778f9-474f-46c2-9c60-cd56bb861eee" />
+ | **Group JSON** editor (optional) |
 
 
 ## Telegram notifications
