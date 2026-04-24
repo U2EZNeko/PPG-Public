@@ -7,8 +7,11 @@
   <script>
     (function () {
       try {
-        if (localStorage.getItem("ppg_theme") === "light") {
+        var mode = localStorage.getItem("ppg_theme");
+        if (mode === "light") {
           document.documentElement.setAttribute("data-theme", "light");
+        } else if (mode === "oled") {
+          document.documentElement.setAttribute("data-theme", "oled");
         }
         var _zs = localStorage.getItem("ppg_ui_scale");
         if (_zs != null) {
@@ -16,6 +19,19 @@
           if (!isNaN(_zn) && _zn >= 0.75 && _zn <= 1.5) {
             document.documentElement.style.setProperty("--ui-zoom", String(_zn));
           }
+        }
+        var _ac = localStorage.getItem("ppg_ui_accent");
+        if (/^#([0-9a-fA-F]{6})$/.test(_ac || "")) {
+          var _hex = String(_ac).toUpperCase();
+          var _r = Math.round(parseInt(_hex.slice(1, 3), 16) * 0.78);
+          var _g = Math.round(parseInt(_hex.slice(3, 5), 16) * 0.78);
+          var _b = Math.round(parseInt(_hex.slice(5, 7), 16) * 0.78);
+          var _to2 = function (n) { return n.toString(16).toUpperCase().padStart(2, "0"); };
+          document.documentElement.style.setProperty("--accent", _hex);
+          document.documentElement.style.setProperty(
+            "--accent-dim",
+            "#" + _to2(_r) + _to2(_g) + _to2(_b)
+          );
         }
       } catch (e) {}
     })();
@@ -53,6 +69,21 @@
       --inset: #e4e9f2;
       --on-accent: #ffffff;
       --shadow-toast: rgba(0, 0, 0, 0.12);
+    }
+    html[data-theme="oled"] {
+      color-scheme: dark;
+      --bg: #000000;
+      --surface: #050505;
+      --border: #141414;
+      --text: #f2f4f7;
+      --muted: #a2a7b3;
+      --accent: #7fa9ff;
+      --accent-dim: #5d86df;
+      --danger: #f07e87;
+      --ok: #8ee0a6;
+      --inset: #020202;
+      --on-accent: #ffffff;
+      --shadow-toast: rgba(0, 0, 0, 0.55);
     }
     * { box-sizing: border-box; }
     html {
@@ -941,6 +972,77 @@
       color: var(--muted);
       min-width: 2.75rem;
       text-align: right;
+    }
+    .ui-theme-field {
+      margin: 0.9rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .ui-theme-field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .ui-theme-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+    }
+    .ui-theme-hint {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    #ui-theme-oled {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.38rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      white-space: nowrap;
+    }
+    #ui-theme-oled[aria-pressed="true"] {
+      background: var(--accent);
+      color: var(--on-accent);
+      border-color: transparent;
+    }
+    .ui-accent-field {
+      margin: 0.9rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .ui-accent-field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .ui-accent-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    #ui-accent-color {
+      width: 2.2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+    .ui-accent-value {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      min-width: 5.5rem;
+      text-transform: uppercase;
     }
     .ppg-dialog-inner {
       padding: 1.15rem 1.3rem 1rem;
@@ -2029,6 +2131,20 @@
           <span id="ui-scale-value" class="ui-scale-value" aria-live="polite">100%</span>
         </div>
       </div>
+      <div class="ui-theme-field">
+        <label for="ui-theme-oled">Theme mode</label>
+        <div class="ui-theme-row">
+          <p class="ui-theme-hint">Enable true black for OLED screens (dark mode only).</p>
+          <button type="button" id="ui-theme-oled" aria-pressed="false">OLED black: Off</button>
+        </div>
+      </div>
+      <div class="ui-accent-field">
+        <label for="ui-accent-color">Accent color</label>
+        <div class="ui-accent-row">
+          <input type="color" id="ui-accent-color" value="#6c9ef8" />
+          <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
+        </div>
+      </div>
       <div class="ppg-dialog-actions">
         <button type="button" id="ui-settings-reset">Reset</button>
         <button type="button" id="ui-settings-done">Done</button>
@@ -2057,12 +2173,38 @@
       const themeToggle = document.getElementById("theme-toggle");
       const themeLabel = document.getElementById("theme-toggle-label");
       const themeIcon = document.getElementById("theme-toggle-icon");
+      const uiThemeOledBtn = document.getElementById("ui-theme-oled");
       const THEME_KEY = "ppg_theme";
-      function themeIsLight() {
-        return document.documentElement.getAttribute("data-theme") === "light";
+      const DARK_VARIANT_KEY = "ppg_theme_dark_variant";
+      function readDarkVariant() {
+        try {
+          const v = localStorage.getItem(DARK_VARIANT_KEY);
+          if (v === "dark" || v === "oled") return v;
+          const t = localStorage.getItem(THEME_KEY);
+          if (t === "oled") return "oled";
+        } catch (e) {}
+        return "dark";
       }
-      function applyUiTheme(light) {
-        if (light) {
+      function persistDarkVariant(mode) {
+        const m = mode === "oled" ? "oled" : "dark";
+        try {
+          localStorage.setItem(DARK_VARIANT_KEY, m);
+        } catch (e) {}
+      }
+      function readThemeMode() {
+        const t = document.documentElement.getAttribute("data-theme");
+        if (t === "light" || t === "oled") return t;
+        return "dark";
+      }
+      function themeIsLight() {
+        return readThemeMode() === "light";
+      }
+      function themeIsOled() {
+        return readThemeMode() === "oled";
+      }
+      function applyUiThemeMode(mode) {
+        const m = mode === "light" || mode === "oled" ? mode : "dark";
+        if (m === "light") {
           document.documentElement.setAttribute("data-theme", "light");
           if (themeToggle) {
             themeToggle.setAttribute("aria-pressed", "false");
@@ -2070,6 +2212,14 @@
           }
           if (themeLabel) themeLabel.textContent = "Dark";
           if (themeIcon) themeIcon.textContent = "🌙";
+        } else if (m === "oled") {
+          document.documentElement.setAttribute("data-theme", "oled");
+          if (themeToggle) {
+            themeToggle.setAttribute("aria-pressed", "true");
+            themeToggle.title = "Switch to light theme";
+          }
+          if (themeLabel) themeLabel.textContent = "Light";
+          if (themeIcon) themeIcon.textContent = "\u2600";
         } else {
           document.documentElement.removeAttribute("data-theme");
           if (themeToggle) {
@@ -2079,17 +2229,39 @@
           if (themeLabel) themeLabel.textContent = "Light";
           if (themeIcon) themeIcon.textContent = "\u2600";
         }
+        if (uiThemeOledBtn) {
+          const on = m === "oled";
+          uiThemeOledBtn.setAttribute("aria-pressed", on ? "true" : "false");
+          uiThemeOledBtn.textContent = on ? "OLED black: On" : "OLED black: Off";
+          uiThemeOledBtn.title = on
+            ? "Disable true-black OLED mode"
+            : "Enable true-black OLED mode";
+        }
+      }
+      function persistAndApplyThemeMode(mode) {
+        const m = mode === "light" || mode === "oled" ? mode : "dark";
+        if (m === "dark" || m === "oled") {
+          persistDarkVariant(m);
+        }
+        try {
+          localStorage.setItem(THEME_KEY, m);
+        } catch (e) {}
+        applyUiThemeMode(m);
       }
       function initThemeToggle() {
-        if (!themeToggle) return;
-        applyUiTheme(themeIsLight());
-        themeToggle.addEventListener("click", function () {
-          var next = !themeIsLight();
-          try {
-            localStorage.setItem(THEME_KEY, next ? "light" : "dark");
-          } catch (e) {}
-          applyUiTheme(next);
-        });
+        applyUiThemeMode(readThemeMode());
+        if (themeToggle) {
+          themeToggle.addEventListener("click", function () {
+            var next = themeIsLight() ? readDarkVariant() : "light";
+            persistAndApplyThemeMode(next);
+          });
+        }
+        if (uiThemeOledBtn) {
+          uiThemeOledBtn.addEventListener("click", function () {
+            var next = themeIsOled() ? "dark" : "oled";
+            persistAndApplyThemeMode(next);
+          });
+        }
       }
       initThemeToggle();
 
@@ -2097,9 +2269,50 @@
       const uiSettingsDialog = document.getElementById("ui-settings-dialog");
       const uiScaleSlider = document.getElementById("ui-scale-slider");
       const uiScaleValue = document.getElementById("ui-scale-value");
+      const uiAccentColor = document.getElementById("ui-accent-color");
+      const uiAccentValue = document.getElementById("ui-accent-value");
       const uiSettingsOpen = document.getElementById("ui-settings-open");
       const uiSettingsDone = document.getElementById("ui-settings-done");
       const uiSettingsReset = document.getElementById("ui-settings-reset");
+      const UI_ACCENT_KEY = "ppg_ui_accent";
+      const DEFAULT_ACCENT = "#6C9EF8";
+      function normalizeHexColor(v) {
+        const s = String(v || "").trim();
+        const m = /^#([0-9a-fA-F]{6})$/.exec(s);
+        return m ? ("#" + m[1].toUpperCase()) : null;
+      }
+      function dimHexColor(hex, factor) {
+        const h = normalizeHexColor(hex) || DEFAULT_ACCENT;
+        const f = typeof factor === "number" ? Math.max(0, Math.min(1, factor)) : 0.78;
+        const r = Math.round(parseInt(h.slice(1, 3), 16) * f);
+        const g = Math.round(parseInt(h.slice(3, 5), 16) * f);
+        const b = Math.round(parseInt(h.slice(5, 7), 16) * f);
+        const to2 = function (n) {
+          return n.toString(16).toUpperCase().padStart(2, "0");
+        };
+        return "#" + to2(r) + to2(g) + to2(b);
+      }
+      function readStoredAccent() {
+        try {
+          const raw = localStorage.getItem(UI_ACCENT_KEY);
+          return normalizeHexColor(raw) || DEFAULT_ACCENT;
+        } catch (e) {
+          return DEFAULT_ACCENT;
+        }
+      }
+      function applyAccentColor(hex, persist) {
+        const c = normalizeHexColor(hex) || DEFAULT_ACCENT;
+        const d = dimHexColor(c, 0.78);
+        document.documentElement.style.setProperty("--accent", c);
+        document.documentElement.style.setProperty("--accent-dim", d);
+        if (uiAccentColor) uiAccentColor.value = c;
+        if (uiAccentValue) uiAccentValue.textContent = c;
+        if (persist !== false) {
+          try {
+            localStorage.setItem(UI_ACCENT_KEY, c);
+          } catch (e) {}
+        }
+      }
       function readUiZoom() {
         var raw = getComputedStyle(document.documentElement).getPropertyValue("--ui-zoom").trim();
         var n = parseFloat(raw);
@@ -2124,12 +2337,19 @@
       function initUiScaleControls() {
         if (!uiScaleSlider || !uiSettingsDialog) return;
         setUiZoom(readUiZoom(), false);
+        applyAccentColor(readStoredAccent(), false);
         uiScaleSlider.addEventListener("input", function () {
           setUiZoom(parseInt(uiScaleSlider.value, 10) / 100, true);
         });
+        if (uiAccentColor) {
+          uiAccentColor.addEventListener("input", function () {
+            applyAccentColor(uiAccentColor.value, true);
+          });
+        }
         if (uiSettingsOpen) {
           uiSettingsOpen.addEventListener("click", function () {
             setUiZoom(readUiZoom(), false);
+            applyAccentColor(readStoredAccent(), false);
             if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
           });
         }
@@ -2141,6 +2361,9 @@
         if (uiSettingsReset) {
           uiSettingsReset.addEventListener("click", function () {
             setUiZoom(1, true);
+            persistDarkVariant("dark");
+            persistAndApplyThemeMode("dark");
+            applyAccentColor(DEFAULT_ACCENT, true);
           });
         }
       }
