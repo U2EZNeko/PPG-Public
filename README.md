@@ -71,7 +71,8 @@ The .json files can easily be extended, you can find a list of genres and moods 
 
 The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generator scripts you would start from the CLI, watch **live stdout**, edit **genre / mood / pool JSON**, browse and save **`.env`**, manage **Plex playlists** linked to PPG, and inspect **run statistics** from `log.txt` without leaving the browser.
 
-<img width="2544" height="650" alt="image" src="https://github.com/user-attachments/assets/4df764fe-6b7f-4d72-bd3e-cf6f9e32c909" />
+<img width="2544" height="1112" alt="image" src="https://github.com/user-attachments/assets/9aa544dd-beab-4654-99a4-8cdade3a66e6" />
+
 
 
 ### Tabs
