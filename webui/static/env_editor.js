@@ -1,15 +1,21 @@
 /**
- * Configs tab: parse .env into labeled inputs, preserve comments / blank lines / raw lines.
+ * Configs tab: parse .env into labeled inputs, or edit full text in raw mode.
  */
 (function () {
   "use strict";
 
   let _items = [];
   let _baselineText = "";
+  let envViewMode = "form";
+
+  const envRaw = document.getElementById("env-raw");
+  const envViewFormBtn = document.getElementById("env-view-form");
+  const envViewRawBtn = document.getElementById("env-view-raw");
+  const envFilter = document.getElementById("env-filter");
 
   function toast(msg, isErr) {
-    if (typeof window.__ppgShowToast === "function") {
-      window.__ppgShowToast(msg, isErr);
+    if (typeof window.__pvpgShowToast === "function") {
+      window.__pvpgShowToast(msg, isErr);
     }
   }
 
@@ -59,7 +65,7 @@
     return items;
   }
 
-  function serializeFromDom(items) {
+  function serializeFromDomItems(items) {
     return items
       .map(function (it, idx) {
         if (it.t === "blank" || it.t === "comment" || it.t === "raw") {
@@ -74,11 +80,19 @@
       .join("\n");
   }
 
+  function getCurrentText() {
+    if (envViewMode === "raw" && envRaw) {
+      return String(envRaw.value);
+    }
+    return serializeFromDomItems(_items);
+  }
+
   function envDirty() {
-    return serializeFromDom(_items) !== _baselineText;
+    return getCurrentText() !== _baselineText;
   }
 
   function applyFilter() {
+    if (envViewMode === "raw") return;
     const inp = document.getElementById("env-filter");
     const q = ((inp && inp.value) || "").trim().toLowerCase();
     document.querySelectorAll("#env-form .env-row").forEach(function (row) {
@@ -158,11 +172,60 @@
     renderForm(_items);
   }
 
+  function setEnvViewMode(mode) {
+    const wantRaw = mode === "raw";
+    const form = document.getElementById("env-form");
+    if (wantRaw) {
+      if (envViewMode === "form" && envRaw) {
+        envRaw.value = serializeFromDomItems(_items);
+      }
+    } else {
+      if (envViewMode === "raw" && envRaw) {
+        parseAndRender(String(envRaw.value));
+      }
+    }
+    envViewMode = wantRaw ? "raw" : "form";
+    if (form) form.classList.toggle("hidden", wantRaw);
+    if (envRaw) envRaw.classList.toggle("hidden", !wantRaw);
+    if (envViewFormBtn) envViewFormBtn.classList.toggle("active", !wantRaw);
+    if (envViewRawBtn) envViewRawBtn.classList.toggle("active", wantRaw);
+    if (envFilter) {
+      envFilter.disabled = wantRaw;
+      if (wantRaw) {
+        envFilter.classList.add("hidden");
+      } else {
+        envFilter.classList.remove("hidden");
+        applyFilter();
+      }
+    }
+  }
+
+  /** Form view chrome only (no form↔raw parse) — e.g. after load replaces content. */
+  function showFormViewChrome() {
+    envViewMode = "form";
+    const form = document.getElementById("env-form");
+    if (form) form.classList.remove("hidden");
+    if (envRaw) envRaw.classList.add("hidden");
+    if (envViewFormBtn) envViewFormBtn.classList.add("active");
+    if (envViewRawBtn) envViewRawBtn.classList.remove("active");
+    if (envFilter) {
+      envFilter.disabled = false;
+      envFilter.classList.remove("hidden");
+    }
+  }
+
+  function syncTextareaWithBaselineText(text) {
+    if (envRaw) {
+      envRaw.value = String(text);
+    }
+  }
+
   async function loadEnv() {
     const meta = document.getElementById("env-meta");
     if (!meta) return;
     meta.classList.remove("warn");
     meta.textContent = "Loading…";
+    showFormViewChrome();
     try {
       const r = await fetch("/api/dotenv");
       const j = await r.json();
@@ -174,6 +237,7 @@
       const text = j.content != null ? j.content : "";
       _baselineText = text;
       parseAndRender(text);
+      syncTextareaWithBaselineText(text);
       const n = _items.filter(function (x) {
         return x.t === "entry";
       }).length;
@@ -187,7 +251,7 @@
           n +
           " field" +
           (n === 1 ? "" : "s") +
-          " below).";
+          " in form / raw editor).";
     } catch (e) {
       meta.textContent = String(e);
       meta.classList.add("warn");
@@ -197,7 +261,7 @@
   async function saveEnv() {
     const meta = document.getElementById("env-meta");
     if (!meta) return;
-    const body = serializeFromDom(_items);
+    const body = getCurrentText();
     meta.classList.remove("warn");
     meta.textContent = "Saving…";
     try {
@@ -217,13 +281,14 @@
       }
       _baselineText = body;
       parseAndRender(body);
+      syncTextareaWithBaselineText(body);
       const n = _items.filter(function (x) {
         return x.t === "entry";
       }).length;
       meta.textContent = "Saved .env (" + n + " variable" + (n === 1 ? "" : "s") + ").";
       toast(".env saved");
-      if (typeof window.__ppgRefreshScriptCardMeta === "function") {
-        window.__ppgRefreshScriptCardMeta();
+      if (typeof window.__pvpgRefreshScriptCardMeta === "function") {
+        window.__pvpgRefreshScriptCardMeta();
       }
     } catch (e) {
       meta.textContent = String(e);
@@ -234,11 +299,13 @@
 
   function revertDiscard() {
     parseAndRender(_baselineText);
+    syncTextareaWithBaselineText(_baselineText);
+    showFormViewChrome();
   }
 
-  window.__ppgEnvIsDirty = envDirty;
-  window.__ppgLoadEnvConfigs = loadEnv;
-  window.__ppgEnvRevertDiscard = revertDiscard;
+  window.__pvpgEnvIsDirty = envDirty;
+  window.__pvpgLoadEnvConfigs = loadEnv;
+  window.__pvpgEnvRevertDiscard = revertDiscard;
 
   function init() {
     document.getElementById("env-reload")?.addEventListener("click", function () {
@@ -249,6 +316,15 @@
     });
     document.getElementById("env-save")?.addEventListener("click", saveEnv);
     document.getElementById("env-filter")?.addEventListener("input", applyFilter);
+
+    envViewFormBtn?.addEventListener("click", function () {
+      if (envViewMode === "form") return;
+      setEnvViewMode("form");
+    });
+    envViewRawBtn?.addEventListener("click", function () {
+      if (envViewMode === "raw") return;
+      setEnvViewMode("raw");
+    });
   }
 
   if (document.readyState === "loading") {

@@ -13,6 +13,13 @@
         } else if (mode === "oled") {
           document.documentElement.setAttribute("data-theme", "oled");
         }
+        var _zs = localStorage.getItem("ppg_ui_scale");
+        if (_zs != null) {
+          var _zn = parseFloat(_zs);
+          if (!isNaN(_zn) && _zn >= 0.75 && _zn <= 1.5) {
+            document.documentElement.style.setProperty("--ui-zoom", String(_zn));
+          }
+        }
         var _ac = localStorage.getItem("ppg_ui_accent");
         if (/^#([0-9a-fA-F]{6})$/.test(_ac || "")) {
           var _hex = String(_ac).toUpperCase();
@@ -32,6 +39,7 @@
   <style>
     :root {
       color-scheme: dark;
+      --ui-zoom: 1;
       --bg: #0f1216;
       --surface: #181c24;
       --border: #2a3140;
@@ -81,6 +89,7 @@
     html {
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
+      font-size: calc(100% * var(--ui-zoom, 1));
     }
     body {
       margin: 0;
@@ -461,6 +470,31 @@
       margin: 0 0 0.25rem;
       letter-spacing: -0.02em;
     }
+    .page-header-brand {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.85rem 1.1rem;
+    }
+    .site-logo {
+      display: block;
+      width: 2.85rem;
+      height: 2.85rem;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      flex-shrink: 0;
+    }
+    html:not([data-theme="light"]) .site-logo {
+      filter: invert(1);
+    }
+    html[data-theme="light"] .site-logo {
+      filter: none;
+    }
+    .page-header-titles {
+      flex: 1;
+      min-width: min(100%, 12rem);
+    }
     .page-header {
       display: flex;
       flex-wrap: wrap;
@@ -477,12 +511,18 @@
       margin-bottom: 0;
     }
     .page-header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
       flex-shrink: 0;
       margin-left: auto;
     }
-    .theme-toggle {
+    .theme-toggle,
+    .ui-settings-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.45rem;
       margin-top: 0.1rem;
       padding: 0.42rem 0.85rem;
@@ -495,15 +535,22 @@
       cursor: pointer;
       font-family: var(--font);
     }
-    .theme-toggle:hover {
+    .ui-settings-btn {
+      padding: 0.42rem 0.65rem;
+      min-width: 2.5rem;
+    }
+    .theme-toggle:hover,
+    .ui-settings-btn:hover {
       border-color: var(--muted);
       background: var(--inset);
     }
-    .theme-toggle:focus-visible {
+    .theme-toggle:focus-visible,
+    .ui-settings-btn:focus-visible {
       outline: 2px solid var(--accent-dim);
       outline-offset: 2px;
     }
-    .theme-toggle .theme-toggle-icon {
+    .theme-toggle .theme-toggle-icon,
+    .ui-settings-btn .ui-settings-icon {
       font-size: 1.05rem;
       line-height: 1;
     }
@@ -886,63 +933,45 @@
     dialog.ppg-dialog::backdrop {
       background: rgba(0, 0, 0, 0.55);
     }
-    .ppg-dialog-inner {
-      padding: 1.15rem 1.3rem 1rem;
-      max-height: min(calc(100dvh - 2rem), calc(100vh - 2rem));
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    dialog#ui-settings-dialog.ppg-dialog {
+      width: min(22rem, calc(100vw - 1.5rem));
     }
-    .ppg-dialog-title {
-      margin: 0 0 0.5rem;
-      font-size: 1.08rem;
-      font-weight: 650;
-    }
-    .ppg-dialog-summary {
+    .ui-scale-hint {
       margin: 0;
-      font-size: 0.88rem;
+      font-size: 0.78rem;
       line-height: 1.45;
-      color: var(--text);
-    }
-    ul.ppg-dialog-list {
-      margin: 0.65rem 0 0;
-      padding-left: 1.2rem;
-      max-height: min(36dvh, min(42vh, 16rem));
-      overflow: auto;
-      font-size: 0.82rem;
-      line-height: 1.4;
-      -webkit-overflow-scrolling: touch;
-    }
-    ul.ppg-dialog-list li {
-      margin: 0.2rem 0;
-    }
-    .ppg-dialog-list-more {
       color: var(--muted);
-      list-style: none;
-      margin-left: -1.2rem;
-      padding-left: 0;
     }
-    .ppg-dialog-actions {
+    .ui-scale-field {
+      margin: 0.85rem 0 0;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      padding-top: 0.9rem;
-      border-top: 1px solid var(--border);
+      flex-direction: column;
+      gap: 0.45rem;
     }
-    .ppg-dialog-actions button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.4rem 0.85rem;
-      border-radius: 6px;
+    .ui-scale-field label {
       font-size: 0.82rem;
       font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font);
+      color: var(--text);
     }
-    .ppg-dialog-actions button:hover {
-      border-color: var(--muted);
+    .ui-scale-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .ui-scale-row input[type="range"] {
+      flex: 1;
+      min-width: 0;
+      accent-color: var(--accent);
+      height: 1.5rem;
+    }
+    .ui-scale-value {
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      min-width: 2.75rem;
+      text-align: right;
     }
     .ui-theme-field {
       margin: 0.9rem 0 0;
@@ -1015,6 +1044,64 @@
       min-width: 5.5rem;
       text-transform: uppercase;
     }
+    .ppg-dialog-inner {
+      padding: 1.15rem 1.3rem 1rem;
+      max-height: min(calc(100dvh - 2rem), calc(100vh - 2rem));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .ppg-dialog-title {
+      margin: 0 0 0.5rem;
+      font-size: 1.08rem;
+      font-weight: 650;
+    }
+    .ppg-dialog-summary {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    ul.ppg-dialog-list {
+      margin: 0.65rem 0 0;
+      padding-left: 1.2rem;
+      max-height: min(36dvh, min(42vh, 16rem));
+      overflow: auto;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      -webkit-overflow-scrolling: touch;
+    }
+    ul.ppg-dialog-list li {
+      margin: 0.2rem 0;
+    }
+    .ppg-dialog-list-more {
+      color: var(--muted);
+      list-style: none;
+      margin-left: -1.2rem;
+      padding-left: 0;
+    }
+    .ppg-dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    .ppg-dialog-actions button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    .ppg-dialog-actions button:hover {
+      border-color: var(--muted);
+    }
     .ppg-dialog-actions button.playlists-delete-btn {
       color: var(--danger);
       border-color: rgba(224, 108, 117, 0.45);
@@ -1031,6 +1118,17 @@
       cursor: not-allowed;
     }
 
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     .hidden { display: none !important; }
 
     .json-toolbar-top {
@@ -1804,19 +1902,30 @@
   <div class="wrap">
     <header class="page-header">
       <div class="page-header-text">
-        <h1>Plex Playlist Generator</h1>
-        <p class="sub">Run scripts from the project root <code>{{ repo_root }}</code></p>
+        <div class="page-header-brand">
+          <img
+            class="site-logo"
+            src="{{ url_for('static', filename='logo.jpg') }}"
+            alt=""
+            decoding="async"
+          />
+          <div class="page-header-titles">
+            <h1>Plex Playlist Generator</h1>
+            <p class="sub">Run scripts from the project root <code>{{ repo_root }}</code></p>
+          </div>
+        </div>
       </div>
       <div class="page-header-actions">
         <button
           type="button"
-          class="theme-toggle"
+          class="ui-settings-btn"
           id="ui-settings-open"
+          aria-haspopup="dialog"
           aria-controls="ui-settings-dialog"
-          aria-label="Display settings"
           title="Display settings"
         >
-          ⚙
+          <span class="ui-settings-icon" aria-hidden="true">⚙</span>
+          <span class="visually-hidden">Display settings</span>
         </button>
         <button
           type="button"
@@ -2009,9 +2118,19 @@
     </div>
   </div>
 
+  <div id="toast" class="toast" role="status"></div>
+
   <dialog id="ui-settings-dialog" class="ppg-dialog" aria-labelledby="ui-settings-title">
     <div class="ppg-dialog-inner">
       <h2 id="ui-settings-title" class="ppg-dialog-title">Display</h2>
+      <p class="ui-scale-hint">Adjust text and control sizes. The choice is saved in this browser.</p>
+      <div class="ui-scale-field">
+        <label for="ui-scale-slider">Interface scale</label>
+        <div class="ui-scale-row">
+          <input type="range" id="ui-scale-slider" min="75" max="150" step="1" value="100" />
+          <span id="ui-scale-value" class="ui-scale-value" aria-live="polite">100%</span>
+        </div>
+      </div>
       <div class="ui-theme-field">
         <label for="ui-theme-oled">Theme mode</label>
         <div class="ui-theme-row">
@@ -2032,8 +2151,6 @@
       </div>
     </div>
   </dialog>
-
-  <div id="toast" class="toast" role="status"></div>
 
   <dialog id="playlists-delete-dialog" class="ppg-dialog" aria-labelledby="playlists-delete-dialog-title">
     <div class="ppg-dialog-inner">
@@ -2148,7 +2265,10 @@
       }
       initThemeToggle();
 
+      const UI_SCALE_KEY = "ppg_ui_scale";
       const uiSettingsDialog = document.getElementById("ui-settings-dialog");
+      const uiScaleSlider = document.getElementById("ui-scale-slider");
+      const uiScaleValue = document.getElementById("ui-scale-value");
       const uiAccentColor = document.getElementById("ui-accent-color");
       const uiAccentValue = document.getElementById("ui-accent-value");
       const uiSettingsOpen = document.getElementById("ui-settings-open");
@@ -2193,30 +2313,61 @@
           } catch (e) {}
         }
       }
-      applyAccentColor(readStoredAccent(), false);
-      if (uiAccentColor) {
-        uiAccentColor.addEventListener("input", function () {
-          applyAccentColor(uiAccentColor.value, true);
-        });
+      function readUiZoom() {
+        var raw = getComputedStyle(document.documentElement).getPropertyValue("--ui-zoom").trim();
+        var n = parseFloat(raw);
+        if (!isNaN(n) && n >= 0.75 && n <= 1.5) return n;
+        return 1;
       }
-      if (uiSettingsOpen && uiSettingsDialog) {
-        uiSettingsOpen.addEventListener("click", function () {
-          applyAccentColor(readStoredAccent(), false);
-          if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
-        });
+      function clampUiZoom(n) {
+        if (typeof n !== "number" || isNaN(n)) return 1;
+        return Math.min(1.5, Math.max(0.75, n));
       }
-      if (uiSettingsDone && uiSettingsDialog) {
-        uiSettingsDone.addEventListener("click", function () {
-          uiSettingsDialog.close();
-        });
+      function setUiZoom(scale, persist) {
+        var z = clampUiZoom(scale);
+        document.documentElement.style.setProperty("--ui-zoom", String(z));
+        if (persist !== false) {
+          try {
+            localStorage.setItem(UI_SCALE_KEY, String(z));
+          } catch (e) {}
+        }
+        if (uiScaleSlider) uiScaleSlider.value = String(Math.round(z * 100));
+        if (uiScaleValue) uiScaleValue.textContent = Math.round(z * 100) + "%";
       }
-      if (uiSettingsReset) {
-        uiSettingsReset.addEventListener("click", function () {
-          persistDarkVariant("dark");
-          persistAndApplyThemeMode("dark");
-          applyAccentColor(DEFAULT_ACCENT, true);
+      function initUiScaleControls() {
+        if (!uiScaleSlider || !uiSettingsDialog) return;
+        setUiZoom(readUiZoom(), false);
+        applyAccentColor(readStoredAccent(), false);
+        uiScaleSlider.addEventListener("input", function () {
+          setUiZoom(parseInt(uiScaleSlider.value, 10) / 100, true);
         });
+        if (uiAccentColor) {
+          uiAccentColor.addEventListener("input", function () {
+            applyAccentColor(uiAccentColor.value, true);
+          });
+        }
+        if (uiSettingsOpen) {
+          uiSettingsOpen.addEventListener("click", function () {
+            setUiZoom(readUiZoom(), false);
+            applyAccentColor(readStoredAccent(), false);
+            if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
+          });
+        }
+        if (uiSettingsDone) {
+          uiSettingsDone.addEventListener("click", function () {
+            uiSettingsDialog.close();
+          });
+        }
+        if (uiSettingsReset) {
+          uiSettingsReset.addEventListener("click", function () {
+            setUiZoom(1, true);
+            persistDarkVariant("dark");
+            persistAndApplyThemeMode("dark");
+            applyAccentColor(DEFAULT_ACCENT, true);
+          });
+        }
       }
+      initUiScaleControls();
 
       /** @type {Map<string, { es: EventSource, pre: HTMLElement, scriptId: string, label: string }>} */
       const jobStreams = new Map();
