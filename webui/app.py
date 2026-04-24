@@ -1189,6 +1189,7 @@ def _watch_recovered_subprocess(
             buf.append(note)
             _trim_job_output_buffer(buf)
     out_q.put({"type": "line", "text": note})
+    job_ref["last_exit_code"] = -1
     out_q.put({"type": "result", "exit_code": -1})
     _mark_job_completed(job_ref)
     job_ref["done"].set()
@@ -1443,6 +1444,7 @@ def _run_script_worker(
             output_buf.append(msg)
             _trim_job_output_buffer(output_buf)
         out_q.put({"type": "error", "message": "Script not found"})
+        job_ref["last_exit_code"] = 127
         out_q.put({"type": "result", "exit_code": 127})
         finish()
         return
@@ -1495,6 +1497,7 @@ def _run_script_worker(
             output_buf.append(err_line)
             _trim_job_output_buffer(output_buf)
         out_q.put({"type": "error", "message": str(e)})
+        job_ref["last_exit_code"] = 126
         out_q.put({"type": "result", "exit_code": 126})
         finish()
         if live_f is not None:
@@ -1534,6 +1537,7 @@ def _run_script_worker(
         except Exception:
             pass
         _invalidate_lac_leaf_cache_after_run(script_id, exit_code)
+        job_ref["last_exit_code"] = int(exit_code)
         out_q.put({"type": "result", "exit_code": exit_code})
         finish()
 
@@ -1636,6 +1640,25 @@ def api_job_output(job_id: str):
             text = "".join(buf)
             n = len(buf)
     return jsonify({"text": text, "line_count": n})
+
+
+@app.route("/api/job/<job_id>/info", methods=["GET"])
+def api_job_info(job_id: str):
+    """Job state for the web UI when SSE is unavailable or the tab reconnects."""
+    with _job_lock:
+        j = _jobs.get(job_id)
+        if not j:
+            return jsonify({"ok": False, "error": "Unknown or expired job"}), 404
+        done = j["done"].is_set()
+        return jsonify(
+            {
+                "ok": True,
+                "script_id": j["script_id"],
+                "done": done,
+                "exit_code": j.get("last_exit_code") if done else None,
+                "recovered": bool(j.get("recovered")),
+            }
+        )
 
 
 @app.route("/api/stats")
@@ -2108,8 +2131,6 @@ def api_stream(job_id: str):
 
             yield _sse_format(item)
             if item.get("type") == "result":
-                break
-            if item.get("type") == "error" and done.is_set():
                 break
 
     return Response(
