@@ -71,6 +71,9 @@ The .json files can easily be extended, you can find a list of genres and moods 
 
 The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generator scripts you would start from the CLI, watch **live stdout**, edit **genre / mood / pool JSON**, browse and save **`.env`**, manage **Plex playlists** linked to PPG, and inspect **run statistics** from `log.txt` without leaving the browser.
 
+<img width="2544" height="650" alt="image" src="https://github.com/user-attachments/assets/4df764fe-6b7f-4d72-bd3e-cf6f9e32c909" />
+
+
 ### Tabs
 
 | Tab | Purpose |
@@ -117,22 +120,18 @@ When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** 
 
 ### Web UI screenshots
 
-Drop images under `docs/screenshots/` (create the folder if needed) or paste GitHub **user-attachments** URLs. Suggested filenames:
 
 | Suggested file | What to show |
 | --- | --- |
-| `docs/screenshots/webui-scripts.png` | **Scripts** — grid of generators + live log / progress |
-| `docs/screenshots/webui-playlists.png` | **Playlists** — list, search, selection, delete/regenerate |
-| `docs/screenshots/webui-statistics.png` | **Statistics** — slowest builds, failures, **Playlists needing attention** |
-| `docs/screenshots/webui-json.png` | **Group JSON** editor (optional) |
-| `docs/screenshots/webui-mobile.png` | Narrow viewport / tab strip (optional) |
+| `<img width="2544" height="650" alt="image" src="https://github.com/user-attachments/assets/5e07730b-0ad7-4303-9c49-562c26848932" />
+` | **Scripts** — grid of generators + live log / progress |
+| `<img width="2534" height="557" alt="image" src="https://github.com/user-attachments/assets/86e32d1e-dc4a-4c00-8f2f-7ff75f98e2c6" />
+` | **Playlists** — list, search, selection, delete/regenerate |
+| `<img width="2535" height="603" alt="image" src="https://github.com/user-attachments/assets/7ba6c6ed-57af-45a9-a985-2bc86bcaa483" />
+` | **Statistics** — slowest builds, failures, **Playlists needing attention** |
+| `<img width="2525" height="721" alt="image" src="https://github.com/user-attachments/assets/543778f9-474f-46c2-9c60-cd56bb861eee" />
+` | **Group JSON** editor (optional) |
 
-Example markdown once files exist:
-
-```markdown
-![PPG Web UI — Scripts](docs/screenshots/webui-scripts.png)
-![PPG Web UI — Playlists](docs/screenshots/webui-playlists.png)
-```
 
 ## Telegram notifications
 
@@ -296,6 +295,8 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
   To get sub-user plex token:
   
   Log into sub user -> Go to some item -> CTRL Shift I -> Go to network tab -> Find "x-Plex-Token" in the Header (might need to click on another item with the network tab open)
+
+  Largely deprecated now that they actually show shared playlists in Plexamp
 
 
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
