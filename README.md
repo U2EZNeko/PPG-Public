@@ -27,7 +27,10 @@ The .json files can easily be extended, you can find a list of genres and moods 
 - [Requirements](#requirements)
 - [Setup](#setup)
 - [Web UI](#web-ui)
+  - [Mobile-compatible UI](#mobile-compatible-ui)
   - [Screenshots](#web-ui-screenshots)
+- [Telegram notifications](#telegram-notifications)
+- [Track filters (regex)](#track-filters-regex)
 - [Cronjob Examples](#cronjob-examples)
 - [Shared Python module](#shared-python-module)
 - [Usage Description](#usage-description)
@@ -86,15 +89,27 @@ The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generat
 - **Structured events** for each run are appended to `webui/data/ppg_events.jsonl`. Active web-started jobs are also tracked under `webui/data/active_web_jobs.json` so a **server restart** can reconnect to still-running PIDs when possible.
 - **Chronic failures:** repeated failures for the same real playlist title (streak resets after a **successful** build) are recorded in `webui/data/playlist_chronic_failures.json` and listed under **Statistics → Playlists needing attention**. Threshold: `PPG_CHRONIC_FAILURE_THRESHOLD` (default **3**); see `example.env`.
 
-### Layout and mobile
+### Mobile-compatible UI
 
-- Layout uses the **full window width** with safe-area padding; the tab bar **scrolls horizontally** when labels do not fit (e.g. phones). The horizontal scrollbar appears only when there is overflow.
+The Web UI is built to work on **phones and tablets**, not only desktop:
+
+- **Viewport:** `viewport-fit=cover` so notched devices respect **safe-area** insets; padding on `.wrap` uses `env(safe-area-inset-*)` so content stays clear of the status bar and home indicator.
+- **Full width:** The main column uses the **whole screen width** (no narrow max-width column), with comfortable side padding that tightens slightly on very small screens.
+- **Navigation:** Tab labels (**Scripts**, **Errors**, **Group JSON**, etc.) sit in a **horizontally scrollable** strip. On narrow screens you **swipe** the strip to reach **Statistics** and the rest. The scrollbar uses **`overflow-x: auto`**, so it **only appears when the row actually overflows** (no permanent empty scrollbar on desktop).
+- **Sticky tabs (tablet / narrow desktop):** On viewports up to ~960px wide, the tab bar can **stick** under the top of the viewport while you scroll long pages (e.g. Statistics), so you can switch tabs without scrolling back up.
+- **Touch-friendly:** Run buttons and other controls use **larger tap targets** where it matters; output and playlist tables use **horizontal scrolling** inside their panels so wide tables do not blow up the page layout.
+- **Dialogs:** Destructive actions (for example **deleting Plex playlists**) use an **in-page `<dialog>`** with proper focus and layout on small screens instead of the browser’s tiny `confirm()` box.
+- **Live logs:** Script output panes and the JSON editor use **dynamic viewport units (`dvh`)** where helpful so visible height adapts on mobile browsers with collapsing chrome.
+
+Use a normal mobile browser (or responsive mode in devtools) for the best match; embedded preview panes may not reproduce scrolling and touch behavior perfectly.
 
 ### Configuration highlights (`example.env`)
 
 - **`PPG_MIN_SONGS_REQUIRED_PERCENT`** — optional **global** minimum pool size as a fraction of `SONGS_PER_PLAYLIST` for all generators; when set, you can rely on this instead of each script’s own min-percent variable.
 - **`PPG_CHRONIC_FAILURE_THRESHOLD`** — consecutive failures before a playlist is flagged for review (see above).
 - **`PPG_WEB_HOST` / `PPG_WEB_PORT`** — Web UI bind address.
+- **`TELEGRAM_*`** — see [Telegram notifications](#telegram-notifications).
+- **`SKIP_SONG_TITLE_REGEX` / `SKIP_ALBUM_TITLE_REGEX`** — see [Track filters (regex)](#track-filters-regex).
 
 ### Dev server console
 
@@ -118,6 +133,64 @@ Example markdown once files exist:
 ![PPG Web UI — Scripts](docs/screenshots/webui-scripts.png)
 ![PPG Web UI — Playlists](docs/screenshots/webui-playlists.png)
 ```
+
+## Telegram notifications
+
+Optional **Telegram** messages when a **generator run finishes** (success or uncaught crash), so you get a summary on your phone without watching the console. This applies to runs started from the **CLI**, **cron / Task Scheduler**, or the **Web UI** (the UI runs the same scripts as subprocesses).
+
+**What you get in one message (typical):**
+
+- Script name and optional run id  
+- Total **duration**  
+- **Result** (completed vs crashed)  
+- Count of playlists updated successfully  
+- **Per-playlist** lines with duration and ok/failed (and short failure notes when present)  
+- A **Failures** section when anything failed  
+
+Long summaries are **truncated** to Telegram’s size limit (~4096 characters) with a clear “truncated” marker.
+
+**Environment variables** (set in `.env`; see `example.env`):
+
+| Variable | Meaning |
+| --- | --- |
+| `TELEGRAM_BOT_TOKEN` | Bot token from [@BotFather](https://t.me/BotFather). |
+| `TELEGRAM_CHAT_ID` | Chat or channel id to send to (numeric id or string for supergroups). |
+| `TELEGRAM_NOTIFICATIONS` | If `false`, `0`, `no`, or `off`, **no messages are sent** but tokens stay in `.env` (handy for testing). Default behavior sends when token + chat are set. |
+
+If either **token** or **chat id** is missing, nothing is sent (no error). Failed HTTP calls are printed to **stderr** only.
+
+Implementation lives in **`module/ppg_telegram.py`** and is invoked from the shared run logger when a run completes. Dependencies: **`requests`** (already in `requirements.txt`).
+
+## Track filters (regex)
+
+You can **globally exclude** tracks from generator pools and candidate lists by matching **song title** and/or **album title** with **Python regular expressions** (case-insensitive). This is useful for skits, live-only cuts, demos, interludes, or any pattern you want to keep out of automated playlists.
+
+**Environment variables** (in `.env`):
+
+| Variable | Effect |
+| --- | --- |
+| `SKIP_SONG_TITLE_REGEX` | If non-empty, any track whose **title** matches this regex is dropped. |
+| `SKIP_ALBUM_TITLE_REGEX` | If non-empty, any track whose **album** title matches this regex is dropped. |
+
+**Rules:**
+
+- Matching is **case-insensitive** (`IGNORECASE` + `UNICODE`).  
+- Leave a variable **empty or unset** to disable that side of the filter.  
+- If a regex is **invalid**, the process **exits immediately** with a clear error on stderr (fail-fast so you do not get silent “no filters” behavior).  
+- When tracks are removed, scripts log a short line (for example how many were removed from the pool vs the current candidate list).
+
+**Where it applies:** the filters are loaded in **PPG-Daily**, **PPG-Weekly**, **PPG-Genres**, **PPG-Moods**, **PPG-LikedArtists**, **PPG-LikedArtistsCollection**, and **fetch-liked-artists** so cached liked data and generated playlists stay consistent with the same rules.
+
+**Example** (one line in `.env`; adjust for your library):
+
+```env
+# Example: drop obvious skits / live / demo patterns (tune to taste)
+SKIP_SONG_TITLE_REGEX=\b(skit|live(\s+from|\s+at)?|demo(\s+version)?|interlude|acoustic session)\b
+```
+
+`example.env` includes commented examples and notes for these variables.
+
+Implementation: **`module/ppg_track_filters.py`**.
 
 ## Shared Python module
 
@@ -231,9 +304,11 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ### 23.04.2026:
 
-- **Web UI:** Scripts, Errors, Group JSON, Configs, Playlists (multi-select delete + confirm dialog, regenerate), Statistics; full-width and mobile-friendly layout with horizontal tab scroll when needed.
+- **Web UI:** Scripts, Errors, Group JSON, Configs, Playlists (multi-select delete + confirm dialog, regenerate), Statistics; **full-width**, **mobile-oriented** layout (safe areas, sticky tabs on smaller viewports, horizontal tab strip with overflow only when needed, touch-friendly controls, in-page dialogs, `dvh`-aware panes).
 - **Run recovery:** server-side job buffers, SSE reconnect, `GET /api/job/<id>/info`, and polling so finished runs report exit state even if the tab was closed or the stream dropped.
 - **Chronic failures:** `webui/data/playlist_chronic_failures.json`, Statistics section **Playlists needing attention**, `PPG_CHRONIC_FAILURE_THRESHOLD`.
+- **Telegram:** optional end-of-run summaries via `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` (`module/ppg_telegram.py`); `TELEGRAM_NOTIFICATIONS=false` disables sends without removing credentials.
+- **Track filters:** `SKIP_SONG_TITLE_REGEX` and `SKIP_ALBUM_TITLE_REGEX` in `.env` for case-insensitive exclusion by track/album title across generators and liked-artist tooling (`module/ppg_track_filters.py`).
 - **Config:** optional global `PPG_MIN_SONGS_REQUIRED_PERCENT` for minimum pool size across generators (`example.env`).
 - **Code layout:** shared helpers in **`module/`** (`ppg_run_logger`, `ppg_min_songs`, `ppg_chronic_failures`, `ppg_track_filters`, `ppg_single_playlist`, etc.).
 - **Dev UX:** quieter Flask access log; rolling last-10 HTTP summary in the lower half of the terminal.
