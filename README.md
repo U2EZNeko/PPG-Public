@@ -26,7 +26,10 @@ The .json files can easily be extended, you can find a list of genres and moods 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Setup](#setup)
-  - [Cronjob Examples](#cronjob-examples)
+- [Web UI](#web-ui)
+  - [Screenshots](#web-ui-screenshots)
+- [Cronjob Examples](#cronjob-examples)
+- [Shared Python module](#shared-python-module)
 - [Usage Description](#usage-description)
   - [PPG-Daily and PPG-Weekly](#ppg-daily-and-ppg-weekly)
   - [PPG-Moods](#ppg-moods)
@@ -55,6 +58,70 @@ The .json files can easily be extended, you can find a list of genres and moods 
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
      I've included a few obviously self-drawn examples. ;)
   5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
+  6. **Optional — Web UI:** install dependencies (`flask` is in `requirements.txt`), then run from the repo root:
+     ```bash
+     python webui/app.py
+     ```
+     Bind address defaults come from `webui/config.json`; override with `PPG_WEB_HOST` and `PPG_WEB_PORT` in `.env` (see `example.env`). Use a real browser for best results (mobile layout and live logs are tuned for normal clients).
+
+## Web UI
+
+The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generator scripts you would start from the CLI, watch **live stdout**, edit **genre / mood / pool JSON**, browse and save **`.env`**, manage **Plex playlists** linked to PPG, and inspect **run statistics** from `log.txt` without leaving the browser.
+
+### Tabs
+
+| Tab | Purpose |
+| --- | --- |
+| **Scripts** | Start Daily / Weekly / Genres / Moods / Liked Artists (and related flows). One output card per script with progress and a live log streamed over SSE. |
+| **Errors** | Playlist-level failures surfaced during runs (also persisted in the browser). Points you to chronic failure tracking in **Statistics** when the same title keeps failing. |
+| **Group JSON** | Load and edit `daily_weekly_genre_pools.json`, `named_genre_mix_playlists.json`, `mood_groups.json`, etc., with search and structure helpers. |
+| **Configs** | View and edit environment variables (backed by project `.env`). |
+| **Playlists** | List Plex music playlists, filter, **multi-select**, delete with an in-page confirmation dialog (not `window.confirm`), and trigger **regenerate** for PPG-managed titles where supported. |
+| **Statistics** | Aggregates from `log.txt`: slowest successful builds, failed playlists, runs per script, recent runs, and **Playlists needing attention** (see below). |
+
+### Runs, reconnects, and statistics
+
+- Subprocesses are started **on the server**; closing a tab does **not** stop a run. Reopening the UI (or reconnecting the event stream) **reloads buffered output** and continues live updates.
+- Completed jobs expose **`GET /api/job/<job_id>/info`** so the page can recover **exit code** and **done** state even if the browser missed the last SSE message.
+- **Structured events** for each run are appended to `webui/data/ppg_events.jsonl`. Active web-started jobs are also tracked under `webui/data/active_web_jobs.json` so a **server restart** can reconnect to still-running PIDs when possible.
+- **Chronic failures:** repeated failures for the same real playlist title (streak resets after a **successful** build) are recorded in `webui/data/playlist_chronic_failures.json` and listed under **Statistics → Playlists needing attention**. Threshold: `PPG_CHRONIC_FAILURE_THRESHOLD` (default **3**); see `example.env`.
+
+### Layout and mobile
+
+- Layout uses the **full window width** with safe-area padding; the tab bar **scrolls horizontally** when labels do not fit (e.g. phones). The horizontal scrollbar appears only when there is overflow.
+
+### Configuration highlights (`example.env`)
+
+- **`PPG_MIN_SONGS_REQUIRED_PERCENT`** — optional **global** minimum pool size as a fraction of `SONGS_PER_PLAYLIST` for all generators; when set, you can rely on this instead of each script’s own min-percent variable.
+- **`PPG_CHRONIC_FAILURE_THRESHOLD`** — consecutive failures before a playlist is flagged for review (see above).
+- **`PPG_WEB_HOST` / `PPG_WEB_PORT`** — Web UI bind address.
+
+### Dev server console
+
+When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** polling is **not** printed for every request. Other requests are summarized in a **rolling “last 10”** panel in the **lower half** of the terminal (upper half stays as the normal Flask banner). This keeps logs readable while you develop.
+
+### Web UI screenshots
+
+Drop images under `docs/screenshots/` (create the folder if needed) or paste GitHub **user-attachments** URLs. Suggested filenames:
+
+| Suggested file | What to show |
+| --- | --- |
+| `docs/screenshots/webui-scripts.png` | **Scripts** — grid of generators + live log / progress |
+| `docs/screenshots/webui-playlists.png` | **Playlists** — list, search, selection, delete/regenerate |
+| `docs/screenshots/webui-statistics.png` | **Statistics** — slowest builds, failures, **Playlists needing attention** |
+| `docs/screenshots/webui-json.png` | **Group JSON** editor (optional) |
+| `docs/screenshots/webui-mobile.png` | Narrow viewport / tab strip (optional) |
+
+Example markdown once files exist:
+
+```markdown
+![PPG Web UI — Scripts](docs/screenshots/webui-scripts.png)
+![PPG Web UI — Playlists](docs/screenshots/webui-playlists.png)
+```
+
+## Shared Python module
+
+Shared helpers live under **`module/`** (import as `module.*` from repo root scripts): run logging and `log.txt` / `ppg_events.jsonl`, minimum-song / pool thresholds, track title/album regex filters, single-playlist (`PPG_ONLY_PLAYLIST_TITLE`) helpers, Telegram summaries, and **chronic failure** tracking for the Web UI. Generator scripts at the repo root stay the main entry points.
 
 # Cronjob examples:
 
@@ -161,6 +228,15 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 ![collection](https://github.com/user-attachments/assets/1862f8eb-1854-41c3-b288-f6c39a4cb0b2)
 
 # Update log
+
+### 23.04.2026:
+
+- **Web UI:** Scripts, Errors, Group JSON, Configs, Playlists (multi-select delete + confirm dialog, regenerate), Statistics; full-width and mobile-friendly layout with horizontal tab scroll when needed.
+- **Run recovery:** server-side job buffers, SSE reconnect, `GET /api/job/<id>/info`, and polling so finished runs report exit state even if the tab was closed or the stream dropped.
+- **Chronic failures:** `webui/data/playlist_chronic_failures.json`, Statistics section **Playlists needing attention**, `PPG_CHRONIC_FAILURE_THRESHOLD`.
+- **Config:** optional global `PPG_MIN_SONGS_REQUIRED_PERCENT` for minimum pool size across generators (`example.env`).
+- **Code layout:** shared helpers in **`module/`** (`ppg_run_logger`, `ppg_min_songs`, `ppg_chronic_failures`, `ppg_track_filters`, `ppg_single_playlist`, etc.).
+- **Dev UX:** quieter Flask access log; rolling last-10 HTTP summary in the lower half of the terminal.
 
 ### 10.11.2025:
 
