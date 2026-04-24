@@ -1,0 +1,82 @@
+{
+  "Angry": [
+    "Angry",
+    "Aggressive",
+    "Defiant",
+    "Fiery",
+    "Fierce",
+    "Hostile",
+    "Rebellious"
+  ],
+  "Chill": [
+    "Relaxed",
+    "Gentle",
+    "Calm/Peaceful",
+    "Meditative",
+    "Lush",
+    "Soft/Quiet",
+    "Laid-Back/Mellow"
+  ],
+  "Chill Milk": [
+    "Calm/Peaceful",
+    "Relaxed",
+    "Soothing",
+    "Gentle",
+    "Meditative",
+    "Soft/Quiet",
+    "Languid",
+    "Lazy"
+  ],
+  "Escapism": [
+    "Dreamy",
+    "Mysterious",
+    "Ethereal",
+    "Spiritual",
+    "Enigmatic",
+    "Exploratory",
+    "Wistful"
+  ],
+  "Hype High Energy": [
+    "Energetic",
+    "Exciting",
+    "Epic",
+    "Triumphant",
+    "Explosive",
+    "Anthemic"
+  ],
+  "Melancholy": [
+    "Melancholy",
+    "Sad",
+    "Wistful",
+    "Lonely",
+    "Nostalgic",
+    "Poignant",
+    "Somber"
+  ],
+  "Mellow Rainy Day": [
+    "Relaxed",
+    "Gentle",
+    "Meditative",
+    "Soft/Quiet",
+    "Languid",
+    "Somber",
+    "Wistful",
+    "Reflective"
+  ],
+  "Rage Sad": [
+    "Angry",
+    "Sad",
+    "Desperate",
+    "Fiery",
+    "Lonely",
+    "Intense",
+    "Fierce"
+  ],
+  "Sad": [
+    "Sad",
+    "Gloomy",
+    "Desperate",
+    "Poignant",
+    "Angst-Ridden"
+  ]
+}
