@@ -122,7 +122,6 @@ When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** 
 ### Web UI screenshots
 
 
-| Suggested file | What to show |
 | --- | --- |
 | <img width="2520" height="650" alt="image" src="https://github.com/user-attachments/assets/0fa76edf-750c-410e-83a2-34dd4b614546" /> | **Scripts** — grid of generators + live log / progress |
 | <img width="2527" height="656" alt="image" src="https://github.com/user-attachments/assets/03da883c-2313-42d4-9980-9cc21cc7342c" /> | **Playlists** — list, search, selection, delete/regenerate |
