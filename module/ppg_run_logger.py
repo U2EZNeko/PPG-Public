@@ -96,6 +96,7 @@ def _append_jsonl_event(payload: dict) -> None:
         try:
             with open(EVENTS_PATH, "a", encoding="utf-8") as f:
                 f.write(line)
+                f.flush()
         except OSError:
             pass
 
@@ -199,6 +200,7 @@ class RunRecorder:
         with _lock:
             with open(LOG_PATH, "a", encoding="utf-8") as f:
                 f.write(text)
+                f.flush()
 
     def _print_timing_report(self) -> None:
         if not self.playlist_timing:

@@ -18,6 +18,9 @@
   const jsonViewRawBtn = document.getElementById("json-view-raw");
   const jsonAddGroupBtn = document.getElementById("json-add-group");
   const jsonSortGroupsBtn = document.getElementById("json-sort-groups");
+  const jsonSelectVisibleBtn = document.getElementById("json-select-visible-groups");
+  const jsonClearSelectionBtn = document.getElementById("json-clear-group-selection");
+  const jsonDeleteSelectedBtn = document.getElementById("json-delete-selected-groups");
   const jsonFilterInput = document.getElementById("json-group-filter");
   const jsonFetchGenresBtn = document.getElementById("json-fetch-genres");
   const plexGenresStatusEl = document.getElementById("plex-genres-status");
@@ -39,6 +42,61 @@
   let plexMoods = [];
   let plexMoodsSet = new Set();
   let plexMoodsReady = false;
+
+  /** Merged with ISO list from /static/ppg_country_picklist.json (Plex often uses shorter names). */
+  const COUNTRY_PICKLIST_EXTRA = [
+    "United States",
+    "USA",
+    "U.S.A.",
+    "UK",
+    "U.K.",
+    "Great Britain",
+    "England",
+    "Scotland",
+    "Wales",
+    "Northern Ireland",
+    "Russia",
+    "South Korea",
+    "North Korea",
+  ];
+  let countryPicklistReady = false;
+  let countryPicklistPromise = null;
+
+  function ensureCountryPicklistDatalist() {
+    const dl = document.getElementById("ppg-country-picklist");
+    if (!dl || dl.dataset.populated === "1") {
+      countryPicklistReady = true;
+      return Promise.resolve();
+    }
+    if (countryPicklistPromise) return countryPicklistPromise;
+    countryPicklistPromise = fetch("/static/ppg_country_picklist.json")
+      .then(function (r) {
+        return r.ok ? r.json() : [];
+      })
+      .then(function (arr) {
+        const base = Array.isArray(arr) ? arr.map(function (x) { return String(x); }) : [];
+        const set = new Set(base);
+        COUNTRY_PICKLIST_EXTRA.forEach(function (x) {
+          if (x && x.trim()) set.add(x.trim());
+        });
+        const sorted = Array.from(set).sort(function (a, b) {
+          return a.localeCompare(b, undefined, { sensitivity: "base" });
+        });
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < sorted.length; i++) {
+          const opt = document.createElement("option");
+          opt.value = sorted[i];
+          frag.appendChild(opt);
+        }
+        dl.appendChild(frag);
+        dl.dataset.populated = "1";
+        countryPicklistReady = true;
+      })
+      .catch(function () {
+        countryPicklistReady = true;
+      });
+    return countryPicklistPromise;
+  }
 
   let entries = [];
   let viewMode = "form";
@@ -262,10 +320,26 @@
         const genres = Array.isArray(val.genres)
           ? val.genres.map((x) => String(x))
           : [];
+        let artistCountryInclude = [];
+        let artistCountryFilterComplex = null;
+        const acf = val.artist_country_filter;
+        if (Array.isArray(acf)) {
+          artistCountryInclude = acf.map((x) => String(x)).filter((s) => s.trim());
+        } else if (acf && typeof acf === "object") {
+          if (Array.isArray(acf.include)) {
+            artistCountryInclude = acf.include.map((x) => String(x)).filter((s) => s.trim());
+          }
+          const rest = { ...acf };
+          delete rest.include;
+          if (Object.keys(rest).length > 0) {
+            artistCountryFilterComplex = rest;
+          }
+        }
         const extra = { ...val };
         delete extra.genres;
         delete extra.release_date_filter;
         delete extra.prefer_liked_artists;
+        delete extra.artist_country_filter;
         let filter = null;
         const rdf = val.release_date_filter;
         if (rdf && typeof rdf === "object") {
@@ -285,6 +359,12 @@
         if (typeof val.prefer_liked_artists === "boolean") {
           preferLiked = val.prefer_liked_artists;
         }
+        const hasCx =
+          artistCountryFilterComplex &&
+          typeof artistCountryFilterComplex === "object" &&
+          Object.keys(artistCountryFilterComplex).length > 0;
+        const _uiOpenCountry =
+          artistCountryInclude.length > 0 || !!hasCx;
         out.push({
           _uid: uid(),
           kind: "rich",
@@ -292,6 +372,9 @@
           genres,
           filter,
           preferLiked,
+          artistCountryInclude,
+          artistCountryFilterComplex,
+          _uiOpenCountry,
           extra,
         });
       } else {
@@ -331,6 +414,19 @@
         }
         if (e.preferLiked !== null && e.preferLiked !== undefined) {
           o.prefer_liked_artists = e.preferLiked;
+        }
+        const hasCountries =
+          Array.isArray(e.artistCountryInclude) && e.artistCountryInclude.length > 0;
+        const complex = e.artistCountryFilterComplex;
+        const hasComplex = complex && typeof complex === "object" && Object.keys(complex).length > 0;
+        if (hasCountries) {
+          if (hasComplex) {
+            o.artist_country_filter = { ...complex, include: e.artistCountryInclude.slice() };
+          } else {
+            o.artist_country_filter = e.artistCountryInclude.slice();
+          }
+        } else if (hasComplex) {
+          o.artist_country_filter = { ...complex };
         }
         out[name] = o;
       }
@@ -389,6 +485,103 @@
       const ok = !q || name.toLowerCase().includes(q);
       card.style.display = ok ? "" : "none";
     });
+    refreshGroupJsonBulkToolbar();
+  }
+
+  function countSelectedGroupCards() {
+    if (!jsonVisual) return 0;
+    return jsonVisual.querySelectorAll(".group-card-select:checked").length;
+  }
+
+  function refreshGroupJsonBulkToolbar() {
+    const formOk = viewMode === "form" && !parseError;
+    const hasEntries = entries.length > 0;
+    const filterTrim = (jsonFilterInput && jsonFilterInput.value || "").trim();
+    const hasFilter = !!filterTrim;
+    const nSel = countSelectedGroupCards();
+
+    if (jsonSelectVisibleBtn) {
+      jsonSelectVisibleBtn.disabled = !formOk || !hasEntries || !hasFilter;
+    }
+    if (jsonClearSelectionBtn) {
+      jsonClearSelectionBtn.disabled = !formOk || !hasEntries || nSel === 0;
+    }
+    if (jsonDeleteSelectedBtn) {
+      jsonDeleteSelectedBtn.disabled = !formOk || !hasEntries || nSel === 0;
+      jsonDeleteSelectedBtn.textContent =
+        nSel > 0 ? "Delete selection (" + nSel + ")" : "Delete selection";
+    }
+  }
+
+  function selectVisibleGroupCards() {
+    if (viewMode !== "form" || parseError || !entries.length) return;
+    const filterTrim = (jsonFilterInput && jsonFilterInput.value || "").trim();
+    if (!filterTrim) {
+      showToast(
+        "Type part of a group name in the filter first — Select visible only checks rows that match.",
+        true
+      );
+      return;
+    }
+    let n = 0;
+    jsonVisual.querySelectorAll(".group-card").forEach((card) => {
+      if (card.style.display === "none") return;
+      const cb = card.querySelector(".group-card-select");
+      if (cb) {
+        cb.checked = true;
+        n++;
+      }
+    });
+    refreshGroupJsonBulkToolbar();
+    showToast(n ? "Selected " + n + " visible group(s)." : "No visible groups.", false);
+  }
+
+  function clearGroupCardSelection() {
+    if (!jsonVisual) return;
+    jsonVisual.querySelectorAll(".group-card-select").forEach((cb) => {
+      cb.checked = false;
+    });
+    refreshGroupJsonBulkToolbar();
+  }
+
+  function deleteSelectedGroups() {
+    if (viewMode !== "form" || parseError || !entries.length) return;
+    const checked = jsonVisual.querySelectorAll(".group-card-select:checked");
+    if (!checked.length) return;
+    const uids = [];
+    const names = [];
+    checked.forEach((cb) => {
+      const card = cb.closest(".group-card");
+      if (!card || !card.dataset.uid) return;
+      uids.push(card.dataset.uid);
+      const ni = card.querySelector(".group-card-name");
+      names.push(ni ? String(ni.value || "").trim() || card.dataset.uid : card.dataset.uid);
+    });
+    if (!uids.length) return;
+    const preview =
+      names.slice(0, 15).join(", ") + (names.length > 15 ? "… (+" + (names.length - 15) + " more)" : "");
+    if (
+      !window.confirm(
+        "Delete " +
+          uids.length +
+          " selected group(s)?\n\n" +
+          preview +
+          "\n\nTip: Reload without saving if this is wrong."
+      )
+    ) {
+      return;
+    }
+    const drop = new Set(uids);
+    entries = entries.filter((e) => !drop.has(e._uid));
+    const id = jsonSelect.value;
+    renderAll();
+    setJsonDirty(true);
+    updateJsonMeta("Unsaved changes");
+    if (id) updateJsonFileOptionLabel(id, entries.length);
+    showToast(
+      "Removed " + drop.size + " group(s). Save to update " + selectedJsonDiskFilename() + ".",
+      false
+    );
   }
 
   function setViewMode(mode) {
@@ -405,6 +598,7 @@
       jsonSortGroupsBtn.disabled = !isForm || !!parseError || entries.length < 2;
     }
     if (jsonFilterInput) jsonFilterInput.disabled = !isForm || !!parseError;
+    refreshGroupJsonBulkToolbar();
     if (!isForm && !parseError) {
       try {
         syncTextareaFromEntries();
@@ -415,6 +609,7 @@
   }
 
   function bindCard(wrap, e, fileId) {
+    const selectCb = wrap.querySelector(".group-card-select");
     const expandBtn = wrap.querySelector(".group-card-expand");
     const head = wrap.querySelector(".group-card-head");
     const body = wrap.querySelector(".group-card-body");
@@ -441,8 +636,13 @@
     expandBtn.addEventListener("click", toggleExpand);
     head.addEventListener("dblclick", (ev) => {
       if (ev.target === nameInput) return;
+      if (ev.target && ev.target.classList && ev.target.classList.contains("group-card-select")) return;
       toggleExpand();
     });
+
+    if (selectCb) {
+      selectCb.addEventListener("change", refreshGroupJsonBulkToolbar);
+    }
 
     nameInput.addEventListener("input", () => {
       e.name = nameInput.value;
@@ -450,10 +650,34 @@
       updateJsonMeta("Unsaved changes");
     });
 
+    const runMixBtn = wrap.querySelector(".group-card-run-one");
+    if (runMixBtn) {
+      runMixBtn.addEventListener("click", () => {
+        const base = (nameInput.value || "").trim();
+        if (!base) {
+          showToast("Enter a group name first.", true);
+          return;
+        }
+        const title = base + " Mix";
+        if (typeof window.__ppgRegeneratePlaylist === "function") {
+          window.__ppgRegeneratePlaylist(title, false);
+        } else {
+          showToast("Page not ready — refresh and try again.", true);
+        }
+      });
+    }
+
     removeBtn.addEventListener("click", () => {
-      if (!window.confirm('Remove group "' + e.name + '"?')) return;
+      if (!window.confirm('Delete group "' + e.name + '"?')) return;
       entries = entries.filter((x) => x._uid !== e._uid);
       wrap.remove();
+      const id = jsonSelect.value;
+      if (id) updateJsonFileOptionLabel(id, entries.length);
+      if (jsonSortGroupsBtn) {
+        jsonSortGroupsBtn.disabled =
+          viewMode !== "form" || !!parseError || entries.length < 2;
+      }
+      refreshGroupJsonBulkToolbar();
       setJsonDirty(true);
       updateJsonMeta("Unsaved changes");
     });
@@ -541,12 +765,51 @@
     });
 
     if (e.kind === "rich") {
+      if (typeof e._uiOpenCountry !== "boolean") {
+        const _hasC =
+          Array.isArray(e.artistCountryInclude) && e.artistCountryInclude.length > 0;
+        const _cx = e.artistCountryFilterComplex;
+        const _hasCx =
+          _cx && typeof _cx === "object" && Object.keys(_cx).length > 0;
+        e._uiOpenCountry = !!(_hasC || _hasCx);
+      }
       const condSel = wrap.querySelector(".filter-condition");
       const startL = wrap.querySelector(".filter-start-wrap");
       const endL = wrap.querySelector(".filter-end-wrap");
       const startIn = wrap.querySelector(".filter-start-input");
       const endIn = wrap.querySelector(".filter-end-input");
       const prefSel = wrap.querySelector(".prefer-liked");
+      const filterPicker = wrap.querySelector(".filter-add-picker");
+      const secRelease = wrap.querySelector(".filter-section-release");
+      const secLiked = wrap.querySelector(".filter-section-liked");
+      const secCountry = wrap.querySelector(".filter-section-country");
+
+      function releaseFilterActive() {
+        return !!(e.filter && String(e.filter.condition || "").trim());
+      }
+      function likedFilterActive() {
+        return e.preferLiked === true || e.preferLiked === false;
+      }
+      function countryFilterActive() {
+        const has =
+          Array.isArray(e.artistCountryInclude) && e.artistCountryInclude.length > 0;
+        const cx = e.artistCountryFilterComplex;
+        const hasCx = cx && typeof cx === "object" && Object.keys(cx).length > 0;
+        return !!e._uiOpenCountry || has || !!hasCx;
+      }
+      function syncRichFilterSections() {
+        if (secRelease) secRelease.hidden = !releaseFilterActive();
+        if (secLiked) secLiked.hidden = !likedFilterActive();
+        if (secCountry) secCountry.hidden = !countryFilterActive();
+        if (filterPicker) {
+          const oRel = filterPicker.querySelector('option[value="release"]');
+          const oLik = filterPicker.querySelector('option[value="liked"]');
+          const oCnt = filterPicker.querySelector('option[value="country"]');
+          if (oRel) oRel.disabled = releaseFilterActive();
+          if (oLik) oLik.disabled = likedFilterActive();
+          if (oCnt) oCnt.disabled = countryFilterActive();
+        }
+      }
 
       function syncFilterVisibility() {
         const c = condSel.value;
@@ -566,6 +829,59 @@
       else prefSel.value = "";
 
       syncFilterVisibility();
+      syncRichFilterSections();
+
+      if (filterPicker) {
+        filterPicker.addEventListener("change", function () {
+          const v = filterPicker.value;
+          if (!v) return;
+          if (v === "release") {
+            e.filter = { condition: "between", start_date: "", end_date: "" };
+            condSel.value = "between";
+            startIn.value = "";
+            endIn.value = "";
+            syncFilterVisibility();
+          } else if (v === "liked") {
+            e.preferLiked = true;
+            prefSel.value = "true";
+          } else if (v === "country") {
+            if (!Array.isArray(e.artistCountryInclude)) e.artistCountryInclude = [];
+            e._uiOpenCountry = true;
+            renderCountryTags();
+          }
+          filterPicker.value = "";
+          syncRichFilterSections();
+          setJsonDirty(true);
+          updateJsonMeta("Unsaved changes");
+        });
+      }
+
+      const filtersWrap = wrap.querySelector(".rich-filters-wrap");
+      if (filtersWrap) {
+        filtersWrap.addEventListener("click", function (ev) {
+          const btn = ev.target.closest(".filter-section-remove");
+          if (!btn) return;
+          const which = btn.getAttribute("data-filter");
+          if (which === "release") {
+            e.filter = null;
+            condSel.value = "";
+            startIn.value = "";
+            endIn.value = "";
+            syncFilterVisibility();
+          } else if (which === "liked") {
+            e.preferLiked = null;
+            prefSel.value = "";
+          } else if (which === "country") {
+            e.artistCountryInclude = [];
+            e.artistCountryFilterComplex = null;
+            e._uiOpenCountry = false;
+            renderCountryTags();
+          }
+          syncRichFilterSections();
+          setJsonDirty(true);
+          updateJsonMeta("Unsaved changes");
+        });
+      }
 
       condSel.addEventListener("change", () => {
         const c = condSel.value;
@@ -580,6 +896,7 @@
           e.filter.condition = c;
         }
         syncFilterVisibility();
+        syncRichFilterSections();
         setJsonDirty(true);
         updateJsonMeta("Unsaved changes");
       });
@@ -596,9 +913,63 @@
       prefSel.addEventListener("change", () => {
         const v = prefSel.value;
         e.preferLiked = v === "" ? null : v === "true";
+        syncRichFilterSections();
         setJsonDirty(true);
         updateJsonMeta("Unsaved changes");
       });
+
+      const countryTagList = wrap.querySelector(".country-tag-list");
+      const countryInput = wrap.querySelector(".country-input");
+      const countryAddBtn = wrap.querySelector(".country-tag-add");
+      if (!Array.isArray(e.artistCountryInclude)) e.artistCountryInclude = [];
+      function renderCountryTags() {
+        if (!countryTagList) return;
+        countryTagList.innerHTML = "";
+        e.artistCountryInclude.forEach(function (c, idx) {
+          const span = document.createElement("span");
+          span.className = "tag-chip";
+          span.appendChild(document.createTextNode(c + " "));
+          const x = document.createElement("button");
+          x.type = "button";
+          x.className = "tag-remove";
+          x.setAttribute("aria-label", "Remove country");
+          x.textContent = "×";
+          x.addEventListener("click", function () {
+            e.artistCountryInclude.splice(idx, 1);
+            renderCountryTags();
+            syncRichFilterSections();
+            setJsonDirty(true);
+            updateJsonMeta("Unsaved changes");
+          });
+          span.appendChild(x);
+          countryTagList.appendChild(span);
+        });
+      }
+      renderCountryTags();
+      function addCountryTag() {
+        if (!countryInput) return;
+        const v = countryInput.value.trim();
+        if (!v) return;
+        if (e.artistCountryInclude.indexOf(v) !== -1) {
+          showToast("That country is already in the list.", true);
+          return;
+        }
+        e.artistCountryInclude.push(v);
+        countryInput.value = "";
+        renderCountryTags();
+        syncRichFilterSections();
+        setJsonDirty(true);
+        updateJsonMeta("Unsaved changes");
+      }
+      if (countryAddBtn) countryAddBtn.addEventListener("click", addCountryTag);
+      if (countryInput) {
+        countryInput.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            addCountryTag();
+          }
+        });
+      }
     }
 
     if (fileId !== "mood_groups" && e.kind === "simple") {
@@ -608,6 +979,9 @@
           e.kind = "rich";
           e.filter = null;
           e.preferLiked = null;
+          e.artistCountryInclude = [];
+          e.artistCountryFilterComplex = null;
+          e._uiOpenCountry = false;
           e.extra = {};
           renderAll();
           setJsonDirty(true);
@@ -630,6 +1004,15 @@
     const head = document.createElement("div");
     head.className = "group-card-head";
 
+    const selectCb = document.createElement("input");
+    selectCb.type = "checkbox";
+    selectCb.className = "group-card-select";
+    selectCb.title = "Select for bulk delete";
+    selectCb.setAttribute(
+      "aria-label",
+      "Select group for bulk delete: " + String(e.name || "").replace(/["\\]/g, "")
+    );
+
     const expandBtn = document.createElement("button");
     expandBtn.type = "button";
     expandBtn.className = "group-card-expand";
@@ -648,9 +1031,22 @@
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.className = "group-card-remove";
-    removeBtn.textContent = "Remove";
+    removeBtn.textContent = "Delete";
+    removeBtn.title = "Remove this group from the file (Save to write to disk)";
+    removeBtn.setAttribute("aria-label", "Delete group");
 
-    head.append(expandBtn, nameInput, badge, removeBtn);
+    if (fileId === "named_genre_mix_playlists" || fileId === "mood_groups") {
+      const runOneBtn = document.createElement("button");
+      runOneBtn.type = "button";
+      runOneBtn.className = "group-card-run-one";
+      runOneBtn.textContent = "Run one";
+      runOneBtn.title =
+        "Build only this Plex playlist (name + \" Mix\"). The script reads the JSON file on disk — click Save first if you edited this group.";
+      runOneBtn.setAttribute("aria-label", "Generate this mix playlist only");
+      head.append(selectCb, expandBtn, nameInput, badge, runOneBtn, removeBtn);
+    } else {
+      head.append(selectCb, expandBtn, nameInput, badge, removeBtn);
+    }
 
     const body = document.createElement("div");
     body.className = "group-card-body";
@@ -676,9 +1072,20 @@
 
     if (e.kind === "rich") {
       const fl = document.createElement("div");
-      fl.className = "filter-block";
+      fl.className = "rich-filters-wrap";
       fl.innerHTML =
-        '<div class="field-label">Release date filter</div>' +
+        '<div class="filter-add-toolbar">' +
+        '<span class="field-label">Filters</span>' +
+        '<select class="filter-add-picker" aria-label="Add filter">' +
+        '<option value="">Add filter…</option>' +
+        '<option value="release">Release date filter</option>' +
+        '<option value="liked">Liked artists</option>' +
+        '<option value="country">Artist countries</option>' +
+        "</select></div>" +
+        '<div class="filter-section filter-section-release" hidden>' +
+        '<div class="filter-section-head">' +
+        '<span class="field-label">Release date filter</span>' +
+        '<button type="button" class="filter-section-remove" data-filter="release">Remove</button></div>' +
         '<div class="filter-row">' +
         '<select class="filter-condition" aria-label="Filter condition">' +
         '<option value="">No filter</option>' +
@@ -688,10 +1095,24 @@
         "</select>" +
         '<span class="filter-start-wrap"><label>Start <input type="text" class="filter-start-input" placeholder="e.g. 1990" /></label></span>' +
         '<span class="filter-end-wrap"><label>End <input type="text" class="filter-end-input" placeholder="e.g. 1999" /></label></span>' +
-        "</div>" +
-        '<div class="prefer-row"><label>Liked artists <select class="prefer-liked">' +
+        "</div></div>" +
+        '<div class="filter-section filter-section-liked" hidden>' +
+        '<div class="filter-section-head">' +
+        '<span class="field-label">Liked artists</span>' +
+        '<button type="button" class="filter-section-remove" data-filter="liked">Remove</button></div>' +
+        '<div class="prefer-row"><label>Preference <select class="prefer-liked">' +
         '<option value="">(not set)</option><option value="true">Prefer</option><option value="false">Do not prefer</option>' +
-        "</select></label></div>";
+        "</select></label></div></div>" +
+        '<div class="filter-section filter-section-country country-filter-section" hidden>' +
+        '<div class="filter-section-head">' +
+        '<span class="field-label">Artist countries</span>' +
+        '<button type="button" class="filter-section-remove" data-filter="country">Remove</button></div>' +
+        '<p class="country-filter-hint">Match <strong>any</strong> of these (OR). Same as <code>artist_country_filter</code> as a JSON array. You can type a name exactly as in Plex if it is not in the list.</p>' +
+        '<div class="tag-list country-tag-list"></div>' +
+        '<div class="tag-add-row country-add-row">' +
+        '<input type="text" class="country-input" list="ppg-country-picklist" placeholder="Pick or type a country…" autocomplete="off" aria-label="Country to add" />' +
+        '<button type="button" class="tag-add country-tag-add">Add</button>' +
+        "</div></div>";
       body.appendChild(fl);
     } else if (!isMood) {
       const prom = document.createElement("div");
@@ -724,6 +1145,7 @@
       jsonSortGroupsBtn.disabled =
         viewMode !== "form" || !!parseError || entries.length < 2;
     }
+    refreshGroupJsonBulkToolbar();
   }
 
   function ingestJsonText(text, fileId) {
@@ -745,6 +1167,7 @@
     jsonSaveBtn.disabled = true;
     updateJsonMeta("Loading…");
     try {
+      await ensureCountryPicklistDatalist();
       const r = await fetch("/api/json-groups/" + encodeURIComponent(id));
       const j = await r.json();
       if (!r.ok) {
@@ -985,14 +1408,40 @@
       if (fileId === "mood_groups") {
         e = { _uid: uid(), kind: "mood", name: "New group", tags: [] };
       } else {
-        e = { _uid: uid(), kind: "rich", name: "New group", genres: [], filter: null, preferLiked: null, extra: {} };
+        e = {
+          _uid: uid(),
+          kind: "rich",
+          name: "New group",
+          genres: [],
+          filter: null,
+          preferLiked: null,
+          artistCountryInclude: [],
+          artistCountryFilterComplex: null,
+          _uiOpenCountry: false,
+          extra: {},
+        };
       }
       entries.push(e);
       jsonVisual.appendChild(cardTemplate(e, fileId));
       applyFilter();
+      if (jsonSortGroupsBtn) {
+        jsonSortGroupsBtn.disabled =
+          viewMode !== "form" || !!parseError || entries.length < 2;
+      }
+      refreshGroupJsonBulkToolbar();
       setJsonDirty(true);
       updateJsonMeta("Unsaved changes");
     });
+  }
+
+  if (jsonSelectVisibleBtn) {
+    jsonSelectVisibleBtn.addEventListener("click", selectVisibleGroupCards);
+  }
+  if (jsonClearSelectionBtn) {
+    jsonClearSelectionBtn.addEventListener("click", clearGroupCardSelection);
+  }
+  if (jsonDeleteSelectedBtn) {
+    jsonDeleteSelectedBtn.addEventListener("click", deleteSelectedGroups);
   }
 
   if (jsonFilterInput) {
@@ -1023,6 +1472,7 @@
     jsonSortGroupsBtn.disabled =
       viewMode !== "form" || !!parseError || entries.length < 2;
   }
+  refreshGroupJsonBulkToolbar();
 
   function sortGroupsAtoZ() {
     if (viewMode !== "form" || parseError || entries.length < 2) return;
@@ -1094,4 +1544,6 @@
       }
     });
   }
+
+  void ensureCountryPicklistDatalist();
 })();

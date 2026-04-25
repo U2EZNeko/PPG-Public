@@ -15,6 +15,7 @@ import contextlib
 import json
 import logging
 import os
+from datetime import datetime
 import queue
 import re
 from collections import defaultdict, deque
@@ -101,6 +102,13 @@ def _failed_playlists_from_log(log_text: str, script_id: str) -> list[dict]:
         m = re.search(r"Time taken for Playlist (\d+) \(failed\):", line)
         if m:
             note(_numbered_playlist_label(script_id, int(m.group(1))), line)
+            continue
+        # Daily / Weekly / LikedArtists use unquoted names: Time taken for Daily Playlist 1 (failed):
+        m = re.search(r"Time taken for (.+?) \(failed\):", line)
+        if m:
+            name = m.group(1).strip().strip("'\"")
+            if name:
+                note(name, line)
             continue
         m = re.search(r"Not enough songs for Playlist '([^']+)', skipping\.?", line, re.I)
         if m:
@@ -262,6 +270,142 @@ def _parse_single_run_block(chunk: str) -> dict | None:
     return meta
 
 
+def _log_display_ts_to_event_t(ts: str) -> str:
+    """Map log.txt 'Started:' / 'Finished:' timestamps to event ISO (no timezone)."""
+    s = (ts or "").strip()
+    if len(s) >= 19 and s[4] == "-" and s[7] == "-":
+        if s[10] == " ":
+            return s[:10] + "T" + s[11:19]
+        if s[10] == "T":
+            return s[:19]
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def _rebuild_events_jsonl_from_log() -> dict:
+    """Rewrite webui/data/ppg_events.jsonl from log.txt run blocks (recovery for Statistics)."""
+    if not LOG_TXT_PATH.is_file():
+        return {"ok": False, "error": "log.txt not found at repository root."}
+    try:
+        text = LOG_TXT_PATH.read_text(encoding="utf-8", errors="replace")
+    except OSError as e:
+        return {"ok": False, "error": str(e)}
+    blocks = _split_log_into_run_blocks(text)
+    out_lines: list[str] = []
+    n_runs = 0
+    for b in blocks:
+        meta = _parse_single_run_block(b)
+        if not meta:
+            continue
+        n_runs += 1
+        run_id = uuid.uuid4().hex[:16]
+        script = meta.get("script") or ""
+        t_start = _log_display_ts_to_event_t(meta.get("started") or "")
+        t_end = _log_display_ts_to_event_t(meta.get("finished") or "") or t_start
+
+        def _dump(obj: dict) -> str:
+            return json.dumps(obj, ensure_ascii=False)
+
+        out_lines.append(
+            _dump(
+                {
+                    "v": 1,
+                    "type": "run_start",
+                    "run_id": run_id,
+                    "script": script,
+                    "t": t_start,
+                }
+            )
+        )
+        for row in meta.get("timing") or []:
+            pl = row.get("playlist") or ""
+            if not pl:
+                continue
+            sec = row.get("seconds")
+            try:
+                sec_f = float(sec) if sec is not None else 0.0
+            except (TypeError, ValueError):
+                sec_f = 0.0
+            dlab = row.get("duration_label") or ""
+            note = (row.get("note") or "").strip()
+            if len(note) > 400:
+                note = note[:397] + "…"
+            out_lines.append(
+                _dump(
+                    {
+                        "v": 1,
+                        "type": "playlist",
+                        "run_id": run_id,
+                        "script": script,
+                        "playlist": pl,
+                        "seconds": sec_f,
+                        "ok": bool(row.get("ok")),
+                        "note": note,
+                        "duration_label": dlab,
+                        "t": t_end,
+                    }
+                )
+            )
+        for f in meta.get("failures") or []:
+            pl = (f.get("playlist") or "").strip()
+            if not pl:
+                continue
+            reason = (f.get("reason") or "").strip()
+            if len(reason) > 600:
+                reason = reason[:597] + "…"
+            out_lines.append(
+                _dump(
+                    {
+                        "v": 1,
+                        "type": "failure",
+                        "run_id": run_id,
+                        "script": script,
+                        "playlist": pl,
+                        "reason": reason,
+                        "t": t_end,
+                    }
+                )
+            )
+        dur = meta.get("duration_seconds")
+        try:
+            dur_f = float(dur) if dur is not None else None
+        except (TypeError, ValueError):
+            dur_f = None
+        res_l = (meta.get("result") or "").lower()
+        had_exc = "crash" in res_l
+        out_lines.append(
+            _dump(
+                {
+                    "v": 1,
+                    "type": "run_end",
+                    "run_id": run_id,
+                    "script": script,
+                    "t": t_end,
+                    "had_exception": had_exc,
+                    "duration_sec": dur_f,
+                    "duration_label": (meta.get("duration_label") or "").strip(),
+                    "playlists_ok": int(meta.get("playlists_ok") or 0),
+                    "timing_count": len(meta.get("timing") or []),
+                    "failures_count": len(meta.get("failures") or []),
+                }
+            )
+        )
+    try:
+        EVENTS_JSONL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = EVENTS_JSONL_PATH.with_suffix(".jsonl.tmp")
+        body = "\n".join(out_lines) + ("\n" if out_lines else "")
+        tmp.write_text(body, encoding="utf-8")
+        tmp.replace(EVENTS_JSONL_PATH)
+    except OSError as e:
+        return {"ok": False, "error": str(e)}
+    rel = str(EVENTS_JSONL_PATH.relative_to(REPO_ROOT)).replace("\\", "/")
+    return {
+        "ok": True,
+        "runs_rebuilt": n_runs,
+        "events_lines": len(out_lines),
+        "path": rel,
+    }
+
+
 def _load_active_run_state() -> dict | None:
     """Snapshot written by ppg_run_logger after each playlist completes."""
     if not RUN_STATE_PATH.is_file():
@@ -295,6 +439,21 @@ def _event_ts_display(iso_val: str | None) -> str:
     return s[:19] if len(s) >= 19 else s
 
 
+def _empty_run_shell_from_event(ev: dict) -> dict:
+    """When playlist/failure lines appear without run_start (truncated file, parse skip, etc.)."""
+    return {
+        "script": ev.get("script") or "",
+        "started": _event_ts_display(ev.get("t")),
+        "finished": "",
+        "duration_label": "",
+        "duration_seconds": None,
+        "result": "incomplete",
+        "playlists_ok": 0,
+        "timing": [],
+        "failures": [],
+    }
+
+
 def _runs_from_events_jsonl(path: Path, max_runs: int) -> list[dict]:
     """Rebuild run summaries from ppg_events.jsonl (CLI / cron friendly)."""
     if not path.is_file():
@@ -319,18 +478,27 @@ def _runs_from_events_jsonl(path: Path, max_runs: int) -> list[dict]:
                     continue
                 rid_s = str(rid)
                 if typ == "run_start":
-                    open_by_id[rid_s] = {
-                        "script": ev.get("script") or "",
-                        "started": _event_ts_display(ev.get("t")),
-                        "finished": "",
-                        "duration_label": "",
-                        "duration_seconds": None,
-                        "result": "incomplete",
-                        "playlists_ok": 0,
-                        "timing": [],
-                        "failures": [],
-                    }
-                elif typ == "playlist" and rid_s in open_by_id:
+                    if rid_s not in open_by_id:
+                        open_by_id[rid_s] = {
+                            "script": ev.get("script") or "",
+                            "started": _event_ts_display(ev.get("t")),
+                            "finished": "",
+                            "duration_label": "",
+                            "duration_seconds": None,
+                            "result": "incomplete",
+                            "playlists_ok": 0,
+                            "timing": [],
+                            "failures": [],
+                        }
+                    else:
+                        run = open_by_id[rid_s]
+                        if not (run.get("script") or "").strip():
+                            run["script"] = ev.get("script") or ""
+                        if not (run.get("started") or "").strip():
+                            run["started"] = _event_ts_display(ev.get("t"))
+                elif typ == "playlist":
+                    if rid_s not in open_by_id:
+                        open_by_id[rid_s] = _empty_run_shell_from_event(ev)
                     run = open_by_id[rid_s]
                     sec_raw = ev.get("seconds")
                     try:
@@ -346,7 +514,9 @@ def _runs_from_events_jsonl(path: Path, max_runs: int) -> list[dict]:
                             "note": (ev.get("note") or "").strip(),
                         }
                     )
-                elif typ == "failure" and rid_s in open_by_id:
+                elif typ == "failure":
+                    if rid_s not in open_by_id:
+                        open_by_id[rid_s] = _empty_run_shell_from_event(ev)
                     pl = (ev.get("playlist") or "").strip()
                     if pl:
                         open_by_id[rid_s]["failures"].append(
@@ -556,6 +726,49 @@ def _build_stats_payload(*, max_runs: int, max_slowest: int, max_recent: int) ->
     slowest_pool.sort(key=lambda x: -x["seconds"])
     slowest_ok = slowest_pool[:max_slowest]
 
+    pl_build_ok: dict[str, int] = defaultdict(int)
+    pl_build_fail: dict[str, int] = defaultdict(int)
+
+    def _bump_playlist_timing_rows(rows: list | None) -> None:
+        for row in rows or []:
+            if not isinstance(row, dict):
+                continue
+            pl = (row.get("playlist") or "").strip()
+            if not pl:
+                continue
+            if row.get("ok"):
+                pl_build_ok[pl] += 1
+            else:
+                pl_build_fail[pl] += 1
+
+    for r in runs:
+        _bump_playlist_timing_rows(r.get("timing"))
+    if current_run:
+        _bump_playlist_timing_rows(current_run.get("playlist_timing"))
+
+    playlist_build_stats: list[dict] = []
+    for pl in sorted(set(pl_build_ok) | set(pl_build_fail), key=str.lower):
+        ok_n = pl_build_ok.get(pl, 0)
+        fail_n = pl_build_fail.get(pl, 0)
+        tot = ok_n + fail_n
+        rate = (100.0 * fail_n / tot) if tot > 0 else None
+        playlist_build_stats.append(
+            {
+                "playlist": pl,
+                "builds_ok": ok_n,
+                "builds_failed": fail_n,
+                "builds_total": tot,
+                "fail_rate_pct": round(rate, 1) if rate is not None else None,
+            }
+        )
+    playlist_build_stats.sort(
+        key=lambda x: (
+            -x["builds_failed"],
+            -((x["fail_rate_pct"] or 0)),
+            x["playlist"].lower(),
+        )
+    )
+
     by_pl: dict[str, dict] = {}
     for ev in fail_events:
         pl = ev["playlist"]
@@ -706,6 +919,7 @@ def _build_stats_payload(*, max_runs: int, max_slowest: int, max_recent: int) ->
         "runs_parsed": len(runs),
         "slowest_ok": slowest_ok,
         "failed_playlists": failed_playlists,
+        "playlist_build_stats": playlist_build_stats,
         "recent_runs": recent,
         "by_script": by_script,
         "current_run": current_run,
@@ -1685,6 +1899,18 @@ def api_stats():
     if not payload.get("ok"):
         return jsonify(payload), 500
     return jsonify(payload)
+
+
+@app.route("/api/rebuild-events-from-log", methods=["POST"])
+def api_rebuild_events_from_log():
+    """Rebuild ppg_events.jsonl from log.txt (replaces the events file)."""
+    try:
+        result = _rebuild_events_jsonl_from_log()
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    if not result.get("ok"):
+        return jsonify(result), 400
+    return jsonify(result)
 
 
 def _launch_script_job(

@@ -49,8 +49,8 @@
       --accent-dim: #4a7ad4;
       --danger: #e06c75;
       --ok: #7fd99a;
-      --inset: var(--inset);
-      --on-accent: var(--on-accent);
+      --inset: #12161e;
+      --on-accent: #ffffff;
       --shadow-toast: rgba(0, 0, 0, 0.4);
       --font: "Segoe UI", system-ui, sans-serif;
       --mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
@@ -102,13 +102,20 @@
       width: 100%;
       overflow-x: clip;
     }
-    select {
+    html:not([data-theme="light"]) select {
       color-scheme: dark;
       background: var(--inset);
       color: var(--text);
     }
-    select option,
-    select optgroup {
+    html[data-theme="light"] select {
+      color-scheme: light;
+      background: var(--inset);
+      color: var(--text);
+    }
+    html:not([data-theme="light"]) select option,
+    html:not([data-theme="light"]) select optgroup,
+    html[data-theme="light"] select option,
+    html[data-theme="light"] select optgroup {
       background: var(--inset);
       color: var(--text);
     }
@@ -254,6 +261,11 @@
     }
     .json-explainer li {
       margin: 0.35rem 0;
+    }
+    .json-explainer-delete-hint {
+      margin: 0.65rem 0 0;
+      padding-top: 0.65rem;
+      border-top: 1px dashed var(--border);
     }
     .errors-placeholder {
       margin: 0;
@@ -1044,6 +1056,46 @@
       min-width: 5.5rem;
       text-transform: uppercase;
     }
+    .ui-rebuild-field {
+      margin: 0.9rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .ui-rebuild-field > label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .ui-rebuild-hint {
+      margin: 0;
+      font-size: 0.76rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .ui-rebuild-hint code {
+      font-size: 0.85em;
+    }
+    #ui-rebuild-events-btn {
+      align-self: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.38rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    #ui-rebuild-events-btn:hover:not(:disabled) {
+      border-color: var(--muted);
+      background: var(--inset);
+    }
+    #ui-rebuild-events-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .ppg-dialog-inner {
       padding: 1.15rem 1.3rem 1rem;
       max-height: min(calc(100dvh - 2rem), calc(100vh - 2rem));
@@ -1245,6 +1297,14 @@
       color: var(--text);
       background: rgba(255,255,255,0.06);
     }
+    input.group-card-select {
+      flex-shrink: 0;
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
     .group-card-name {
       flex: 1;
       min-width: 0;
@@ -1275,6 +1335,22 @@
     button.group-card-remove:hover {
       color: var(--danger);
       border-color: var(--danger);
+    }
+    button.group-card-run-one {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    button.group-card-run-one:hover {
+      border-color: var(--accent);
+      color: var(--text);
     }
     .group-card-body {
       padding: 0.65rem 0.75rem 0.85rem;
@@ -1356,6 +1432,77 @@
       padding-top: 0.65rem;
       border-top: 1px dashed var(--border);
     }
+    .rich-filters-wrap {
+      margin-top: 0.5rem;
+      padding-top: 0.65rem;
+      border-top: 1px dashed var(--border);
+    }
+    .filter-add-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .filter-add-toolbar .field-label {
+      margin-bottom: 0;
+    }
+    select.filter-add-picker {
+      min-width: 12rem;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.3rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    /* Every Group JSON filter <select> (add picker, release condition, liked preference). */
+    html:not([data-theme="light"]) .rich-filters-wrap select {
+      color-scheme: only dark;
+      background-color: var(--inset);
+      color: var(--text);
+    }
+    html[data-theme="light"] .rich-filters-wrap select {
+      color-scheme: only light;
+    }
+    html:not([data-theme="light"]) .rich-filters-wrap select option,
+    html:not([data-theme="light"]) .rich-filters-wrap select optgroup,
+    html[data-theme="light"] .rich-filters-wrap select option,
+    html[data-theme="light"] .rich-filters-wrap select optgroup {
+      background: var(--inset);
+      color: var(--text);
+    }
+    .filter-section {
+      margin-top: 0.55rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--border);
+    }
+    .filter-section-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .filter-section-head .field-label {
+      margin-bottom: 0;
+    }
+    button.filter-section-remove {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.22rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    button.filter-section-remove:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
     .filter-row {
       display: flex;
       flex-wrap: wrap;
@@ -1392,6 +1539,27 @@
       color: var(--text);
       padding: 0.3rem 0.45rem;
       border-radius: 6px;
+    }
+    .country-filter-section {
+      margin-top: 0.55rem;
+    }
+    .country-filter-hint {
+      margin: 0 0 0.4rem;
+      font-size: 0.76rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .country-filter-hint code {
+      font-size: 0.85em;
+    }
+    .country-add-row .country-input {
+      flex: 1;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
     }
     .promote-row {
       margin-top: 0.35rem;
@@ -1687,6 +1855,36 @@
       display: block;
       margin-top: 0.2rem;
     }
+    .stats-current-json-hint {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0.5rem 0.75rem;
+      margin: 0 0 0.65rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .stats-current-json-hint .stats-current-json-copy {
+      flex: 1 1 14rem;
+      margin: 0;
+      min-width: 0;
+    }
+    button.stats-open-group-json {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    button.stats-open-group-json:hover {
+      border-color: var(--muted);
+    }
     .stats-tag {
       font-size: 0.68rem;
       padding: 0.1rem 0.35rem;
@@ -1702,6 +1900,43 @@
     }
     tr.stats-row-live td {
       background: rgba(127, 217, 154, 0.07);
+    }
+    .stats-current-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem 1rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.82rem;
+    }
+    .stats-filter-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .stats-current-toolbar .stats-inline-select {
+      min-width: 6.5rem;
+      font-size: 0.82rem;
+      padding: 0.28rem 0.45rem;
+    }
+    .stats-current-toolbar .stats-filter-search {
+      min-width: min(18rem, 100%);
+      max-width: 24rem;
+      width: 14rem;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.28rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
+    .stats-current-toolbar .stats-filter-count {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
     }
 
     @media (max-width: 960px) {
@@ -1983,7 +2218,7 @@
     </div>
 
     <div id="panel-errors" class="panel" role="tabpanel" data-panel="errors" aria-label="Playlist errors">
-      <p class="errors-hint">Playlist-level failures reported by script runs are saved in this browser. They stay after refresh or stopping a run; use Clear when you want an empty list. Playlists that fail repeatedly are also recorded on disk in <code>webui/data/playlist_chronic_failures.json</code> and listed under <strong>Statistics</strong> → <strong>Playlists needing attention</strong> (threshold: <code>PPG_CHRONIC_FAILURE_THRESHOLD</code>, default 3).</p>
+      <p class="errors-hint">Playlist-level failures from <strong>Web UI</strong> runs are saved in this browser only. Cron, Task Scheduler, and other CLI runs do not appear here — use the <strong>Statistics</strong> tab (<strong>Failed playlists</strong>, <strong>Recent runs</strong>) and <code>webui/data/ppg_events.jsonl</code> in the repo. Failures stay after refresh or stopping a run; use Clear when you want an empty list. Playlists that fail repeatedly are also recorded on disk in <code>webui/data/playlist_chronic_failures.json</code> and listed under <strong>Statistics</strong> → <strong>Playlists needing attention</strong> (threshold: <code>PPG_CHRONIC_FAILURE_THRESHOLD</code>, default 3).</p>
       <div class="errors-toolbar">
         <button type="button" id="errors-clear">Clear saved list</button>
       </div>
@@ -2000,6 +2235,9 @@
           <li><code>mood_groups.json</code> → <strong>PPG-Moods only</strong> — same “one <code>{key} Mix</code> playlist per entry” pattern as Genres.</li>
         </ul>
         The object structure is the same across these files; <strong>which script reads the file</strong> is what changes the behavior.
+        <p class="json-explainer-delete-hint">
+          <strong>Delete groups:</strong> use the checkbox on each card, then <strong>Delete selected</strong>. Or filter by name, <strong>Select visible</strong>, uncheck any you want to keep, then <strong>Delete selected</strong>. Click <strong>Save</strong> to write the file.
+        </p>
       </div>
       <div class="json-toolbar json-toolbar-top">
         <label>
@@ -2040,9 +2278,28 @@
         <span id="plex-moods-status" class="plex-genres-status"></span>
         <button type="button" id="json-sort-groups" title="Reorder groups A–Z in the JSON (save to apply)">Sort A–Z</button>
         <button type="button" id="json-add-group">Add group</button>
+        <button
+          type="button"
+          id="json-select-visible-groups"
+          title="Requires a name filter: checks every group row that is still visible (use before Delete selected)"
+        >
+          Select visible
+        </button>
+        <button type="button" id="json-clear-group-selection" title="Uncheck all group checkboxes">
+          Clear selection
+        </button>
+        <button
+          type="button"
+          id="json-delete-selected-groups"
+          disabled
+          title="Remove only checked groups (you confirm the list)"
+        >
+          Delete selection
+        </button>
       </div>
       <p id="json-meta" class="json-meta"></p>
       <datalist id="plex-genres-datalist"></datalist>
+      <datalist id="ppg-country-picklist"></datalist>
       <datalist id="plex-moods-datalist"></datalist>
       <div id="json-visual"></div>
       <textarea id="json-editor" class="hidden" spellcheck="false" autocomplete="off" aria-label="JSON content"></textarea>
@@ -2085,6 +2342,16 @@
       </div>
       <section class="stats-section" id="stats-current-section" hidden aria-labelledby="stats-current-heading">
         <h2 id="stats-current-heading">Current run (live)</h2>
+        <div class="stats-current-json-hint">
+          <p class="stats-current-json-copy">
+            <strong>This table is read-only.</strong> There is no delete here — it only shows run results.
+            To remove a mix from your repo, go to the <strong>Group JSON</strong> tab: use checkboxes + <strong>Delete selected</strong> (or <strong>Delete</strong> on one card), then <strong>Save</strong>.
+            (The <strong>Playlists</strong> tab’s “Delete selected” removes Plex playlists, not JSON groups.)
+          </p>
+          <button type="button" id="stats-open-group-json" class="stats-open-group-json">
+            Open Group JSON tab
+          </button>
+        </div>
         <p id="stats-current-meta" class="stats-empty"></p>
         <div id="stats-current" class="playlists-table-wrap"></div>
       </section>
@@ -2106,6 +2373,15 @@
           Aggregated from timing rows marked <code>failed</code> and from <code>Failures:</code> blocks in the log.
         </p>
         <div id="stats-failed" class="playlists-table-wrap"></div>
+      </section>
+      <section class="stats-section" aria-labelledby="stats-playlist-builds-heading">
+        <h2 id="stats-playlist-builds-heading">Per-mix build outcomes</h2>
+        <p class="stats-empty" id="stats-playlist-builds-hint">
+          How often each mix was built in the scanned history: counts come from per-playlist timing rows (every
+          <code>ok</code> or <code>failed</code> build). Sorted by failed builds, then failure rate. Same run window as
+          other tables on this page.
+        </p>
+        <div id="stats-playlist-builds" class="playlists-table-wrap"></div>
       </section>
       <section class="stats-section" aria-labelledby="stats-scripts-heading">
         <h2 id="stats-scripts-heading">Runs per script</h2>
@@ -2144,6 +2420,14 @@
           <input type="color" id="ui-accent-color" value="#6c9ef8" />
           <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
         </div>
+      </div>
+      <div class="ui-rebuild-field">
+        <label for="ui-rebuild-events-btn">Statistics history</label>
+        <p class="ui-rebuild-hint">
+          Rebuild <code>webui/data/ppg_events.jsonl</code> from <code>log.txt</code> run summaries. This
+          <strong>replaces</strong> the current events file (use to fix missing cron/CLI history in Statistics).
+        </p>
+        <button type="button" id="ui-rebuild-events-btn">Build history from logs</button>
       </div>
       <div class="ppg-dialog-actions">
         <button type="button" id="ui-settings-reset">Reset</button>
@@ -2274,6 +2558,7 @@
       const uiSettingsOpen = document.getElementById("ui-settings-open");
       const uiSettingsDone = document.getElementById("ui-settings-done");
       const uiSettingsReset = document.getElementById("ui-settings-reset");
+      const uiRebuildEventsBtn = document.getElementById("ui-rebuild-events-btn");
       const UI_ACCENT_KEY = "ppg_ui_accent";
       const DEFAULT_ACCENT = "#6C9EF8";
       function normalizeHexColor(v) {
@@ -2364,6 +2649,46 @@
             persistDarkVariant("dark");
             persistAndApplyThemeMode("dark");
             applyAccentColor(DEFAULT_ACCENT, true);
+          });
+        }
+        if (uiRebuildEventsBtn) {
+          uiRebuildEventsBtn.addEventListener("click", function () {
+            if (
+              !window.confirm(
+                "Replace webui/data/ppg_events.jsonl with data rebuilt from log.txt?\n\n" +
+                  "Events that are not represented in log.txt will be removed. Continue?"
+              )
+            ) {
+              return;
+            }
+            uiRebuildEventsBtn.disabled = true;
+            fetch("/api/rebuild-events-from-log", { method: "POST" })
+              .then(function (r) {
+                return r.json().then(function (j) {
+                  return { ok: r.ok, j: j };
+                });
+              })
+              .then(function (x) {
+                uiRebuildEventsBtn.disabled = false;
+                if (!x.ok || !x.j.ok) {
+                  showToast(x.j.error || "Rebuild failed", true);
+                  return;
+                }
+                showToast(
+                  "Rebuilt " +
+                    (x.j.runs_rebuilt || 0) +
+                    " run(s), " +
+                    (x.j.events_lines || 0) +
+                    " event lines → " +
+                    (x.j.path || "webui/data/ppg_events.jsonl"),
+                  false
+                );
+                if (typeof loadStats === "function") loadStats({ silent: true });
+              })
+              .catch(function (e) {
+                uiRebuildEventsBtn.disabled = false;
+                showToast(String(e), true);
+              });
           });
         }
       }
@@ -3237,6 +3562,39 @@
         el.innerHTML = h;
       }
 
+      function renderStatsPlaylistBuilds(rows) {
+        const el = document.getElementById("stats-playlist-builds");
+        if (!el) return;
+        if (!rows || !rows.length) {
+          el.innerHTML =
+            '<p class="stats-empty">No per-playlist timing rows in the scanned history yet — run a generator to populate log / events.</p>';
+          return;
+        }
+        let h =
+          '<table class="stats-table"><thead><tr><th>Playlist / mix</th><th class="num">Failed builds</th><th class="num">OK builds</th><th class="num">Total builds</th><th class="num">Fail %</th></tr></thead><tbody>';
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const pct =
+            r.fail_rate_pct != null && !isNaN(Number(r.fail_rate_pct))
+              ? String(r.fail_rate_pct) + "%"
+              : "—";
+          h +=
+            "<tr><td>" +
+            escapeHtml(r.playlist || "") +
+            '</td><td class="num">' +
+            String(r.builds_failed != null ? r.builds_failed : 0) +
+            '</td><td class="num">' +
+            String(r.builds_ok != null ? r.builds_ok : 0) +
+            '</td><td class="num">' +
+            String(r.builds_total != null ? r.builds_total : 0) +
+            '</td><td class="num">' +
+            escapeHtml(pct) +
+            "</td></tr>";
+        }
+        h += "</tbody></table>";
+        el.innerHTML = h;
+      }
+
       function renderStatsScripts(rows) {
         const el = document.getElementById("stats-scripts");
         if (!el) return;
@@ -3307,6 +3665,43 @@
         el.innerHTML = h;
       }
 
+      var statsCurrentResultFilter = "all";
+      var statsCurrentSearchText = "";
+
+      function applyStatsCurrentFilters() {
+        const wrap = document.getElementById("stats-current");
+        if (!wrap) return;
+        const table = wrap.querySelector("table.stats-current-table");
+        const sel = document.getElementById("stats-current-filter-result");
+        const qIn = document.getElementById("stats-current-filter-q");
+        const countEl = document.getElementById("stats-current-filter-count");
+        if (!table || !sel || !qIn) return;
+        const want = sel.value || "all";
+        const needle = (qIn.value || "").trim().toLowerCase();
+        const rows = table.querySelectorAll("tbody tr");
+        let visible = 0;
+        for (let i = 0; i < rows.length; i++) {
+          const tr = rows[i];
+          const c = tr.cells;
+          if (c.length < 4) continue;
+          const res = (c[2].textContent || "").trim().toLowerCase();
+          const pl = (c[0].textContent || "").toLowerCase();
+          const note = (c[3].textContent || "").toLowerCase();
+          let show = want === "all" || res === want;
+          if (show && needle) {
+            show = pl.indexOf(needle) !== -1 || note.indexOf(needle) !== -1;
+          }
+          tr.hidden = !show;
+          if (show) visible++;
+        }
+        if (countEl) {
+          countEl.textContent =
+            visible === rows.length
+              ? rows.length + " playlist(s)"
+              : visible + " of " + rows.length + " playlist(s)";
+        }
+      }
+
       function renderStatsCurrentRun(cr) {
         const sec = document.getElementById("stats-current-section");
         const el = document.getElementById("stats-current");
@@ -3333,8 +3728,22 @@
             '<p class="stats-empty">No playlist timings yet — the first will appear when a playlist completes.</p>';
           return;
         }
+        const toolbar =
+          '<div class="stats-current-toolbar">' +
+          '<label class="stats-filter-label">Result ' +
+          '<select id="stats-current-filter-result" class="stats-inline-select" aria-label="Filter current run by result">' +
+          '<option value="all">All</option>' +
+          '<option value="ok">ok</option>' +
+          '<option value="failed">failed</option>' +
+          "</select></label>" +
+          '<label class="stats-filter-label">Search ' +
+          '<input type="search" id="stats-current-filter-q" class="stats-filter-search" placeholder="Playlist or note…" autocomplete="off" aria-label="Filter by playlist name or note" />' +
+          "</label>" +
+          '<span id="stats-current-filter-count" class="stats-filter-count" aria-live="polite"></span>' +
+          "</div>";
         let h =
-          '<table class="stats-table"><thead><tr><th>Playlist</th><th class="num">Duration</th><th>Result</th><th>Note</th></tr></thead><tbody>';
+          toolbar +
+          '<table class="stats-table stats-current-table" id="stats-current-table"><thead><tr><th>Playlist</th><th class="num">Duration</th><th>Result</th><th>Note</th></tr></thead><tbody>';
         for (let i = 0; i < rows.length; i++) {
           const r = rows[i];
           const st = r.ok ? "ok" : "failed";
@@ -3351,6 +3760,31 @@
         }
         h += "</tbody></table>";
         el.innerHTML = h;
+        const sel = document.getElementById("stats-current-filter-result");
+        const qIn = document.getElementById("stats-current-filter-q");
+        if (sel) {
+          if (
+            statsCurrentResultFilter === "ok" ||
+            statsCurrentResultFilter === "failed" ||
+            statsCurrentResultFilter === "all"
+          ) {
+            sel.value = statsCurrentResultFilter;
+          } else {
+            sel.value = "all";
+          }
+          sel.addEventListener("change", function () {
+            statsCurrentResultFilter = sel.value || "all";
+            applyStatsCurrentFilters();
+          });
+        }
+        if (qIn) {
+          qIn.value = statsCurrentSearchText || "";
+          qIn.addEventListener("input", function () {
+            statsCurrentSearchText = qIn.value || "";
+            applyStatsCurrentFilters();
+          });
+        }
+        applyStatsCurrentFilters();
       }
 
       async function loadStats(opts) {
@@ -3363,6 +3797,7 @@
           meta.textContent = "Loading…";
           document.getElementById("stats-slowest").innerHTML = "";
           document.getElementById("stats-failed").innerHTML = "";
+          document.getElementById("stats-playlist-builds").innerHTML = "";
           document.getElementById("stats-scripts").innerHTML = "";
           document.getElementById("stats-recent").innerHTML = "";
         }
@@ -3383,6 +3818,7 @@
               meta.classList.add("warn");
               renderStatsSlowest([]);
               renderStatsFailed([]);
+              renderStatsPlaylistBuilds([]);
               renderStatsScripts([]);
               renderStatsRecent([]);
               renderStatsCurrentRun(null);
@@ -3431,6 +3867,7 @@
           renderStatsSlowest(j.slowest_ok || []);
           renderStatsChronic(j.chronic_failures || [], j.chronic_threshold, j.chronic_file);
           renderStatsFailed(j.failed_playlists || []);
+          renderStatsPlaylistBuilds(j.playlist_build_stats || []);
           renderStatsScripts(j.by_script || []);
           renderStatsRecent(j.recent_runs || []);
         } catch (e) {
@@ -3444,6 +3881,12 @@
       const statsRefreshBtn = document.getElementById("stats-refresh");
       if (statsRefreshBtn) {
         statsRefreshBtn.addEventListener("click", () => loadStats());
+      }
+      const statsOpenGroupJsonBtn = document.getElementById("stats-open-group-json");
+      if (statsOpenGroupJsonBtn) {
+        statsOpenGroupJsonBtn.addEventListener("click", function () {
+          activateMainTab("json");
+        });
       }
 
       async function loadPlaylists() {
@@ -4048,6 +4491,7 @@
           showToast(String(e), true);
         }
       }
+      window.__ppgRegeneratePlaylist = regeneratePlaylistOnDemand;
 
       async function runScript(scriptId, label) {
         if (runningScriptIds.has(scriptId)) {
