@@ -1991,13 +1991,34 @@ def _launch_script_job(
     )
 
 
+def _coerce_bool_flag(v) -> bool | None:
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return bool(v)
+    if isinstance(v, str):
+        s = v.strip().lower()
+        if s in {"1", "true", "yes", "on"}:
+            return True
+        if s in {"0", "false", "no", "off"}:
+            return False
+    return None
+
+
 @app.route("/api/run", methods=["POST"])
 def api_run():
     data = request.get_json(silent=True) or {}
     script_id = data.get("script")
     if not script_id or script_id not in SCRIPTS:
         return jsonify({"error": "Invalid or missing script id"}), 400
-    return _launch_script_job(script_id)
+    tg_on = _coerce_bool_flag(data.get("telegram_notifications"))
+    env_overrides: dict[str, str] = {}
+    if tg_on is not None:
+        env_overrides["TELEGRAM_NOTIFICATIONS"] = "true" if tg_on else "false"
+    return _launch_script_job(
+        script_id,
+        env_overrides=env_overrides or None,
+    )
 
 
 @app.route("/api/regenerate-playlist", methods=["POST"])
@@ -2017,9 +2038,13 @@ def api_regenerate_playlist():
         return jsonify({"error": err or "Unknown playlist"}), 400
 
     label = f"{SCRIPT_LABELS.get(script_id, script_id)} — {title}"
+    tg_on = _coerce_bool_flag(data.get("telegram_notifications"))
+    env_overrides = {"PPG_ONLY_PLAYLIST_TITLE": title}
+    if tg_on is not None:
+        env_overrides["TELEGRAM_NOTIFICATIONS"] = "true" if tg_on else "false"
     return _launch_script_job(
         script_id,
-        env_overrides={"PPG_ONLY_PLAYLIST_TITLE": title},
+        env_overrides=env_overrides,
         label_override=label,
     )
 

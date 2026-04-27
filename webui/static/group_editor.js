@@ -166,9 +166,12 @@
     document.querySelectorAll('.tag-add-row[data-plex-genres="1"]').forEach((row) => {
       const btn = row.querySelector(".tag-add");
       const inp = row.querySelector(".tag-input");
+      const sel = row.querySelector(".tag-select-genre");
       const on = plexGenresReady && plexGenres.length > 0;
       if (btn) btn.disabled = !on;
-      if (inp) {
+      if (sel) {
+        sel.disabled = !on;
+      } else if (inp) {
         inp.placeholder = on
           ? "Type or pick a Plex genre…"
           : "Fetch Plex genres first…";
@@ -684,6 +687,7 @@
 
     const tagList = wrap.querySelector(".tag-list");
     const tagInput = wrap.querySelector(".tag-input");
+    const tagSelectGenre = wrap.querySelector(".tag-select-genre");
     const tagAddBtn = wrap.querySelector(".tag-add");
     const tagAddRow = wrap.querySelector(".tag-add-row");
 
@@ -694,7 +698,50 @@
       tagInput.setAttribute("list", "plex-moods-datalist");
     } else if (fileId !== "mood_groups" && tagAddRow) {
       tagAddRow.setAttribute("data-plex-genres", "1");
-      tagInput.setAttribute("list", "plex-genres-datalist");
+    }
+
+    function setGenreSelectPlaceholder() {
+      if (!tagSelectGenre || fileId === "mood_groups") return;
+      tagSelectGenre.innerHTML = "";
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      if (!plexGenresReady || plexGenres.length === 0) {
+        opt0.textContent = "— Fetch Plex genres first… —";
+      } else {
+        opt0.textContent = "— Select a Plex genre —";
+      }
+      tagSelectGenre.appendChild(opt0);
+      tagSelectGenre.dataset.populated = "0";
+    }
+
+    function populateGenreSelectOptions() {
+      if (!tagSelectGenre || fileId === "mood_groups") return;
+      if (!plexGenresReady || plexGenres.length === 0) {
+        setGenreSelectPlaceholder();
+        return;
+      }
+      const prev = String(tagSelectGenre.value || "");
+      tagSelectGenre.innerHTML = "";
+      const used = new Set(tags.map((x) => String(x)));
+      const available = plexGenres.filter((g) => !used.has(String(g)));
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = available.length
+        ? "— Select a Plex genre —"
+        : "— All cached Plex genres already added —";
+      tagSelectGenre.appendChild(opt0);
+      for (let i = 0; i < available.length; i++) {
+        const o = document.createElement("option");
+        o.value = available[i];
+        o.textContent = available[i];
+        tagSelectGenre.appendChild(o);
+      }
+      if (prev && !used.has(prev) && available.indexOf(prev) !== -1) {
+        tagSelectGenre.value = prev;
+      } else {
+        tagSelectGenre.value = "";
+      }
+      tagSelectGenre.dataset.populated = "1";
     }
 
     function renderTags() {
@@ -720,11 +767,30 @@
         span.appendChild(x);
         tagList.appendChild(span);
       });
+      if (tagSelectGenre && fileId !== "mood_groups") {
+        if (tagSelectGenre.dataset.populated === "1") {
+          populateGenreSelectOptions();
+        } else {
+          setGenreSelectPlaceholder();
+        }
+      }
     }
     renderTags();
 
+    if (tagSelectGenre && fileId !== "mood_groups") {
+      setGenreSelectPlaceholder();
+      // Large libraries can have many genres; populate only on interaction.
+      tagSelectGenre.addEventListener("focus", populateGenreSelectOptions);
+      tagSelectGenre.addEventListener("pointerdown", function () {
+        if (tagSelectGenre.dataset.populated !== "1") {
+          populateGenreSelectOptions();
+        }
+      });
+    }
+
     function addTag() {
-      const v = tagInput.value.trim();
+      const src = tagSelectGenre || tagInput;
+      const v = src ? String(src.value || "").trim() : "";
       if (!v) return;
       if (fileId === "mood_groups") {
         if (!plexMoodsReady || plexMoods.length === 0) {
@@ -750,19 +816,25 @@
         return;
       }
       tags.push(v);
-      tagInput.value = "";
+      if (tagSelectGenre) {
+        tagSelectGenre.value = "";
+      } else if (tagInput) {
+        tagInput.value = "";
+      }
       renderTags();
       refreshBadge();
       setJsonDirty(true);
       updateJsonMeta("Unsaved changes");
     }
     tagAddBtn.addEventListener("click", addTag);
-    tagInput.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        addTag();
-      }
-    });
+    if (tagInput && !tagSelectGenre) {
+      tagInput.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          addTag();
+        }
+      });
+    }
 
     if (e.kind === "rich") {
       if (typeof e._uiOpenCountry !== "boolean") {
@@ -1059,10 +1131,21 @@
     tagList.className = "tag-list";
     const addRow = document.createElement("div");
     addRow.className = "tag-add-row";
-    const tagInput = document.createElement("input");
-    tagInput.type = "text";
-    tagInput.className = "tag-input";
-    tagInput.placeholder = isMood ? "Add mood…" : "Add genre…";
+    let tagInput;
+    if (isMood) {
+      tagInput = document.createElement("input");
+      tagInput.type = "text";
+      tagInput.className = "tag-input";
+      tagInput.placeholder = "Add mood…";
+    } else {
+      tagInput = document.createElement("select");
+      tagInput.className = "tag-input tag-select-genre";
+      tagInput.setAttribute("aria-label", "Select a Plex genre to add");
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "— Fetch Plex genres first… —";
+      tagInput.appendChild(opt);
+    }
     const tagAdd = document.createElement("button");
     tagAdd.type = "button";
     tagAdd.className = "tag-add";

@@ -1067,6 +1067,46 @@
       font-weight: 600;
       color: var(--text);
     }
+    .ui-telegram-field {
+      margin: 0.9rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .ui-telegram-field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .ui-telegram-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+    }
+    .ui-telegram-hint {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    #ui-telegram-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.38rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      white-space: nowrap;
+    }
+    #ui-telegram-toggle[aria-pressed="true"] {
+      background: var(--accent);
+      color: var(--on-accent);
+      border-color: transparent;
+    }
     .ui-rebuild-hint {
       margin: 0;
       font-size: 0.76rem;
@@ -2421,6 +2461,13 @@
           <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
         </div>
       </div>
+      <div class="ui-telegram-field">
+        <label for="ui-telegram-toggle">Telegram notifications</label>
+        <div class="ui-telegram-row">
+          <p class="ui-telegram-hint">For runs started from this Web UI. Cron/CLI runs still follow <code>.env</code>.</p>
+          <button type="button" id="ui-telegram-toggle" aria-pressed="true">On</button>
+        </div>
+      </div>
       <div class="ui-rebuild-field">
         <label for="ui-rebuild-events-btn">Statistics history</label>
         <p class="ui-rebuild-hint">
@@ -2559,7 +2606,9 @@
       const uiSettingsDone = document.getElementById("ui-settings-done");
       const uiSettingsReset = document.getElementById("ui-settings-reset");
       const uiRebuildEventsBtn = document.getElementById("ui-rebuild-events-btn");
+      const uiTelegramToggleBtn = document.getElementById("ui-telegram-toggle");
       const UI_ACCENT_KEY = "ppg_ui_accent";
+      const UI_TELEGRAM_KEY = "ppg_ui_telegram_notifications";
       const DEFAULT_ACCENT = "#6C9EF8";
       function normalizeHexColor(v) {
         const s = String(v || "").trim();
@@ -2619,10 +2668,35 @@
         if (uiScaleSlider) uiScaleSlider.value = String(Math.round(z * 100));
         if (uiScaleValue) uiScaleValue.textContent = Math.round(z * 100) + "%";
       }
+      function readTelegramNotificationsEnabled() {
+        try {
+          const raw = (localStorage.getItem(UI_TELEGRAM_KEY) || "").trim().toLowerCase();
+          if (!raw) return true;
+          return !(raw === "false" || raw === "0" || raw === "off" || raw === "no");
+        } catch (e) {
+          return true;
+        }
+      }
+      function setTelegramNotificationsEnabled(on, persist) {
+        const enabled = !!on;
+        if (uiTelegramToggleBtn) {
+          uiTelegramToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+          uiTelegramToggleBtn.textContent = enabled ? "On" : "Off";
+          uiTelegramToggleBtn.title = enabled
+            ? "Disable Telegram notifications for web UI runs"
+            : "Enable Telegram notifications for web UI runs";
+        }
+        if (persist !== false) {
+          try {
+            localStorage.setItem(UI_TELEGRAM_KEY, enabled ? "true" : "false");
+          } catch (e) {}
+        }
+      }
       function initUiScaleControls() {
         if (!uiScaleSlider || !uiSettingsDialog) return;
         setUiZoom(readUiZoom(), false);
         applyAccentColor(readStoredAccent(), false);
+        setTelegramNotificationsEnabled(readTelegramNotificationsEnabled(), false);
         uiScaleSlider.addEventListener("input", function () {
           setUiZoom(parseInt(uiScaleSlider.value, 10) / 100, true);
         });
@@ -2635,6 +2709,7 @@
           uiSettingsOpen.addEventListener("click", function () {
             setUiZoom(readUiZoom(), false);
             applyAccentColor(readStoredAccent(), false);
+            setTelegramNotificationsEnabled(readTelegramNotificationsEnabled(), false);
             if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
           });
         }
@@ -2649,6 +2724,13 @@
             persistDarkVariant("dark");
             persistAndApplyThemeMode("dark");
             applyAccentColor(DEFAULT_ACCENT, true);
+            setTelegramNotificationsEnabled(true, true);
+          });
+        }
+        if (uiTelegramToggleBtn) {
+          uiTelegramToggleBtn.addEventListener("click", function () {
+            const next = uiTelegramToggleBtn.getAttribute("aria-pressed") !== "true";
+            setTelegramNotificationsEnabled(next, true);
           });
         }
         if (uiRebuildEventsBtn) {
@@ -2755,6 +2837,7 @@
           document.querySelectorAll(".card-meta[data-script-meta]").forEach(function (el) {
             const id = el.getAttribute("data-script-meta");
             const text = id && j[id] != null && j[id] !== "" ? String(j[id]) : "";
+            if (el.dataset) delete el.dataset.externalBase;
             if (text) {
               el.textContent = text;
               el.removeAttribute("hidden");
@@ -4395,6 +4478,24 @@
           const pre = ensureOutputPanel(sid, label, ext.run_id || "external");
           pre.textContent = formatExternalRunText(ext);
           pre._ppgExternalPoll = true;
+          const metaEl = document.querySelector('.card-meta[data-script-meta="' + sid + '"]');
+          if (metaEl) {
+            const upd = (ext.updated_at || "").replace("T", " ").slice(0, 19);
+            const baseStored =
+              metaEl.dataset && metaEl.dataset.externalBase != null
+                ? String(metaEl.dataset.externalBase)
+                : null;
+            const base =
+              baseStored != null
+                ? baseStored
+                : (metaEl.textContent ? String(metaEl.textContent).trim() : "");
+            if (metaEl.dataset) metaEl.dataset.externalBase = base;
+            const next =
+              (base ? base + " · " : "") +
+              (upd ? "Last update " + upd : "Running externally");
+            metaEl.textContent = next;
+            metaEl.removeAttribute("hidden");
+          }
           updateRunButtonsState();
           updateStatusBar();
           return;
@@ -4414,6 +4515,9 @@
             );
             pre._ppgExternalPoll = false;
           }
+          const metaEl = document.querySelector('.card-meta[data-script-meta="' + sid + '"]');
+          if (metaEl && metaEl.dataset) delete metaEl.dataset.externalBase;
+          refreshScriptCardMeta();
           updateRunButtonsState();
           updateStatusBar();
         }
@@ -4450,7 +4554,11 @@
           const r = await fetch("/api/regenerate-playlist", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: title, smart: false }),
+            body: JSON.stringify({
+              title: title,
+              smart: false,
+              telegram_notifications: readTelegramNotificationsEnabled(),
+            }),
           });
           const j = await r.json().catch(() => ({}));
           if (r.status === 409) {
@@ -4514,7 +4622,10 @@
           const r = await fetch("/api/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ script: scriptId }),
+            body: JSON.stringify({
+              script: scriptId,
+              telegram_notifications: readTelegramNotificationsEnabled(),
+            }),
           });
           const j = await r.json().catch(() => ({}));
           if (r.status === 409) {
