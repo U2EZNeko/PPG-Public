@@ -59,9 +59,12 @@ def track_matches_skip_regex(
     song_re: Pattern | None,
     album_re: Pattern | None,
 ) -> bool:
-    if song_re and song_re.search(get_track_title_for_filter(track)):
+    # If only one regex is configured, apply it to both fields.
+    title_re = song_re or album_re
+    alb_re = album_re or song_re
+    if title_re and title_re.search(get_track_title_for_filter(track)):
         return True
-    if album_re and album_re.search(get_track_album_for_filter(track)):
+    if alb_re and alb_re.search(get_track_album_for_filter(track)):
         return True
     return False
 

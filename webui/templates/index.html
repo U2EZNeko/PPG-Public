@@ -2231,7 +2231,7 @@
     <div id="panel-run" class="panel active" role="tabpanel" data-panel="run">
       <div class="grid" id="script-grid">
         {% for s in scripts %}
-        <div class="card" data-script="{{ s.id }}">
+        <div class="card" data-script="{{ s.id }}" data-script-file="{{ s.file }}">
           <div class="card-body">
             <div class="card-text">
               <h2>{{ s.label }}</h2>
@@ -2240,7 +2240,7 @@
               {% if s.note %}<p class="note">{{ s.note }}</p>{% endif %}
             </div>
             <div class="card-actions">
-              <span class="script-last-run script-last-run--empty" data-script="{{ s.id }}" title="Last successful run (this browser)"></span>
+              <span class="script-last-run script-last-run--empty" data-script="{{ s.id }}" title="Last successful run (completed on server); merges from Statistics on load and when an external run ends in this tab"></span>
               <button type="button" class="run" data-script="{{ s.id }}">Run</button>
             </div>
           </div>
@@ -2253,6 +2253,7 @@
       <div class="run-outputs-head">
         <span>Output (one panel per script)</span>
         <button type="button" id="clear-log">Clear all</button>
+        <button type="button" id="clear-external-run">Clear external run</button>
       </div>
       <div id="run-outputs" class="run-outputs" aria-live="polite"></div>
     </div>
@@ -2818,8 +2819,8 @@
         el.textContent = text;
         el.classList.toggle("script-last-run--empty", !iso);
         el.title = iso
-          ? "Last successful run (exit code 0), stored in this browser"
-          : "No successful run recorded yet in this browser";
+          ? "Last successful run (completed on server); merged from Statistics and this browser"
+          : "No successful run recorded yet (open Statistics or run a script)";
       }
 
       function refreshAllLastRunLabels() {
@@ -2827,6 +2828,63 @@
           const id = el.getAttribute("data-script");
           if (id) updateLastRunLabel(id);
         });
+      }
+
+      function parseStatsFinishedToIso(finished) {
+        const s = (finished || "").trim();
+        if (!s) return "";
+        const d = new Date(s.replace(" ", "T"));
+        if (isNaN(d.getTime())) return "";
+        return d.toISOString();
+      }
+
+      function mergeStatsIntoLastRunStorage(statsJson) {
+        if (!statsJson || !statsJson.ok || !Array.isArray(statsJson.by_script)) return;
+        const byFile = {};
+        for (let i = 0; i < statsJson.by_script.length; i++) {
+          const st = statsJson.by_script[i];
+          const fn = (st.script || "").trim();
+          if (fn) byFile[fn] = st;
+        }
+        let o = {};
+        try {
+          o = JSON.parse(localStorage.getItem(LAST_RUN_STORAGE) || "{}");
+        } catch (e) {
+          o = {};
+        }
+        let changed = false;
+        document.querySelectorAll("#panel-run .card[data-script][data-script-file]").forEach(function (card) {
+          const sid = card.getAttribute("data-script");
+          const fn = card.getAttribute("data-script-file");
+          if (!sid || !fn) return;
+          const st = byFile[fn];
+          if (!st || st.last_result !== "completed" || !st.last_finished) return;
+          const iso = parseStatsFinishedToIso(st.last_finished);
+          if (!iso) return;
+          const prev = o[sid] || "";
+          if (!prev || iso > prev) {
+            o[sid] = iso;
+            changed = true;
+          }
+        });
+        if (changed) {
+          try {
+            localStorage.setItem(LAST_RUN_STORAGE, JSON.stringify(o));
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        refreshAllLastRunLabels();
+      }
+
+      async function syncLastRunsFromServerStats() {
+        try {
+          const r = await fetch("/api/stats?max_runs=500&max_slowest=1&max_recent=40");
+          const j = await r.json();
+          mergeStatsIntoLastRunStorage(j);
+        } catch (e) {
+          /* ignore */
+        }
       }
 
       async function refreshScriptCardMeta() {
@@ -4373,6 +4431,38 @@
           });
         });
       }
+      const clearExternalRunBtn = document.getElementById("clear-external-run");
+      if (clearExternalRunBtn) {
+        clearExternalRunBtn.addEventListener("click", async () => {
+          if (!confirm("Clear stale external run state? Use this only if no script is actually running.")) {
+            return;
+          }
+          clearExternalRunBtn.disabled = true;
+          try {
+            const r = await fetch("/api/external-run/clear", { method: "POST" });
+            const j = await r.json().catch(() => ({}));
+            if (!r.ok || !j.ok) {
+              showToast(j.error || "Could not clear external run state.", true);
+              return;
+            }
+            runningScriptIds.clear();
+            document.querySelectorAll("#run-outputs .run-output-card").forEach(function (card) {
+              const pre = card.querySelector("pre.run-output-log");
+              if (!pre || !pre._ppgExternalPoll) return;
+              card.remove();
+            });
+            lastExternalScriptId = null;
+            updateRunButtonsState();
+            updateStatusBar();
+            await pollRuntimeStatus();
+            showToast("External run state cleared.");
+          } catch (e) {
+            showToast(String(e), true);
+          } finally {
+            clearExternalRunBtn.disabled = false;
+          }
+        });
+      }
 
       const runOutputsHost = document.getElementById("run-outputs");
       if (runOutputsHost) {
@@ -4426,6 +4516,7 @@
         lines.push("Started: " + (ext.started_at || ""));
         lines.push("Last update: " + (ext.updated_at || ""));
         lines.push("Playlists OK (counter): " + (ext.playlists_ok != null ? ext.playlists_ok : "—"));
+        if (ext.status_message) lines.push("Status: " + ext.status_message);
         lines.push("");
         const timing = ext.playlist_timing || [];
         if (timing.length) {
@@ -4518,6 +4609,7 @@
           const metaEl = document.querySelector('.card-meta[data-script-meta="' + sid + '"]');
           if (metaEl && metaEl.dataset) delete metaEl.dataset.externalBase;
           refreshScriptCardMeta();
+          void syncLastRunsFromServerStats();
           updateRunButtonsState();
           updateStatusBar();
         }
@@ -4677,6 +4769,7 @@
       renderRunFailuresDOM();
       refreshAllLastRunLabels();
       refreshScriptCardMeta();
+      void syncLastRunsFromServerStats();
     })();
   </script>
   <script src="{{ url_for('static', filename='env_editor.js') }}"></script>

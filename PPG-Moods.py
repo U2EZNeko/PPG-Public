@@ -9,6 +9,7 @@ from tqdm import tqdm
 import requests
 from urllib.parse import quote
 import tempfile
+from module.ppg_plex_retry import call_plex_with_retry
 from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 from module.ppg_single_playlist import skip_unless_target_playlist
 from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
@@ -1107,8 +1108,16 @@ def generate_mood_playlists():
 
             if existing_playlist:
                 print(f"Updating existing playlist: {playlist_name}")
-                existing_playlist.removeItems(existing_playlist.items())
-                existing_playlist.addItems(playlist_songs)
+                call_plex_with_retry(
+                    lambda: existing_playlist.removeItems(existing_playlist.items()),
+                    log_fn=lambda m: print(m),
+                    op_label=f"Plex clear playlist {playlist_name!r}",
+                )
+                call_plex_with_retry(
+                    lambda: existing_playlist.addItems(playlist_songs),
+                    log_fn=lambda m: print(m),
+                    op_label=f"Plex add tracks to {playlist_name!r}",
+                )
                 
                 # Update the description with the selected moods and timestamp
                 mood_description = ", ".join(moods)
@@ -1124,7 +1133,11 @@ def generate_mood_playlists():
                 playlist = existing_playlist
             else:
                 print(f"Creating new playlist: {playlist_name}")
-                playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
+                playlist = call_plex_with_retry(
+                    lambda: plex.createPlaylist(playlist_name, items=playlist_songs),
+                    log_fn=lambda m: print(m),
+                    op_label=f"Plex create playlist {playlist_name!r}",
+                )
                 
                 # Set the description with the selected moods and timestamp
                 mood_description = ", ".join(moods)

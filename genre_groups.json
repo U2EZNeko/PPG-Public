@@ -762,6 +762,7 @@
     }
   },
   "Rock": ["Classic Rock", "Alternative Rock", "Hard Rock", "Indie Rock", "Psychedelic Rock", "Grunge", "Proto-punk", "Arena Rock", "Art Rock", "Blues Rock", "Folk Rock", "Garage Rock", "Heartland Rock", "Southern Rock"],
+  "Rock Ballads": ["Soft Rock", "Pop Rock", "Classic Rock", "Arena Rock", "Hard Rock", "Acoustic Rock", "Heartland Rock", "Blues Rock", "Ballad"],
   "Pop": ["Pop", "Pop Rock", "Bubblegum Pop", "Indie Pop", "Dance Pop", "Pop Punk", "Pop Rap", "J-Pop", "K-Pop", "Brazilian Pop", "Britpop", "Europop", "Latin Pop"],
   "Electronic": ["Electronic", "Electropop", "Deep House", "Tech House", "Synthwave", "Trance", "Eurodance", "Techno", "Acid Trance", "Goa Trance", "Dubstep", "House", "Ambient", "IDM", "Breakbeat"],
   "Hip Hop": ["Hip Hop", "Hip-Hop", "Trap", "Cloud Rap", "Emo Rap", "Alternative Hip Hop", "Old School Hip Hop", "Lo-Fi Hip-Hop", "UK Drill", "G-Funk", "Chicago Drill", "Jamaican Dancehall", "Bay Area Hip Hop", "Russian Hip Hop", "Chicano Rap", "Afroswing", "Boom Bap", "Gangsta Rap"],

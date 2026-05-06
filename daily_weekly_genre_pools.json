@@ -4461,6 +4461,17 @@
     "Heartland Rock",
     "Southern Rock"
   ],
+  "Rock Ballads": [
+    "Soft Rock",
+    "Pop Rock",
+    "Classic Rock",
+    "Arena Rock",
+    "Hard Rock",
+    "Acoustic Rock",
+    "Heartland Rock",
+    "Blues Rock",
+    "Ballad"
+  ],
   "Rock Classics": {
     "genres": [
       "Rock",

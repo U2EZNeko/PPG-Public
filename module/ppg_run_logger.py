@@ -102,7 +102,15 @@ def _append_jsonl_event(payload: dict) -> None:
 
 
 class RunRecorder:
-    __slots__ = ("script_name", "run_id", "_t0", "failures", "ok_count", "playlist_timing")
+    __slots__ = (
+        "script_name",
+        "run_id",
+        "_t0",
+        "failures",
+        "ok_count",
+        "playlist_timing",
+        "status_message",
+    )
 
     def __init__(self, script_name: str) -> None:
         self.script_name = script_name
@@ -111,6 +119,7 @@ class RunRecorder:
         self.failures: list[tuple[str, str]] = []
         self.ok_count = 0
         self.playlist_timing: list[tuple[str, float, bool, str]] = []
+        self.status_message = ""
 
     def record_playlist_result(
         self, playlist: str, seconds: float, ok: bool, note: str = ""
@@ -145,6 +154,7 @@ class RunRecorder:
             "started_at": datetime.fromtimestamp(self._t0).isoformat(timespec="seconds"),
             "updated_at": datetime.now().isoformat(timespec="seconds"),
             "playlists_ok": self.ok_count,
+            "status_message": (self.status_message or "").strip(),
             "playlist_timing": [
                 {
                     "playlist": pl,
@@ -348,6 +358,17 @@ def finish_run(had_exception: bool = False) -> None:
         RUN_STATE_PATH.unlink(missing_ok=True)
     except OSError:
         pass
+
+
+def set_status(message: str) -> None:
+    """Publish a short live status string to .ppg_run_state.json for external run UI."""
+    if _current is None:
+        return
+    msg = (message or "").strip()
+    if len(msg) > 240:
+        msg = msg[:237] + "..."
+    _current.status_message = msg
+    _sync_live_state()
     try:
         RUN_STATE_PATH.with_suffix(".json.tmp").unlink(missing_ok=True)
     except OSError:

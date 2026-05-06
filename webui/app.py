@@ -1841,6 +1841,23 @@ def api_status():
     )
 
 
+@app.route("/api/external-run/clear", methods=["POST"])
+def api_external_run_clear():
+    """Clear stale external run-state file so Run tab can recover."""
+    removed = False
+    errors: list[str] = []
+    for p in (RUN_STATE_PATH, RUN_STATE_PATH.with_suffix(".json.tmp")):
+        try:
+            if p.is_file():
+                p.unlink()
+                removed = True
+        except OSError as e:
+            errors.append(f"{p.name}: {e}")
+    if errors:
+        return jsonify({"ok": False, "error": "; ".join(errors), "removed": removed}), 500
+    return jsonify({"ok": True, "removed": removed})
+
+
 @app.route("/api/job/<job_id>/output", methods=["GET"])
 def api_job_output(job_id: str):
     """Buffered stdout for a job (used to refill the log after a page refresh)."""

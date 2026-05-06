@@ -10,6 +10,7 @@ from tqdm import tqdm
 from urllib.parse import quote
 import urllib.request
 import tempfile
+from module.ppg_plex_retry import call_plex_with_retry
 from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 from module.ppg_single_playlist import skip_unless_target_playlist
 from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
@@ -1429,8 +1430,16 @@ def generate_liked_artists_playlists():
             
             if existing_playlist:
                 log_info(f"🔄 Updating existing playlist: {playlist_name}")
-                existing_playlist.removeItems(existing_playlist.items())
-                existing_playlist.addItems(playlist_songs)
+                call_plex_with_retry(
+                    lambda: existing_playlist.removeItems(existing_playlist.items()),
+                    log_fn=log_warning,
+                    op_label=f"Plex clear playlist {playlist_name!r}",
+                )
+                call_plex_with_retry(
+                    lambda: existing_playlist.addItems(playlist_songs),
+                    log_fn=log_warning,
+                    op_label=f"Plex add tracks to {playlist_name!r}",
+                )
                 
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1446,7 +1455,11 @@ def generate_liked_artists_playlists():
                 playlist = existing_playlist
             else:
                 log_info(f"✨ Creating new playlist: {playlist_name}")
-                playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
+                playlist = call_plex_with_retry(
+                    lambda: plex.createPlaylist(playlist_name, items=playlist_songs),
+                    log_fn=log_warning,
+                    op_label=f"Plex create playlist {playlist_name!r}",
+                )
                 
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

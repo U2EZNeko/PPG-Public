@@ -6,6 +6,7 @@ import time
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+from module.ppg_plex_retry import call_plex_with_retry
 from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
 from module.ppg_single_playlist import skip_unless_target_playlist
 from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
@@ -1183,10 +1184,18 @@ def generate_weekly_playlists():
                 log_info(f"🔄 Updating existing playlist: {playlist_name}")
 
                 # Remove all items from the existing playlist before adding new ones
-                existing_playlist.removeItems(existing_playlist.items())  # This empties the current playlist
+                call_plex_with_retry(
+                    lambda: existing_playlist.removeItems(existing_playlist.items()),
+                    log_fn=log_warning,
+                    op_label=f"Plex clear playlist {playlist_name!r}",
+                )
 
                 # Add the new songs
-                existing_playlist.addItems(playlist_songs)
+                call_plex_with_retry(
+                    lambda: existing_playlist.addItems(playlist_songs),
+                    log_fn=log_warning,
+                    op_label=f"Plex add tracks to {playlist_name!r}",
+                )
 
                 # Update the description with the selected genres and timestamp
                 genre_description = ", ".join(selected_genres)
@@ -1200,7 +1209,11 @@ def generate_weekly_playlists():
                 playlist = existing_playlist
             else:
                 log_info(f"✨ Creating new playlist: {playlist_name}")
-                playlist = plex.createPlaylist(playlist_name, items=playlist_songs)
+                playlist = call_plex_with_retry(
+                    lambda: plex.createPlaylist(playlist_name, items=playlist_songs),
+                    log_fn=log_warning,
+                    op_label=f"Plex create playlist {playlist_name!r}",
+                )
 
                 # Set the description with the selected genres and timestamp
                 genre_description = ", ".join(selected_genres)
