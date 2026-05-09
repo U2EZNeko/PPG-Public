@@ -12,6 +12,7 @@ import tempfile
 import threading
 from contextlib import nullcontext
 from typing import Optional
+from module.ppg_playlist_pick_cache import choose_and_record
 from module.ppg_plex_retry import call_plex_with_retry
 from module.ppg_min_songs import resolve_min_songs_fraction, validate_min_songs_env
 from module.ppg_run_logger import fail_playlist, playlist_succeeded, record_playlist_result
@@ -1288,6 +1289,13 @@ def _process_single_genre_mix(
             max_songs_per_album=MAX_SONGS_PER_ALBUM,
             prevent_consecutive=PREVENT_CONSECUTIVE_ARTISTS,
             mood_grouping=MOOD_GROUPING_ENABLED,
+        )
+        playlist_songs = choose_and_record(
+            script_name="PPG-Genres.py",
+            playlist_name=playlist_name,
+            picked_items=playlist_songs,
+            candidates=songs,
+            logger=log_info,
         )
 
         audio_pl = _audio_playlists_by_title(plex)
