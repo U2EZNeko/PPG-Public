@@ -5,8 +5,23 @@ log.txt
 .ppg_run_state.json
 .ppg_run_state.json.tmp
 webui/.live/
+webui/config.json
+webui/data/*.json
 webui/data/ppg_events.jsonl
 webui/data/ppg_events.jsonl.bak
+webui/data/ppg_pick_cache.json
+
+# Run logs (paths from .env)
+dailylog.txt
+weeklylog.txt
+likedartistslog.txt
+
+# IDE — ignore JetBrains metadata but keep poster image folders tracked
+.idea/*
+!.idea/DailyImages/
+!.idea/DailyImages/**
+!.idea/WeeklyImages/
+!.idea/WeeklyImages/**
 
 # Local caches (regenerate with scripts; override paths in .env if needed)
 liked_artists_cache.json
