@@ -10,7 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
-DEFAULT_CACHE_PATH = Path("webui") / "data" / "ppg_pick_cache.json"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CACHE_PATH = _REPO_ROOT / "webui" / "data" / "ppg_pick_cache.json"
 _CACHE_LOCK = threading.Lock()
 
 
