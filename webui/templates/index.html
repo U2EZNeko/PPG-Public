@@ -1090,7 +1090,18 @@
       color: var(--muted);
       line-height: 1.45;
     }
-    #ui-telegram-toggle {
+    .ui-options-section-heading {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 1rem 0 0.35rem;
+    }
+    .ui-options-section-heading:first-of-type {
+      margin-top: 0.1rem;
+    }
+    .ui-telegram-toggle-btn {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
@@ -1102,10 +1113,20 @@
       font-family: var(--font);
       white-space: nowrap;
     }
-    #ui-telegram-toggle[aria-pressed="true"] {
+    .ui-telegram-toggle-btn[aria-pressed="true"] {
       background: var(--accent);
       color: var(--on-accent);
       border-color: transparent;
+    }
+    .ui-telegram-toggle-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .ui-telegram-field.ui-telegram-nested {
+      margin-left: 0.65rem;
+      margin-top: 0.45rem;
+      padding-left: 0.55rem;
+      border-left: 2px solid var(--border);
     }
     .ui-rebuild-hint {
       margin: 0;
@@ -2197,10 +2218,10 @@
           id="ui-settings-open"
           aria-haspopup="dialog"
           aria-controls="ui-settings-dialog"
-          title="Display settings"
+          title="Options"
         >
           <span class="ui-settings-icon" aria-hidden="true">⚙</span>
-          <span class="visually-hidden">Display settings</span>
+          <span class="visually-hidden">Options</span>
         </button>
         <button
           type="button"
@@ -2439,7 +2460,8 @@
 
   <dialog id="ui-settings-dialog" class="ppg-dialog" aria-labelledby="ui-settings-title">
     <div class="ppg-dialog-inner">
-      <h2 id="ui-settings-title" class="ppg-dialog-title">Display</h2>
+      <h2 id="ui-settings-title" class="ppg-dialog-title">Options</h2>
+      <h3 class="ui-options-section-heading">Display</h3>
       <p class="ui-scale-hint">Adjust text and control sizes. The choice is saved in this browser.</p>
       <div class="ui-scale-field">
         <label for="ui-scale-slider">Interface scale</label>
@@ -2462,13 +2484,38 @@
           <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
         </div>
       </div>
+      <h3 class="ui-options-section-heading">Telegram</h3>
       <div class="ui-telegram-field">
-        <label for="ui-telegram-toggle">Telegram notifications</label>
+        <label for="ui-telegram-master-toggle">Web UI notifications</label>
         <div class="ui-telegram-row">
-          <p class="ui-telegram-hint">For runs started from this Web UI. Cron/CLI runs still follow <code>.env</code>.</p>
-          <button type="button" id="ui-telegram-toggle" aria-pressed="true">On</button>
+          <p class="ui-telegram-hint">
+            End-of-run Telegram summaries for jobs started from this Web UI. Changes apply right away, including runs
+            already in progress. Cron and CLI jobs still follow <code>.env</code> only (they do not read these toggles).
+          </p>
+          <button type="button" class="ui-telegram-toggle-btn" id="ui-telegram-master-toggle" aria-pressed="true">
+            On
+          </button>
         </div>
       </div>
+      <div class="ui-telegram-field ui-telegram-nested">
+        <label for="ui-telegram-success-toggle">Successful runs</label>
+        <div class="ui-telegram-row">
+          <p class="ui-telegram-hint">Send a summary when the script finishes without an uncaught error (individual playlist failures can still appear in the message).</p>
+          <button type="button" class="ui-telegram-toggle-btn" id="ui-telegram-success-toggle" aria-pressed="true">
+            On
+          </button>
+        </div>
+      </div>
+      <div class="ui-telegram-field ui-telegram-nested">
+        <label for="ui-telegram-failure-toggle">Crashed runs (uncaught exception)</label>
+        <div class="ui-telegram-row">
+          <p class="ui-telegram-hint">Send a summary when the script stops with an uncaught exception.</p>
+          <button type="button" class="ui-telegram-toggle-btn" id="ui-telegram-failure-toggle" aria-pressed="true">
+            On
+          </button>
+        </div>
+      </div>
+      <h3 class="ui-options-section-heading">Statistics</h3>
       <div class="ui-rebuild-field">
         <label for="ui-rebuild-events-btn">Statistics history</label>
         <p class="ui-rebuild-hint">
@@ -2607,10 +2654,146 @@
       const uiSettingsDone = document.getElementById("ui-settings-done");
       const uiSettingsReset = document.getElementById("ui-settings-reset");
       const uiRebuildEventsBtn = document.getElementById("ui-rebuild-events-btn");
-      const uiTelegramToggleBtn = document.getElementById("ui-telegram-toggle");
+      const uiTelegramMasterBtn = document.getElementById("ui-telegram-master-toggle");
+      const uiTelegramSuccessBtn = document.getElementById("ui-telegram-success-toggle");
+      const uiTelegramFailureBtn = document.getElementById("ui-telegram-failure-toggle");
       const UI_ACCENT_KEY = "ppg_ui_accent";
-      const UI_TELEGRAM_KEY = "ppg_ui_telegram_notifications";
+      const UI_TELEGRAM_PREFS_KEY = "ppg_ui_telegram_prefs";
+      const UI_TELEGRAM_LEGACY_KEY = "ppg_ui_telegram_notifications";
       const DEFAULT_ACCENT = "#6C9EF8";
+      function defaultTelegramPrefs() {
+        return { enabled: true, notify_run_success: true, notify_run_failure: true };
+      }
+      var telegramPrefs = defaultTelegramPrefs();
+      function readTelegramPrefsFromLocalStorage() {
+        try {
+          const raw = (localStorage.getItem(UI_TELEGRAM_PREFS_KEY) || "").trim();
+          if (raw) {
+            const j = JSON.parse(raw);
+            if (j && typeof j === "object") {
+              return {
+                enabled: j.enabled !== false,
+                notify_run_success: j.notify_run_success !== false,
+                notify_run_failure: j.notify_run_failure !== false,
+              };
+            }
+          }
+        } catch (e) {}
+        try {
+          const leg = (localStorage.getItem(UI_TELEGRAM_LEGACY_KEY) || "").trim().toLowerCase();
+          if (leg === "false" || leg === "0" || leg === "off" || leg === "no") {
+            return { enabled: false, notify_run_success: true, notify_run_failure: true };
+          }
+        } catch (e2) {}
+        return defaultTelegramPrefs();
+      }
+      function persistTelegramPrefsLocal(p) {
+        try {
+          localStorage.setItem(
+            UI_TELEGRAM_PREFS_KEY,
+            JSON.stringify({
+              enabled: !!p.enabled,
+              notify_run_success: !!p.notify_run_success,
+              notify_run_failure: !!p.notify_run_failure,
+            })
+          );
+          localStorage.removeItem(UI_TELEGRAM_LEGACY_KEY);
+        } catch (e) {}
+      }
+      function applyTelegramPrefsToUI() {
+        var en = !!telegramPrefs.enabled;
+        var su = !!telegramPrefs.notify_run_success;
+        var fa = !!telegramPrefs.notify_run_failure;
+        if (uiTelegramMasterBtn) {
+          uiTelegramMasterBtn.setAttribute("aria-pressed", en ? "true" : "false");
+          uiTelegramMasterBtn.textContent = en ? "On" : "Off";
+          uiTelegramMasterBtn.title = en
+            ? "Disable Telegram summaries for Web UI runs"
+            : "Enable Telegram summaries for Web UI runs";
+        }
+        if (uiTelegramSuccessBtn) {
+          uiTelegramSuccessBtn.setAttribute("aria-pressed", su ? "true" : "false");
+          uiTelegramSuccessBtn.textContent = su ? "On" : "Off";
+          uiTelegramSuccessBtn.disabled = !en;
+          uiTelegramSuccessBtn.title = !en
+            ? "Turn Web UI notifications on first"
+            : su
+              ? "Do not notify on successful runs"
+              : "Notify on successful runs";
+        }
+        if (uiTelegramFailureBtn) {
+          uiTelegramFailureBtn.setAttribute("aria-pressed", fa ? "true" : "false");
+          uiTelegramFailureBtn.textContent = fa ? "On" : "Off";
+          uiTelegramFailureBtn.disabled = !en;
+          uiTelegramFailureBtn.title = !en
+            ? "Turn Web UI notifications on first"
+            : fa
+              ? "Do not notify when the script crashes"
+              : "Notify when the script crashes (uncaught exception)";
+        }
+      }
+      function mergeTelegramPrefsFromServerPayload(j) {
+        if (!j || typeof j !== "object") return;
+        telegramPrefs = {
+          enabled: j.enabled !== false,
+          notify_run_success: j.notify_run_success !== false,
+          notify_run_failure: j.notify_run_failure !== false,
+        };
+      }
+      async function fetchTelegramPrefsFromServer() {
+        try {
+          const r = await fetch("/api/telegram-notification-prefs");
+          if (!r.ok) return false;
+          const j = await r.json().catch(function () {
+            return null;
+          });
+          if (!j || j.error) return false;
+          mergeTelegramPrefsFromServerPayload(j);
+          persistTelegramPrefsLocal(telegramPrefs);
+          applyTelegramPrefsToUI();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      async function pushTelegramPrefsToServer(full) {
+        const body = {
+          enabled: !!full.enabled,
+          notify_run_success: !!full.notify_run_success,
+          notify_run_failure: !!full.notify_run_failure,
+        };
+        const r = await fetch("/api/telegram-notification-prefs", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const j = await r.json().catch(function () {
+          return {};
+        });
+        if (!r.ok || j.error) {
+          throw new Error(j.error || "HTTP " + r.status);
+        }
+        mergeTelegramPrefsFromServerPayload(j);
+        persistTelegramPrefsLocal(telegramPrefs);
+        applyTelegramPrefsToUI();
+      }
+      async function setTelegramPrefsPatch(patch) {
+        const prev = Object.assign({}, telegramPrefs);
+        Object.assign(telegramPrefs, patch);
+        persistTelegramPrefsLocal(telegramPrefs);
+        applyTelegramPrefsToUI();
+        try {
+          await pushTelegramPrefsToServer(telegramPrefs);
+        } catch (e) {
+          showToast("Could not save Telegram preferences: " + String(e.message || e), true);
+          Object.assign(telegramPrefs, prev);
+          persistTelegramPrefsLocal(telegramPrefs);
+          applyTelegramPrefsToUI();
+        }
+      }
+      function readTelegramNotificationsEnabled() {
+        return !!telegramPrefs.enabled;
+      }
       function normalizeHexColor(v) {
         const s = String(v || "").trim();
         const m = /^#([0-9a-fA-F]{6})$/.exec(s);
@@ -2669,35 +2852,13 @@
         if (uiScaleSlider) uiScaleSlider.value = String(Math.round(z * 100));
         if (uiScaleValue) uiScaleValue.textContent = Math.round(z * 100) + "%";
       }
-      function readTelegramNotificationsEnabled() {
-        try {
-          const raw = (localStorage.getItem(UI_TELEGRAM_KEY) || "").trim().toLowerCase();
-          if (!raw) return true;
-          return !(raw === "false" || raw === "0" || raw === "off" || raw === "no");
-        } catch (e) {
-          return true;
-        }
-      }
-      function setTelegramNotificationsEnabled(on, persist) {
-        const enabled = !!on;
-        if (uiTelegramToggleBtn) {
-          uiTelegramToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
-          uiTelegramToggleBtn.textContent = enabled ? "On" : "Off";
-          uiTelegramToggleBtn.title = enabled
-            ? "Disable Telegram notifications for web UI runs"
-            : "Enable Telegram notifications for web UI runs";
-        }
-        if (persist !== false) {
-          try {
-            localStorage.setItem(UI_TELEGRAM_KEY, enabled ? "true" : "false");
-          } catch (e) {}
-        }
-      }
       function initUiScaleControls() {
         if (!uiScaleSlider || !uiSettingsDialog) return;
         setUiZoom(readUiZoom(), false);
         applyAccentColor(readStoredAccent(), false);
-        setTelegramNotificationsEnabled(readTelegramNotificationsEnabled(), false);
+        telegramPrefs = readTelegramPrefsFromLocalStorage();
+        applyTelegramPrefsToUI();
+        void fetchTelegramPrefsFromServer();
         uiScaleSlider.addEventListener("input", function () {
           setUiZoom(parseInt(uiScaleSlider.value, 10) / 100, true);
         });
@@ -2710,7 +2871,7 @@
           uiSettingsOpen.addEventListener("click", function () {
             setUiZoom(readUiZoom(), false);
             applyAccentColor(readStoredAccent(), false);
-            setTelegramNotificationsEnabled(readTelegramNotificationsEnabled(), false);
+            void fetchTelegramPrefsFromServer();
             if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
           });
         }
@@ -2725,13 +2886,31 @@
             persistDarkVariant("dark");
             persistAndApplyThemeMode("dark");
             applyAccentColor(DEFAULT_ACCENT, true);
-            setTelegramNotificationsEnabled(true, true);
+            void setTelegramPrefsPatch({
+              enabled: true,
+              notify_run_success: true,
+              notify_run_failure: true,
+            });
           });
         }
-        if (uiTelegramToggleBtn) {
-          uiTelegramToggleBtn.addEventListener("click", function () {
-            const next = uiTelegramToggleBtn.getAttribute("aria-pressed") !== "true";
-            setTelegramNotificationsEnabled(next, true);
+        if (uiTelegramMasterBtn) {
+          uiTelegramMasterBtn.addEventListener("click", function () {
+            const next = uiTelegramMasterBtn.getAttribute("aria-pressed") !== "true";
+            void setTelegramPrefsPatch({ enabled: next });
+          });
+        }
+        if (uiTelegramSuccessBtn) {
+          uiTelegramSuccessBtn.addEventListener("click", function () {
+            if (uiTelegramSuccessBtn.disabled) return;
+            const next = uiTelegramSuccessBtn.getAttribute("aria-pressed") !== "true";
+            void setTelegramPrefsPatch({ notify_run_success: next });
+          });
+        }
+        if (uiTelegramFailureBtn) {
+          uiTelegramFailureBtn.addEventListener("click", function () {
+            if (uiTelegramFailureBtn.disabled) return;
+            const next = uiTelegramFailureBtn.getAttribute("aria-pressed") !== "true";
+            void setTelegramPrefsPatch({ notify_run_failure: next });
           });
         }
         if (uiRebuildEventsBtn) {

@@ -8,14 +8,67 @@ disable sends while keeping credentials. Uses the Bot API sendMessage endpoint.
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 import requests
 
 _TELEGRAM_MAX_MESSAGE_LEN = 4096
+
+_TELEGRAM_RUNTIME_DEFAULTS: dict[str, bool] = {
+    "enabled": True,
+    "notify_run_success": True,
+    "notify_run_failure": True,
+}
+
+
+def merge_telegram_runtime_prefs_dict(data: Mapping[str, Any] | None) -> dict[str, bool]:
+    """Normalize Telegram runtime prefs from JSON or API payloads."""
+    out = dict(_TELEGRAM_RUNTIME_DEFAULTS)
+    if not data:
+        return out
+    for key in _TELEGRAM_RUNTIME_DEFAULTS:
+        if key not in data:
+            continue
+        v = data[key]
+        if isinstance(v, bool):
+            out[key] = v
+        elif isinstance(v, (int, float)):
+            out[key] = bool(v)
+        elif isinstance(v, str):
+            s = v.strip().lower()
+            if s in ("1", "true", "yes", "on"):
+                out[key] = True
+            elif s in ("0", "false", "no", "off"):
+                out[key] = False
+    return out
+
+
+def read_telegram_runtime_prefs_file(path: Path) -> dict[str, bool]:
+    """Load prefs from disk; missing or invalid file → defaults."""
+    try:
+        if not path.is_file():
+            return dict(_TELEGRAM_RUNTIME_DEFAULTS)
+        raw = path.read_text(encoding="utf-8")
+        parsed = json.loads(raw)
+        if not isinstance(parsed, dict):
+            return dict(_TELEGRAM_RUNTIME_DEFAULTS)
+        return merge_telegram_runtime_prefs_dict(parsed)
+    except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError):
+        return dict(_TELEGRAM_RUNTIME_DEFAULTS)
+
+
+def runtime_telegram_prefs_from_env() -> dict[str, bool] | None:
+    """If PPG_TELEGRAM_RUNTIME_PREFS is set, return merged prefs for that path."""
+    raw = (os.environ.get("PPG_TELEGRAM_RUNTIME_PREFS") or "").strip()
+    if not raw:
+        return None
+    return read_telegram_runtime_prefs_file(Path(raw))
 
 
 def telegram_notifications_enabled() -> bool:
@@ -88,6 +141,14 @@ def _build_summary_text(rec: Any, *, had_exception: bool) -> str:
 def maybe_notify_run_finished(rec: Any, had_exception: bool) -> None:
     if not telegram_notifications_enabled():
         return
+    rt = runtime_telegram_prefs_from_env()
+    if rt is not None:
+        if not rt.get("enabled", True):
+            return
+        if had_exception and not rt.get("notify_run_failure", True):
+            return
+        if not had_exception and not rt.get("notify_run_success", True):
+            return
     token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
     chat_raw = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
     if not token or not chat_raw:

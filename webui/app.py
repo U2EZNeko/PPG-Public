@@ -145,6 +145,48 @@ RUN_STATE_PATH = REPO_ROOT / ".ppg_run_state.json"
 EVENTS_JSONL_PATH = REPO_ROOT / "webui" / "data" / "ppg_events.jsonl"
 # Survives web UI restarts: repo-root paths so the script subprocess cwd stays valid.
 WEB_ACTIVE_JOBS_PATH = REPO_ROOT / "webui" / "data" / "active_web_jobs.json"
+TELEGRAM_NOTIFICATION_PREFS_PATH = (
+    REPO_ROOT / "webui" / "data" / "telegram_notification_prefs.json"
+)
+
+
+def _ensure_telegram_prefs_dir() -> None:
+    try:
+        TELEGRAM_NOTIFICATION_PREFS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+
+def _read_telegram_notification_prefs() -> dict[str, bool]:
+    from module.ppg_telegram import read_telegram_runtime_prefs_file
+
+    _ensure_telegram_prefs_dir()
+    return read_telegram_runtime_prefs_file(TELEGRAM_NOTIFICATION_PREFS_PATH)
+
+
+def _write_telegram_notification_prefs(data: dict) -> dict[str, bool]:
+    from module.ppg_telegram import merge_telegram_runtime_prefs_dict
+
+    _ensure_telegram_prefs_dir()
+    merged = merge_telegram_runtime_prefs_dict(data)
+    tmp = TELEGRAM_NOTIFICATION_PREFS_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(tmp, TELEGRAM_NOTIFICATION_PREFS_PATH)
+    return merged
+
+
+def _patch_telegram_notification_prefs(updates: dict) -> dict[str, bool]:
+    cur = _read_telegram_notification_prefs()
+    merged_in = {
+        **cur,
+        **{
+            k: updates[k]
+            for k in ("enabled", "notify_run_success", "notify_run_failure")
+            if k in updates
+        },
+    }
+    return _write_telegram_notification_prefs(merged_in)
+
 
 # Per-playlist timing lines use an em dash (—) before optional failure notes.
 _TIMING_LINE = re.compile(
@@ -1668,6 +1710,10 @@ def _run_script_worker(
     env["PYTHONIOENCODING"] = "utf-8"
     for _ek, _ev in (job_ref.get("env_overrides") or {}).items():
         env[str(_ek)] = str(_ev)
+    _ensure_telegram_prefs_dir()
+    env["PPG_TELEGRAM_RUNTIME_PREFS"] = str(
+        TELEGRAM_NOTIFICATION_PREFS_PATH.resolve()
+    )
 
     live_f = None
     _cleanup_stale_live_logs()
@@ -2029,13 +2075,12 @@ def api_run():
     if not script_id or script_id not in SCRIPTS:
         return jsonify({"error": "Invalid or missing script id"}), 400
     tg_on = _coerce_bool_flag(data.get("telegram_notifications"))
-    env_overrides: dict[str, str] = {}
     if tg_on is not None:
-        env_overrides["TELEGRAM_NOTIFICATIONS"] = "true" if tg_on else "false"
-    return _launch_script_job(
-        script_id,
-        env_overrides=env_overrides or None,
-    )
+        try:
+            _patch_telegram_notification_prefs({"enabled": tg_on})
+        except OSError:
+            pass
+    return _launch_script_job(script_id, env_overrides=None)
 
 
 @app.route("/api/regenerate-playlist", methods=["POST"])
@@ -2056,14 +2101,37 @@ def api_regenerate_playlist():
 
     label = f"{SCRIPT_LABELS.get(script_id, script_id)} — {title}"
     tg_on = _coerce_bool_flag(data.get("telegram_notifications"))
-    env_overrides = {"PPG_ONLY_PLAYLIST_TITLE": title}
     if tg_on is not None:
-        env_overrides["TELEGRAM_NOTIFICATIONS"] = "true" if tg_on else "false"
+        try:
+            _patch_telegram_notification_prefs({"enabled": tg_on})
+        except OSError:
+            pass
+    env_overrides = {"PPG_ONLY_PLAYLIST_TITLE": title}
     return _launch_script_job(
         script_id,
         env_overrides=env_overrides,
         label_override=label,
     )
+
+
+@app.route("/api/telegram-notification-prefs", methods=["GET"])
+def api_telegram_notification_prefs_get():
+    try:
+        return jsonify(_read_telegram_notification_prefs())
+    except OSError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/telegram-notification-prefs", methods=["PUT"])
+def api_telegram_notification_prefs_put():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"error": "JSON object required"}), 400
+    try:
+        merged = _patch_telegram_notification_prefs(data)
+        return jsonify(merged)
+    except OSError as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/json-groups")
