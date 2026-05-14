@@ -7,14 +7,17 @@ log.txt
 webui/.live/
 webui/config.json
 webui/data/*.json
+webui/data/*.json.tmp
 webui/data/ppg_events.jsonl
 webui/data/ppg_events.jsonl.bak
 webui/data/ppg_pick_cache.json
 
-# Run logs (paths from .env)
+# Rotation / genre logs and chronic-failure state (default paths from example.env).
+# If you set DAILY_LOG_FILE, LIKED_ARTISTS_LOG_FILE, or WEEKLY_LOG_FILE to other paths, add those here too.
 dailylog.txt
 weeklylog.txt
 likedartistslog.txt
+webui/data/playlist_chronic_failures.json
 
 # IDE — ignore JetBrains metadata but keep poster image folders tracked
 .idea/*
