@@ -100,40 +100,89 @@ def _build_summary_text(rec: Any, *, had_exception: bool) -> str:
         getattr(rec, "playlist_timing", []) or []
     )
 
-    result = "crashed (uncaught exception)" if had_exception else "completed"
+    if had_exception:
+        result_emoji = "💥"
+        result_text = "Crashed (uncaught exception)"
+    else:
+        result_emoji = "✅"
+        result_text = "Completed"
+
     lines = [
-        "PPG run finished",
-        f"Script: {script_name}",
+        "🎵 PPG · run finished",
+        f"🖥 Script: {script_name}",
     ]
     if run_id:
-        lines.append(f"Run: {run_id}")
+        lines.append(f"🆔 Run: {run_id}")
     lines.extend(
         [
-            f"Duration: {_format_duration(duration)}",
-            f"Result: {result}",
-            f"Playlists updated successfully: {ok_count}",
+            f"⏱ Duration: {_format_duration(duration)}",
+            f"{result_emoji} Result: {result_text}",
+            f"📊 Playlists updated successfully: {ok_count}",
         ]
     )
 
-    if timing:
+    timed_fail: list[tuple[str, float, str]] = []
+    timed_ok: list[tuple[str, float, str]] = []
+    for pl, sec, ok, note in timing:
+        pl = (pl or "").strip()
+        if not pl:
+            continue
+        n = (note or "").strip()
+        if ok:
+            timed_ok.append((pl, float(sec), n))
+        else:
+            timed_fail.append((pl, float(sec), n))
+
+    timed_fail_pls = {pl for pl, _, _ in timed_fail}
+    fail_reason: dict[str, str] = {}
+    for pl, r in failures:
+        pl = (pl or "").strip()
+        if not pl:
+            continue
+        rr = (r or "").strip()
+        if pl not in fail_reason or not fail_reason[pl]:
+            fail_reason[pl] = rr
+
+    extra_fail_only = [
+        (pl, fail_reason[pl])
+        for pl in sorted(fail_reason.keys(), key=str.lower)
+        if pl not in timed_fail_pls
+    ]
+    # Longest duration first; playlist name as tie-breaker
+    timed_fail.sort(key=lambda x: (-x[1], x[0].lower()))
+    timed_ok.sort(key=lambda x: (-x[1], x[0].lower()))
+
+    has_playlist_section = bool(
+        extra_fail_only or timed_fail or timed_ok
+    )
+    if has_playlist_section:
         lines.append("")
-        lines.append("Per-playlist:")
-        for pl, sec, ok, note in timing:
-            status = "ok" if ok else "failed"
-            dur = _format_duration(sec)
-            if ok:
-                lines.append(f"• {pl}: {dur} ({status})")
-            else:
-                tail = f" — {note}" if note else ""
-                lines.append(f"• {pl}: {dur} ({status}){tail}")
+        lines.append("📋 Playlists")
+        n_bad = len(extra_fail_only) + len(timed_fail)
+        n_ok = len(timed_ok)
+        if n_bad:
+            lines.append(f"❌ Failed ({n_bad})")
+            for pl, sec, note in timed_fail:
+                dur = _format_duration(sec)
+                detail = (note or "").strip() or fail_reason.get(pl, "")
+                if detail:
+                    lines.append(f"  ❌ {pl}: {dur} — {detail}")
+                else:
+                    lines.append(f"  ❌ {pl}: {dur}")
+            for pl, reason in extra_fail_only:
+                if reason:
+                    lines.append(f"  ❌ {pl} — {reason}")
+                else:
+                    lines.append(f"  ❌ {pl}")
+        if n_ok:
+            lines.append(f"✅ OK ({n_ok}) · longest first")
+            for pl, sec, _note in timed_ok:
+                dur = _format_duration(sec)
+                lines.append(f"  ✅ {pl}: {dur}")
 
     lines.append("")
-    if failures:
-        lines.append("Failures:")
-        for pl, reason in failures:
-            lines.append(f"• {pl}: {reason}" if reason else f"• {pl}")
-    else:
-        lines.append("Failures: none")
+    if not timed_fail and not fail_reason:
+        lines.append("✨ No recorded playlist failures.")
 
     return "\n".join(lines)
 
