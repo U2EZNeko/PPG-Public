@@ -12,6 +12,9 @@
     { id: "weekly", label: "PPG-Weekly.py" },
     { id: "moods", label: "PPG-Moods.py" },
     { id: "genres", label: "PPG-Genres.py" },
+    { id: "fetch_liked", label: "fetch-liked-artists.py" },
+    { id: "liked_artists", label: "PPG-LikedArtists.py" },
+    { id: "liked_artists_collection", label: "PPG-LikedArtistsCollection.py" },
   ];
   let _scripts = FALLBACK_SCRIPTS.slice();
   let _jobStatus = [];
@@ -48,6 +51,36 @@
     if (typeof window.__ppgShowToast === "function") {
       window.__ppgShowToast(msg, isErr);
     }
+  }
+
+  function parseJsonResponse(r) {
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if (ct.indexOf("application/json") === -1) {
+      return r.text().then(function (text) {
+        const snippet = (text || "").replace(/\s+/g, " ").trim().slice(0, 120);
+        const hint =
+          r.status === 404 || r.status === 405
+            ? " Restart the PPG web UI so /api/schedule is available."
+            : "";
+        throw new Error(
+          "Server returned " +
+            r.status +
+            " (" +
+            (ct || "non-JSON") +
+            "), not JSON." +
+            hint +
+            (snippet ? " " + snippet : "")
+        );
+      });
+    }
+    return r.json().then(function (data) {
+      if (!r.ok) {
+        throw new Error(
+          (data && (data.error || data.message)) || r.statusText || "Request failed"
+        );
+      }
+      return data;
+    });
   }
 
   function esc(s) {
@@ -591,12 +624,7 @@
 
   function loadSchedule() {
     return fetch("/api/schedule")
-      .then(function (r) {
-        return r.json().then(function (data) {
-          if (!r.ok) throw new Error(data.error || r.statusText);
-          return data;
-        });
-      })
+      .then(parseJsonResponse)
       .then(function (data) {
         applyPayload(data);
       })
@@ -639,13 +667,9 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(_doc),
     })
-      .then(function (r) {
-        return r.json().then(function (data) {
-          if (!r.ok) throw new Error(data.error || r.statusText);
-          return data;
-        });
-      })
+      .then(parseJsonResponse)
       .then(function (data) {
+        if (data.warning) toast(data.warning, true);
         applyPayload(data);
         toast("Schedule saved.");
       })

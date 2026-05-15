@@ -29,6 +29,10 @@ from pathlib import Path
 from flask import Flask, Response, jsonify, render_template, request
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+# Running as ``python webui/app.py`` puts ``webui/`` on sys.path first; repo-root ``module`` lives next to ``webui/``.
+_repo_root_str = str(REPO_ROOT)
+if _repo_root_str not in sys.path:
+    sys.path.insert(0, _repo_root_str)
 
 try:
     from dotenv import load_dotenv
@@ -1009,7 +1013,15 @@ JSON_GROUP_LABELS: dict[str, str] = {
     "named_genre_mix_playlists": 'PPG-Genres — one "Name Mix" playlist per entry',
 }
 
-SCHEDULE_UI_SCRIPT_IDS = ("daily", "weekly", "moods", "genres")
+SCHEDULE_UI_SCRIPT_IDS = (
+    "daily",
+    "weekly",
+    "moods",
+    "genres",
+    "fetch_liked",
+    "liked_artists",
+    "liked_artists_collection",
+)
 
 SCHEDULE_SCRIPT_LABELS: dict[str, str] = {
     "daily": "PPG-Daily.py",
@@ -2371,7 +2383,7 @@ def _schedule_get_payload() -> dict[str, object]:
 
 @app.route("/api/scheduler/status", methods=["GET"])
 def api_scheduler_status():
-    """Whether pvpg-scheduler systemd unit and/or ppg_scheduler.py process is running."""
+    """Whether ppg-scheduler systemd unit and/or ppg_scheduler.py process is running."""
     from module.ppg_scheduler_status import probe_scheduler_status
 
     return jsonify(probe_scheduler_status())
@@ -2414,7 +2426,10 @@ def api_schedule_run_log(job_id: str):
 @app.route("/api/schedule", methods=["PUT"])
 def api_schedule_put():
     """Save ppg_schedule.json (validated)."""
-    from module.ppg_schedule import parse_schedule_document
+    try:
+        from module.ppg_schedule import parse_schedule_document
+    except ImportError as e:
+        return jsonify({"error": f"Schedule module unavailable: {e}"}), 500
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
@@ -2444,9 +2459,16 @@ def api_schedule_put():
             except OSError:
                 pass
         return jsonify({"error": str(e)}), 500
-    return jsonify({"ok": True, **_schedule_get_payload()})
-
-
+    try:
+        payload = _schedule_get_payload()
+    except Exception as e:
+        return jsonify(
+            {
+                "ok": True,
+                "warning": f"Saved {path.name} but could not refresh status: {e}",
+            }
+        )
+    return jsonify({"ok": True, **payload})
 
 
 @app.route("/api/dotenv", methods=["GET"])
