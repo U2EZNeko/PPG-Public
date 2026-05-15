@@ -6,7 +6,14 @@
 
   let _doc = { version: 1, jobs: [] };
   let _baseline = "";
-  let _scripts = [];
+  /** Matches SCHEDULE_UI_SCRIPT_IDS in webui/app.py; used until GET /api/schedule returns. */
+  const FALLBACK_SCRIPTS = [
+    { id: "daily", label: "PPG-Daily.py" },
+    { id: "weekly", label: "PPG-Weekly.py" },
+    { id: "moods", label: "PPG-Moods.py" },
+    { id: "genres", label: "PPG-Genres.py" },
+  ];
+  let _scripts = FALLBACK_SCRIPTS.slice();
   let _jobStatus = [];
   let viewMode = "form";
 
@@ -289,10 +296,14 @@
     return String(scriptId || "").trim();
   }
 
+  function scriptsForUi() {
+    return _scripts.length ? _scripts : FALLBACK_SCRIPTS;
+  }
+
   function jobCardHtml(job, idx) {
     const st = statusForJob(job.id) || {};
     const selectedScript = scriptIdForSelect(job.script);
-    const scriptOpts = _scripts
+    const scriptOpts = scriptsForUi()
       .map(function (s) {
         return (
           '<option value="' +
@@ -508,7 +519,10 @@
   }
 
   function applyPayload(data) {
-    _scripts = Array.isArray(data.scripts) ? data.scripts : [];
+    _scripts =
+      Array.isArray(data.scripts) && data.scripts.length
+        ? data.scripts
+        : FALLBACK_SCRIPTS.slice();
     _jobStatus = Array.isArray(data.job_status) ? data.job_status : [];
     _doc = {
       version: data.version != null ? data.version : 1,
@@ -587,7 +601,9 @@
         applyPayload(data);
       })
       .catch(function (e) {
+        _scripts = FALLBACK_SCRIPTS.slice();
         toast("Failed to load schedule: " + e.message, true);
+        if (viewMode === "form") renderForm();
       });
   }
 
