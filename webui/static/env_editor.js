@@ -8,7 +8,7 @@
   let _baselineText = "";
   let envViewMode = "form";
 
-  /** Keys rendered as On/Off toggles (same chrome as Display settings). */
+  /** Keys rendered as checkboxes (same chrome as Display → Telegram). */
   const ENV_BOOL_KEYS = {
     TELEGRAM_NOTIFICATIONS: {
       name: "Telegram notifications",
@@ -30,11 +30,6 @@
 
   function envBoolToValue(on) {
     return on ? "true" : "false";
-  }
-
-  function setEnvBoolToggle(btn, displayName, on) {
-    btn.setAttribute("aria-pressed", on ? "true" : "false");
-    btn.textContent = displayName + ": " + (on ? "On" : "Off");
   }
 
   const envRaw = document.getElementById("env-raw");
@@ -100,15 +95,11 @@
         if (it.t === "blank" || it.t === "comment" || it.t === "raw") {
           return it.line;
         }
-        const inp = document.querySelector(
-          '#env-form input[data-env-idx="' + idx + '"], #env-form button.env-bool-toggle[data-env-idx="' +
-            idx +
-            '"]'
-        );
+        const inp = document.querySelector('#env-form input[data-env-idx="' + idx + '"]');
         let v = it.value;
         if (inp) {
-          if (inp.tagName === "BUTTON") {
-            v = envBoolToValue(inp.getAttribute("aria-pressed") === "true");
+          if (inp.type === "checkbox") {
+            v = envBoolToValue(inp.checked);
           } else {
             v = inp.value;
           }
@@ -179,34 +170,29 @@
       const row = document.createElement("div");
       row.className = "env-row";
       row.setAttribute("data-env-key", it.key);
-      const lab = document.createElement("label");
-      lab.htmlFor = "env-inp-" + idx;
-      lab.textContent = it.key;
       const boolMeta = ENV_BOOL_KEYS[it.key];
       if (boolMeta) {
-        const toggleRow = document.createElement("div");
-        toggleRow.className = "env-toggle-row";
+        const checkLab = document.createElement("label");
+        checkLab.className = "env-bool-check-label";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.id = "env-inp-" + idx;
+        cb.setAttribute("data-env-idx", String(idx));
+        cb.checked = parseEnvBool(it.value);
+        checkLab.appendChild(cb);
+        checkLab.appendChild(document.createTextNode(" " + boolMeta.name));
         const hint = document.createElement("p");
-        hint.className = "env-toggle-hint";
+        hint.className = "env-bool-hint";
         hint.textContent = boolMeta.hint;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "ui-settings-toggle env-bool-toggle";
-        btn.id = "env-inp-" + idx;
-        btn.setAttribute("data-env-idx", String(idx));
-        setEnvBoolToggle(btn, boolMeta.name, parseEnvBool(it.value));
-        btn.addEventListener("click", function () {
-          const next = btn.getAttribute("aria-pressed") !== "true";
-          setEnvBoolToggle(btn, boolMeta.name, next);
-        });
-        toggleRow.appendChild(hint);
-        toggleRow.appendChild(btn);
         row.classList.add("env-row-toggle");
-        row.appendChild(lab);
-        row.appendChild(toggleRow);
+        row.appendChild(checkLab);
+        row.appendChild(hint);
         form.appendChild(row);
         return;
       }
+      const lab = document.createElement("label");
+      lab.htmlFor = "env-inp-" + idx;
+      lab.textContent = it.key;
       const wrap = document.createElement("div");
       wrap.className = "env-input-wrap";
       const input = document.createElement("input");
