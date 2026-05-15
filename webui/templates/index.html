@@ -451,6 +451,165 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+    .schedule-explainer-row {
+      margin: 0 0 0.5rem;
+    }
+    .schedule-daemon-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+    .schedule-daemon-status::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .schedule-daemon-status--running {
+      color: var(--ok);
+    }
+    .schedule-daemon-status--stopped {
+      color: var(--muted);
+    }
+    .schedule-daemon-status--unknown {
+      color: #e0b060;
+    }
+    html[data-theme="light"] .schedule-daemon-status--unknown {
+      color: #9a6b10;
+    }
+    #panel-scheduler .schedule-jobs-wrap {
+      max-height: min(75vh, 820px);
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .schedule-job {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--inset);
+      padding: 0.85rem 1rem;
+    }
+    .schedule-job-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: center;
+      margin-bottom: 0.65rem;
+    }
+    .schedule-job-head .sched-id {
+      font-family: var(--mono);
+      min-width: 10rem;
+    }
+    .sched-enabled-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+    }
+    .schedule-job label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .schedule-job input[type="text"],
+    .schedule-job input[type="number"],
+    .schedule-job select {
+      display: block;
+      width: 100%;
+      max-width: 20rem;
+      box-sizing: border-box;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.35rem 0.5rem;
+      margin-top: 0.2rem;
+    }
+    .schedule-job input.sched-at-24 {
+      max-width: 6.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .sched-fields-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+    .sched-fields.hidden {
+      display: none;
+    }
+    .sched-hint {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .sched-first-run-tomorrow-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0.45rem 0 0;
+      max-width: 28rem;
+      line-height: 1.35;
+    }
+    .sched-first-run-tomorrow-wrap input {
+      margin-top: 0.15rem;
+      flex-shrink: 0;
+    }
+    .schedule-job-status {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin: 0.5rem 0 0;
+    }
+    .schedule-job-status--running {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .sched-run-log {
+      display: block;
+      margin: 0.45rem 0 0;
+      padding: 0.5rem 0.55rem;
+      max-height: 14rem;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 1.4;
+      background: var(--inset);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+    }
+    .schedule-empty {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    #schedule-raw {
+      width: 100%;
+      min-height: 320px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.45;
+      background: var(--inset);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      box-sizing: border-box;
+    }
     .env-line-blank {
       height: 0.4rem;
     }
@@ -2245,6 +2404,7 @@
           <button type="button" class="tab" role="tab" aria-selected="false" data-tab="errors" id="tab-errors" aria-label="Errors from the last run">Errors<span class="tab-badge hidden" id="errors-tab-badge" aria-hidden="true"></span></button>
           <button type="button" class="tab" role="tab" aria-selected="false" data-tab="json">Group JSON</button>
           <button type="button" class="tab" role="tab" aria-selected="false" data-tab="configs">Configs</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-tab="scheduler">Scheduler</button>
           <button type="button" class="tab" role="tab" aria-selected="false" data-tab="playlists">Playlists</button>
           <button type="button" class="tab" role="tab" aria-selected="false" data-tab="stats">Statistics</button>
         </div>
@@ -2385,6 +2545,39 @@
       <div class="env-form-wrap">
         <div id="env-form"></div>
       </div>
+    </div>
+
+    <div id="panel-scheduler" class="panel" role="tabpanel" data-panel="scheduler">
+      <div class="json-explainer" role="note">
+        <p class="schedule-explainer-row">
+          <span
+            id="schedule-daemon-status"
+            class="schedule-daemon-status schedule-daemon-status--unknown"
+            role="status"
+            aria-live="polite"
+          >Checking scheduler…</span>
+        </p>
+        <strong>Automatic runs</strong> — edits <code>ppg_schedule.json</code> on the server. The
+        <code>ppg-scheduler</code> systemd service (or <code>python ppg_scheduler.py</code>) reads this file and runs jobs when due.
+        Saving here updates <code>ppg_schedule.json</code> immediately; a running
+        <code>ppg_scheduler.py</code> reloads it within about a second (no service restart).
+        While a job runs, live script output appears below that job (from
+        <code>webui/data/scheduler_runs/</code>). After it finishes, see the <strong>Statistics</strong> tab
+        (<code>log.txt</code> / <code>ppg_events.jsonl</code>). On the server,
+        <code>journalctl --user -u ppg-scheduler.service -f</code> also shows output.
+      </div>
+      <div class="json-toolbar json-toolbar-top">
+        <span class="json-view-toggle" id="schedule-view-toggle" role="group" aria-label="Schedule editor view">
+          <button type="button" class="json-view-btn active" id="schedule-view-form">Form</button>
+          <button type="button" class="json-view-btn" id="schedule-view-raw">Raw JSON</button>
+        </span>
+        <button type="button" id="schedule-reload">Reload</button>
+        <button type="button" id="schedule-save" class="json-primary">Save</button>
+        <button type="button" id="schedule-add-job">Add job</button>
+      </div>
+      <p id="schedule-meta" class="json-meta"></p>
+      <div id="schedule-jobs" class="schedule-jobs-wrap"></div>
+      <textarea id="schedule-raw" class="hidden" spellcheck="false" autocomplete="off" aria-label="Raw schedule JSON"></textarea>
     </div>
 
     <div id="panel-playlists" class="panel" role="tabpanel" data-panel="playlists">
@@ -3099,6 +3292,17 @@
           const activeId = document.querySelector(".tabs .tab.active")?.getAttribute("data-tab");
           const fromJson = activeId === "json";
           const fromConfigs = activeId === "configs";
+          const fromScheduler = activeId === "scheduler";
+          if (
+            fromScheduler &&
+            tab !== "scheduler" &&
+            window.__ppgScheduleIsDirty &&
+            window.__ppgScheduleIsDirty()
+          ) {
+            if (!window.confirm("Discard unsaved schedule changes and leave this tab?")) return;
+            if (window.__ppgScheduleRevert) window.__ppgScheduleRevert();
+            if (window.__ppgScheduleMarkClean) window.__ppgScheduleMarkClean();
+          }
           if (
             fromJson &&
             tab !== "json" &&
@@ -3131,6 +3335,11 @@
             (!window.__ppgEnvIsDirty || !window.__ppgEnvIsDirty())
           ) {
             if (window.__ppgLoadEnvConfigs) window.__ppgLoadEnvConfigs();
+          }
+          if (tab === "scheduler" && window.__ppgLoadSchedule) {
+            window.__ppgLoadSchedule();
+          } else if (fromScheduler && window.__ppgSchedulerTabHidden) {
+            window.__ppgSchedulerTabHidden();
           }
           if (tab === "playlists") loadPlaylists();
           if (tab === "stats") {
@@ -4942,6 +5151,7 @@
       void syncLastRunsFromServerStats();
     })();
   </script>
+  <script src="{{ url_for('static', filename='scheduler.js') }}"></script>
   <script src="{{ url_for('static', filename='env_editor.js') }}"></script>
   <script src="{{ url_for('static', filename='group_editor.js') }}"></script>
 </body>

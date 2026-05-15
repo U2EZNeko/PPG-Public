@@ -1,0 +1,42 @@
+{
+    "version": 1,
+    "jobs": [
+        {
+            "id": "daily-morning",
+            "script": "daily",
+            "enabled": true,
+            "schedule": {
+                "type": "daily",
+                "at": "03:00"
+            }
+        },
+        {
+            "id": "moods-nightly",
+            "script": "moods",
+            "enabled": true,
+            "schedule": {
+                "type": "hourly",
+                "at_minute": 0
+            }
+        },
+        {
+            "id": "weekly-sunday",
+            "script": "weekly",
+            "enabled": false,
+            "schedule": {
+                "type": "weekly",
+                "weekday": "sun",
+                "at": "04:00"
+            }
+        },
+        {
+            "id": "genres-disabled",
+            "script": "genres",
+            "enabled": false,
+            "schedule": {
+                "type": "daily",
+                "at": "02:00"
+            }
+        }
+    ]
+}

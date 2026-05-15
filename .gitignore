@@ -2,6 +2,9 @@
 .venv/
 *.bat
 log.txt
+ppg_scheduler.log
+ppg_schedule.json
+webui/data/scheduler_runs/
 .ppg_run_state.json
 .ppg_run_state.json.tmp
 webui/.live/

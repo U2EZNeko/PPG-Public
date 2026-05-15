@@ -1009,6 +1009,21 @@ JSON_GROUP_LABELS: dict[str, str] = {
     "named_genre_mix_playlists": 'PPG-Genres — one "Name Mix" playlist per entry',
 }
 
+SCHEDULE_UI_SCRIPT_IDS = ("daily", "weekly", "moods", "genres")
+
+SCHEDULE_SCRIPT_LABELS: dict[str, str] = {
+    "daily": "PPG-Daily.py",
+    "weekly": "PPG-Weekly.py",
+    "moods": "PPG-Moods.py",
+    "genres": "PPG-Genres.py",
+    "liked_artists": "PPG-LikedArtists.py",
+    "liked_artists_collection": "PPG-LikedArtistsCollection.py",
+    "fetch_liked": "fetch-liked-artists.py",
+}
+
+SCHEDULER_STATE_PATH = REPO_ROOT / "webui" / "data" / "ppg_scheduler_state.json"
+SCHEDULER_RUN_LOG_DIR = REPO_ROOT / "webui" / "data" / "scheduler_runs"
+
 _PPG_TITLE_DAILY = re.compile(r"^Daily Playlist \d+$")
 _PPG_TITLE_WEEKLY = re.compile(r"^Weekly Playlist \d+$")
 _PPG_TITLE_ARTIST_MIX = re.compile(r"^Artist Mix \(\d+\)$")
@@ -2197,6 +2212,241 @@ def api_json_group_put(file_id: str):
                 pass
         return jsonify({"error": str(e)}), 500
     return jsonify({"ok": True})
+
+
+def _schedule_state_dict() -> dict[str, object]:
+    if not SCHEDULER_STATE_PATH.is_file():
+        return {}
+    try:
+        obj = json.loads(SCHEDULER_STATE_PATH.read_text(encoding="utf-8"))
+        return obj if isinstance(obj, dict) else {}
+    except (OSError, json.JSONDecodeError, TypeError):
+        return {}
+
+
+def _sanitize_schedule_job_id(job_id: str) -> str | None:
+    s = (job_id or "").strip()
+    if not s or len(s) > 128:
+        return None
+    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in s)
+    return safe or None
+
+
+def _schedule_lock_path(job_id: str) -> Path:
+    safe = _sanitize_schedule_job_id(job_id) or "_"
+    return SCHEDULER_STATE_PATH.parent / f"ppg_schedule_lock_{safe}.lock"
+
+
+def _schedule_run_log_path(job_id: str) -> Path:
+    safe = _sanitize_schedule_job_id(job_id) or "_"
+    return SCHEDULER_RUN_LOG_DIR / f"{safe}.log"
+
+
+def _job_has_run_log(job_id: str) -> bool:
+    path = _schedule_run_log_path(job_id)
+    try:
+        return path.is_file() and path.stat().st_size > 0
+    except OSError:
+        return False
+
+
+def _parse_scheduler_state_ts(val: object) -> datetime | None:
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        if "T" in s:
+            return datetime.fromisoformat(s)
+        return datetime.strptime(s[:19], "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return None
+
+
+def _job_scheduler_running(job_id: str, row_dict: dict) -> bool:
+    """True only while the scheduler holds the job lock or last_started > last_finished."""
+    if _schedule_lock_path(job_id).is_file():
+        return True
+    started = _parse_scheduler_state_ts(row_dict.get("last_started"))
+    finished = _parse_scheduler_state_ts(row_dict.get("last_finished"))
+    if started and not finished:
+        return True
+    if started and finished:
+        return started > finished
+    return False
+
+
+def _tail_text_file(path: Path, *, max_lines: int = 120) -> list[str]:
+    if not path.is_file():
+        return []
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    lines = text.splitlines()
+    if len(lines) > max_lines:
+        lines = lines[-max_lines:]
+    return lines
+
+
+def _schedule_scripts_meta() -> list[dict[str, str]]:
+    return [
+        {
+            "id": sid,
+            "label": SCHEDULE_SCRIPT_LABELS.get(sid, sid),
+        }
+        for sid in SCHEDULE_UI_SCRIPT_IDS
+    ]
+
+
+def _schedule_file_path() -> Path:
+    from module.ppg_schedule import default_schedule_path
+
+    return default_schedule_path()
+
+
+def _schedule_get_payload() -> dict[str, object]:
+    from module.ppg_schedule import job_is_due, job_next_run, parse_schedule_document
+
+    path = _schedule_file_path()
+    state_all = _schedule_state_dict()
+    scripts = _schedule_scripts_meta()
+    if not path.is_file():
+        return {
+            "exists": False,
+            "file": path.name,
+            "version": 1,
+            "jobs": [],
+            "job_status": [],
+            "scripts": scripts,
+        }
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError) as e:
+        return {"ok": False, "error": str(e), "scripts": scripts}
+    try:
+        jobs, meta = parse_schedule_document(raw)
+    except ValueError as e:
+        return {
+            "exists": True,
+            "file": path.name,
+            "version": raw.get("version", 1) if isinstance(raw, dict) else 1,
+            "jobs": raw.get("jobs", []) if isinstance(raw, dict) else [],
+            "job_status": [],
+            "scripts": scripts,
+            "error": str(e),
+        }
+    job_status: list[dict[str, object]] = []
+    for job in jobs:
+        row = state_all.get(job.id)
+        row_dict = row if isinstance(row, dict) else {}
+        nxt = job_next_run(job, row_dict)
+        running = _job_scheduler_running(job.id, row_dict)
+        has_log = _job_has_run_log(job.id)
+        job_status.append(
+            {
+                "id": job.id,
+                "script": job.script,
+                "enabled": job.enabled,
+                "schedule": job.schedule,
+                "next_run": nxt.strftime("%Y-%m-%d %H:%M:%S") if nxt else None,
+                "due_now": job_is_due(job, row_dict),
+                "running": running,
+                "has_log": has_log,
+                "last_started": row_dict.get("last_started"),
+                "last_finished": row_dict.get("last_finished"),
+                "last_exit_code": row_dict.get("last_exit_code"),
+            }
+        )
+    return {
+        "exists": True,
+        "file": path.name,
+        "version": meta.get("version", 1),
+        "jobs": raw.get("jobs", []) if isinstance(raw, dict) else [],
+        "job_status": job_status,
+        "scripts": scripts,
+    }
+
+
+@app.route("/api/scheduler/status", methods=["GET"])
+def api_scheduler_status():
+    """Whether pvpg-scheduler systemd unit and/or ppg_scheduler.py process is running."""
+    from module.ppg_scheduler_status import probe_scheduler_status
+
+    return jsonify(probe_scheduler_status())
+
+
+@app.route("/api/schedule", methods=["GET"])
+def api_schedule_get():
+    """Read ppg_schedule.json plus per-job next/last run from the scheduler state file."""
+    payload = _schedule_get_payload()
+    if payload.get("error") and not payload.get("exists"):
+        return jsonify(payload), 500
+    return jsonify(payload)
+
+
+@app.route("/api/schedule/run-log/<job_id>", methods=["GET"])
+def api_schedule_run_log(job_id: str):
+    """Tail stdout/stderr mirrored by ppg_scheduler (webui/data/scheduler_runs/<job_id>.log)."""
+    safe = _sanitize_schedule_job_id(job_id)
+    if not safe:
+        return jsonify({"error": "Invalid job id"}), 400
+    try:
+        tail_n = int(request.args.get("tail", 120))
+    except (TypeError, ValueError):
+        tail_n = 120
+    tail_n = max(10, min(500, tail_n))
+    path = _schedule_run_log_path(job_id)
+    row = _schedule_state_dict().get(job_id)
+    row_dict = row if isinstance(row, dict) else {}
+    return jsonify(
+        {
+            "job_id": job_id,
+            "running": _job_scheduler_running(job_id, row_dict),
+            "log_path": str(path.relative_to(REPO_ROOT)).replace("\\", "/"),
+            "exists": path.is_file(),
+            "lines": _tail_text_file(path, max_lines=tail_n),
+        }
+    )
+
+
+@app.route("/api/schedule", methods=["PUT"])
+def api_schedule_put():
+    """Save ppg_schedule.json (validated)."""
+    from module.ppg_schedule import parse_schedule_document
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Body must be a JSON object"}), 400
+    jobs = data.get("jobs")
+    if not isinstance(jobs, list):
+        return jsonify({"error": "Missing jobs array"}), 400
+    doc = {
+        "version": data.get("version", 1),
+        "jobs": jobs,
+    }
+    try:
+        parse_schedule_document(doc)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    path = _schedule_file_path()
+    text = json.dumps(doc, ensure_ascii=False, indent=4) + "\n"
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except OSError as e:
+        if tmp.is_file():
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+        return jsonify({"error": str(e)}), 500
+    return jsonify({"ok": True, **_schedule_get_payload()})
+
+
 
 
 @app.route("/api/dotenv", methods=["GET"])

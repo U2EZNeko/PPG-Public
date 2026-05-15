@@ -1,0 +1,23 @@
+[Unit]
+Description=PPG script scheduler (ppg_scheduler.py)
+Documentation=https://github.com/U2EZNeko/PPG/blob/main/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Scripts/PPG
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONIOENCODING=utf-8
+Environment=PYTHONPATH=%h/Scripts/PPG
+EnvironmentFile=-%h/Scripts/PPG/.env
+# Child scripts inherit stdout/stderr → journalctl (foreground, not detached).
+StandardOutput=journal
+StandardError=journal
+ExecStart=%h/Scripts/PPG/.venv/bin/python %h/Scripts/PPG/ppg_scheduler.py
+Restart=on-failure
+RestartSec=30
+TimeoutStopSec=120
+
+[Install]
+WantedBy=default.target
