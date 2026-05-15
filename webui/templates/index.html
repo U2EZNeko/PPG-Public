@@ -946,7 +946,7 @@
       background: rgba(0, 0, 0, 0.55);
     }
     dialog#ui-settings-dialog.ppg-dialog {
-      width: min(22rem, calc(100vw - 1.5rem));
+      width: min(26rem, calc(100vw - 1.5rem));
     }
     .ui-scale-hint {
       margin: 0;
@@ -1007,7 +1007,7 @@
       font-size: 0.78rem;
       color: var(--muted);
     }
-    #ui-theme-oled {
+    .ui-settings-toggle {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
@@ -1018,8 +1018,12 @@
       cursor: pointer;
       font-family: var(--font);
       white-space: nowrap;
+      flex-shrink: 0;
     }
-    #ui-theme-oled[aria-pressed="true"] {
+    .ui-settings-toggle:hover {
+      border-color: var(--muted);
+    }
+    .ui-settings-toggle[aria-pressed="true"] {
       background: var(--accent);
       color: var(--on-accent);
       border-color: transparent;
@@ -1067,28 +1071,21 @@
       font-weight: 600;
       color: var(--text);
     }
-    .ui-telegram-field {
-      margin: 0.9rem 0 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
+    .env-row.env-row-toggle {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
     }
-    .ui-telegram-field label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .ui-telegram-row {
+    .env-row.env-row-toggle .env-toggle-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 0.65rem;
     }
-    .ui-telegram-hint {
+    .env-row.env-row-toggle .env-toggle-hint {
       margin: 0;
       font-size: 0.78rem;
-      color: var(--muted);
       line-height: 1.45;
+<<<<<<< Updated upstream
     }
     .ui-options-section-heading {
       font-size: 0.72rem;
@@ -1117,6 +1114,11 @@
       background: var(--accent);
       color: var(--on-accent);
       border-color: transparent;
+=======
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+>>>>>>> Stashed changes
     }
     .ui-telegram-toggle-btn:disabled {
       opacity: 0.45;
@@ -2474,7 +2476,7 @@
         <label for="ui-theme-oled">Theme mode</label>
         <div class="ui-theme-row">
           <p class="ui-theme-hint">Enable true black for OLED screens (dark mode only).</p>
-          <button type="button" id="ui-theme-oled" aria-pressed="false">OLED black: Off</button>
+          <button type="button" id="ui-theme-oled" class="ui-settings-toggle" aria-pressed="false">OLED black: Off</button>
         </div>
       </div>
       <div class="ui-accent-field">
@@ -2484,6 +2486,7 @@
           <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
         </div>
       </div>
+<<<<<<< Updated upstream
       <h3 class="ui-options-section-heading">Telegram</h3>
       <div class="ui-telegram-field">
         <label for="ui-telegram-master-toggle">Web UI notifications</label>
@@ -2495,6 +2498,13 @@
           <button type="button" class="ui-telegram-toggle-btn" id="ui-telegram-master-toggle" aria-pressed="true">
             On
           </button>
+=======
+      <div class="ui-theme-field">
+        <label for="ui-telegram-toggle">Telegram notifications</label>
+        <div class="ui-theme-row">
+          <p class="ui-theme-hint">Send a run summary when a script finishes (web UI runs). Cron/CLI use <code>TELEGRAM_NOTIFICATIONS</code> in Configs.</p>
+          <button type="button" id="ui-telegram-toggle" class="ui-settings-toggle" aria-pressed="true">Telegram notifications: On</button>
+>>>>>>> Stashed changes
         </div>
       </div>
       <div class="ui-telegram-field ui-telegram-nested">
@@ -2852,6 +2862,37 @@
         if (uiScaleSlider) uiScaleSlider.value = String(Math.round(z * 100));
         if (uiScaleValue) uiScaleValue.textContent = Math.round(z * 100) + "%";
       }
+<<<<<<< Updated upstream
+=======
+      function readTelegramNotificationsEnabled() {
+        try {
+          const raw = (localStorage.getItem(UI_TELEGRAM_KEY) || "").trim().toLowerCase();
+          if (!raw) return true;
+          return !(raw === "false" || raw === "0" || raw === "off" || raw === "no");
+        } catch (e) {
+          return true;
+        }
+      }
+      function setTelegramNotificationsEnabled(on, persist) {
+        const enabled = !!on;
+        if (uiTelegramToggleBtn) {
+          uiTelegramToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+          uiTelegramToggleBtn.textContent = enabled
+            ? "Telegram notifications: On"
+            : "Telegram notifications: Off";
+          uiTelegramToggleBtn.title = enabled
+            ? "Disable Telegram notifications for web UI runs"
+            : "Enable Telegram notifications for web UI runs";
+        }
+        if (persist !== false) {
+          try {
+            localStorage.setItem(UI_TELEGRAM_KEY, enabled ? "true" : "false");
+          } catch (e) {}
+        }
+      }
+      window.__ppgReadTelegramNotificationsEnabled = readTelegramNotificationsEnabled;
+      window.__ppgSetTelegramNotificationsEnabled = setTelegramNotificationsEnabled;
+>>>>>>> Stashed changes
       function initUiScaleControls() {
         if (!uiScaleSlider || !uiSettingsDialog) return;
         setUiZoom(readUiZoom(), false);

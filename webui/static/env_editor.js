@@ -8,6 +8,35 @@
   let _baselineText = "";
   let envViewMode = "form";
 
+  /** Keys rendered as On/Off toggles (same chrome as Display settings). */
+  const ENV_BOOL_KEYS = {
+    TELEGRAM_NOTIFICATIONS: {
+      name: "Telegram notifications",
+      hint: "Cron and CLI runs. Web UI runs use Display → Telegram (per-browser override on each run).",
+    },
+    PPG_PICK_CACHE_ENABLED: {
+      name: "Pick cache",
+      hint: "Avoid identical playlist picks on consecutive runs (not used by Liked Artists Collection).",
+    },
+  };
+
+  function parseEnvBool(value) {
+    const v = String(value || "")
+      .trim()
+      .toLowerCase();
+    if (!v) return false;
+    return !(v === "false" || v === "0" || v === "off" || v === "no");
+  }
+
+  function envBoolToValue(on) {
+    return on ? "true" : "false";
+  }
+
+  function setEnvBoolToggle(btn, displayName, on) {
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.textContent = displayName + ": " + (on ? "On" : "Off");
+  }
+
   const envRaw = document.getElementById("env-raw");
   const envViewFormBtn = document.getElementById("env-view-form");
   const envViewRawBtn = document.getElementById("env-view-raw");
@@ -72,9 +101,18 @@
           return it.line;
         }
         const inp = document.querySelector(
-          '#env-form input[data-env-idx="' + idx + '"]'
+          '#env-form input[data-env-idx="' + idx + '"], #env-form button.env-bool-toggle[data-env-idx="' +
+            idx +
+            '"]'
         );
-        const v = inp ? inp.value : it.value;
+        let v = it.value;
+        if (inp) {
+          if (inp.tagName === "BUTTON") {
+            v = envBoolToValue(inp.getAttribute("aria-pressed") === "true");
+          } else {
+            v = inp.value;
+          }
+        }
         return it.keyIndent + it.key + "=" + v + it.suffix;
       })
       .join("\n");
@@ -144,6 +182,31 @@
       const lab = document.createElement("label");
       lab.htmlFor = "env-inp-" + idx;
       lab.textContent = it.key;
+      const boolMeta = ENV_BOOL_KEYS[it.key];
+      if (boolMeta) {
+        const toggleRow = document.createElement("div");
+        toggleRow.className = "env-toggle-row";
+        const hint = document.createElement("p");
+        hint.className = "env-toggle-hint";
+        hint.textContent = boolMeta.hint;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ui-settings-toggle env-bool-toggle";
+        btn.id = "env-inp-" + idx;
+        btn.setAttribute("data-env-idx", String(idx));
+        setEnvBoolToggle(btn, boolMeta.name, parseEnvBool(it.value));
+        btn.addEventListener("click", function () {
+          const next = btn.getAttribute("aria-pressed") !== "true";
+          setEnvBoolToggle(btn, boolMeta.name, next);
+        });
+        toggleRow.appendChild(hint);
+        toggleRow.appendChild(btn);
+        row.classList.add("env-row-toggle");
+        row.appendChild(lab);
+        row.appendChild(toggleRow);
+        form.appendChild(row);
+        return;
+      }
       const wrap = document.createElement("div");
       wrap.className = "env-input-wrap";
       const input = document.createElement("input");
