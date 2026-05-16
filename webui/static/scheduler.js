@@ -388,6 +388,9 @@
       '<label class="sched-enabled-wrap"><input type="checkbox" class="sched-enabled"' +
       (job.enabled !== false ? " checked" : "") +
       " /> Enabled</label>" +
+      '<button type="button" class="sched-run-now"' +
+      (st.running ? " disabled" : "") +
+      ' title="Run this job now">Run now</button>' +
       '<button type="button" class="sched-remove danger" title="Remove job">Remove</button>' +
       "</div>" +
       '<label>Script <select class="sched-script">' +
@@ -464,12 +467,46 @@
           });
         }
       });
+      card.querySelector(".sched-run-now")?.addEventListener("click", function () {
+        const id = (card.querySelector(".sched-id")?.value || "").trim();
+        if (id) runJobNow(id);
+      });
       card.querySelector(".sched-remove")?.addEventListener("click", function () {
         card.remove();
         syncDocFromForm();
         renderForm();
       });
     });
+  }
+
+  function runJobNow(jobId) {
+    if (isDirty()) {
+      toast("Save the schedule before running a job.", true);
+      return;
+    }
+    const btn = Array.from(jobsEl.querySelectorAll(".schedule-job")).find(function (c) {
+      return c.querySelector(".sched-id")?.value.trim() === jobId;
+    });
+    const runBtn = btn && btn.querySelector(".sched-run-now");
+    if (runBtn) runBtn.disabled = true;
+    return fetch("/api/schedule/run/" + encodeURIComponent(jobId), { method: "POST" })
+      .then(function (r) {
+        return r.json().then(function (data) {
+          if (!r.ok) throw new Error(data.error || r.statusText);
+          return data;
+        });
+      })
+      .then(function () {
+        toast("Started job " + jobId + ".");
+        return loadSchedule();
+      })
+      .then(function () {
+        startRunLogPoll();
+      })
+      .catch(function (e) {
+        toast("Run failed: " + e.message, true);
+        if (runBtn) runBtn.disabled = false;
+      });
   }
 
   function setView(mode) {

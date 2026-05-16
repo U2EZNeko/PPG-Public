@@ -506,6 +506,30 @@
       font-family: var(--mono);
       min-width: 10rem;
     }
+    .schedule-job-head button.sched-run-now,
+    .schedule-job-head button.sched-remove {
+      font-size: 0.8rem;
+      padding: 0.32rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .schedule-job-head button.sched-run-now {
+      margin-left: auto;
+      border-color: var(--accent-dim);
+      color: var(--accent);
+    }
+    .schedule-job-head button.sched-run-now:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--surface);
+      border-color: var(--accent);
+    }
+    .schedule-job-head button.sched-run-now:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
     .sched-enabled-wrap {
       display: flex;
       align-items: center;

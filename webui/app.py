@@ -2398,6 +2398,58 @@ def api_schedule_get():
     return jsonify(payload)
 
 
+def _spawn_scheduler_run_once(job_id: str) -> subprocess.Popen[bytes]:
+    """Start ppg_scheduler.py --once in the background (same locks/state as the daemon)."""
+    scheduler_py = REPO_ROOT / "ppg_scheduler.py"
+    env = os.environ.copy()
+    env.setdefault("PYTHONPATH", str(REPO_ROOT))
+    kwargs: dict = {
+        "cwd": str(REPO_ROOT),
+        "env": env,
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+    }
+    if sys.platform == "win32":
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]
+    else:
+        kwargs["start_new_session"] = True
+    return subprocess.Popen(
+        [sys.executable, str(scheduler_py), "--once", job_id],
+        **kwargs,
+    )
+
+
+@app.route("/api/schedule/run/<job_id>", methods=["POST"])
+def api_schedule_run_now(job_id: str):
+    """Run one scheduled job immediately (ppg_scheduler.py --once)."""
+    from module.ppg_schedule import load_schedule_file
+
+    safe = _sanitize_schedule_job_id(job_id)
+    if not safe:
+        return jsonify({"error": "Invalid job id"}), 400
+    job_id = job_id.strip()
+    path = _schedule_file_path()
+    if not path.is_file():
+        return jsonify({"error": "Schedule file not found — save a schedule first"}), 404
+    try:
+        jobs, _meta = load_schedule_file(path)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+        return jsonify({"error": str(e)}), 400
+    match = [j for j in jobs if j.id == job_id]
+    if not match:
+        return jsonify({"error": f"Unknown job id {job_id!r}"}), 404
+    row = _schedule_state_dict().get(job_id)
+    row_dict = row if isinstance(row, dict) else {}
+    if _job_scheduler_running(job_id, row_dict):
+        return jsonify({"error": "Job is already running"}), 409
+    try:
+        proc = _spawn_scheduler_run_once(job_id)
+    except OSError as e:
+        return jsonify({"error": f"Could not start scheduler: {e}"}), 500
+    return jsonify({"ok": True, "job_id": job_id, "pid": proc.pid})
+
+
 @app.route("/api/schedule/run-log/<job_id>", methods=["GET"])
 def api_schedule_run_log(job_id: str):
     """Tail stdout/stderr mirrored by ppg_scheduler (webui/data/scheduler_runs/<job_id>.log)."""
