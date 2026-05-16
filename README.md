@@ -13,7 +13,7 @@
 
 These scripts are designed for rather big Plex instances, it will work with smaller databases but will obviously be less random.
 
-I run the scripts with cronjobs to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
+I run the scripts on a schedule (cron, Windows Task Scheduler, or the built-in **`ppg_scheduler.py`** daemon) to generate playlists for me. My Plex has over 300k tracks on it, your experience may vary.
 
 I'm more than happy to extend the scripts myself and through your Pull Requests. 
 
@@ -29,6 +29,7 @@ The .json files can easily be extended, you can find a list of genres and moods 
 - [Web UI](#web-ui)
   - [Mobile-compatible UI](#mobile-compatible-ui)
   - [Screenshots](#web-ui-screenshots)
+- [Scheduler](#scheduler)
 - [Telegram notifications](#telegram-notifications)
 - [Track filters (regex)](#track-filters-regex)
 - [Cronjob Examples](#cronjob-examples)
@@ -60,7 +61,7 @@ The .json files can easily be extended, you can find a list of genres and moods 
   3. Test run the script once, check your Playlists.
   4. Optional: Set Playlist posters manually, there's no way to do it through API.
      I've included a few obviously self-drawn examples. ;)
-  5. Create cronjobs/Windows Scheduled Tasks (Make sure to use full paths in the config and your cronjob)
+  5. **Automate runs:** use [cron / Task Scheduler](#cronjob-examples), or set up the [built-in scheduler](#scheduler) (`ppg_schedule.json` + `ppg_scheduler.py`). Use full paths in cron entries and in `.env` log paths.
   6. **Optional — Web UI:** install dependencies (`flask` is in `requirements.txt`), then run from the repo root:
      ```bash
      python webui/app.py
@@ -81,6 +82,7 @@ The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generat
 | **Configs** | View and edit environment variables (backed by project `.env`). |
 | **Playlists** | List Plex music playlists, filter, **multi-select**, delete with an in-page confirmation dialog (not `window.confirm`), and trigger **regenerate** for PPG-managed titles where supported. |
 | **Statistics** | Aggregates from `log.txt`: slowest successful builds, failed playlists, runs per script, recent runs, and **Playlists needing attention** (see below). |
+| **Scheduler** | Edit `ppg_schedule.json`, see whether the scheduler daemon is running, **Run now**, and tail per-job logs. See [Scheduler](#scheduler). |
 
 ### Runs, reconnects, and statistics
 
@@ -108,6 +110,7 @@ Use a normal mobile browser (or responsive mode in devtools) for the best match;
 - **`PPG_MIN_SONGS_REQUIRED_PERCENT`** — optional **global** minimum pool size as a fraction of `SONGS_PER_PLAYLIST` for all generators; when set, you can rely on this instead of each script’s own min-percent variable.
 - **`PPG_CHRONIC_FAILURE_THRESHOLD`** — consecutive failures before a playlist is flagged for review (see above).
 - **`PPG_WEB_HOST` / `PPG_WEB_PORT`** — Web UI bind address.
+- **`PPG_SCHEDULE_*` / `PPG_SCHEDULER_*`** — see [Scheduler](#scheduler).
 - **`TELEGRAM_*`** — see [Telegram notifications](#telegram-notifications).
 - **`SKIP_SONG_TITLE_REGEX` / `SKIP_ALBUM_TITLE_REGEX`** — see [Track filters (regex)](#track-filters-regex).
 
@@ -133,6 +136,126 @@ Example markdown once files exist:
 ![PPG Web UI — Scripts](docs/screenshots/webui-scripts.png)
 ![PPG Web UI — Playlists](docs/screenshots/webui-playlists.png)
 ```
+
+## Scheduler
+
+**`ppg_scheduler.py`** is an optional long-lived process that runs the same generator scripts as the CLI/Web UI on a timetable defined in **`ppg_schedule.json`**. It is a convenient alternative to wiring each script into **cron** or **Windows Task Scheduler** yourself: one config file, per-job locks so a slow run does not overlap, and a **Scheduler** tab in the Web UI to edit the file and trigger ad-hoc runs.
+
+### Quick start
+
+1. Copy the example schedule and edit jobs (paths are relative to the repo root unless you override the file location):
+   ```bash
+   cp example.ppg_schedule.json ppg_schedule.json
+   ```
+2. Run the daemon from the repo (use your venv’s Python):
+   ```bash
+   .venv/bin/python ppg_scheduler.py
+   ```
+   Or install the user systemd unit (adjust `WorkingDirectory` and `ExecStart` in `systemd/ppg-scheduler.service` to match your clone):
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cp systemd/ppg-scheduler.service ~/.config/systemd/user/
+   # edit paths inside the unit file, then:
+   systemctl --user daemon-reload
+   systemctl --user enable --now ppg-scheduler.service
+   journalctl --user -u ppg-scheduler.service -f
+   ```
+3. Open the Web UI → **Scheduler** tab to add jobs, save, and use **Run now** for a single job. Saving updates `ppg_schedule.json` on disk; a running daemon **reloads the file within about a second** (no service restart).
+
+`ppg_schedule.json` and scheduler log output under `webui/data/scheduler_runs/` are listed in `.gitignore` so local schedules and run logs are not committed.
+
+### Schedule file (`ppg_schedule.json`)
+
+Top-level shape:
+
+```json
+{
+  "version": 1,
+  "jobs": [
+    {
+      "id": "daily-morning",
+      "script": "daily",
+      "enabled": true,
+      "schedule": { "type": "daily", "at": "03:00" },
+      "env": { "OPTIONAL_KEY": "value" }
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Unique job id (letters, numbers, `-`, `_`). Used for locks, state, and log file names. |
+| `script` | Generator to run (see table below). |
+| `enabled` | `false` skips the job until re-enabled. |
+| `schedule` | When to run (see schedule types). |
+| `env` | Optional per-job environment overrides merged into the child process (same effect as exporting before a manual CLI run). |
+
+**Script ids** (`script` value → command):
+
+| `script` | Runs |
+| --- | --- |
+| `daily` | `PPG-Daily.py` |
+| `weekly` | `PPG-Weekly.py` |
+| `moods` | `PPG-Moods.py` |
+| `genres` | `PPG-Genres.py` |
+| `liked_artists` | `PPG-LikedArtists.py` |
+| `liked_artists_collection` | `PPG-LikedArtistsCollection.py` |
+| `fetch_liked` | `fetch-liked-artists.py` |
+
+**Schedule types** (`schedule.type`):
+
+| Type | Fields | Example |
+| --- | --- | --- |
+| `daily` | `at` — `HH:MM` (24h local time) | `"at": "03:00"` |
+| `weekly` | `weekday` (`mon`…`sun` or `0`–`6`), `at` | `"weekday": "sun", "at": "04:00"` |
+| `hourly` | `at_minute` (0–59) | `"at_minute": 0` |
+| `interval` | `every_minutes` (≥ 1) | `"every_minutes": 90` |
+| `cron` | `expression` — five cron fields | `"expression": "0 3 * * *"` (needs **`croniter`**: `pip install croniter`) |
+
+Optional on **daily** schedules: `first_run_tomorrow: true` — if the daemon starts after today’s `at` time and the job has never run, the first run is pushed to the next day’s slot instead of firing immediately.
+
+### CLI (`ppg_scheduler.py`)
+
+| Command | Purpose |
+| --- | --- |
+| `python ppg_scheduler.py` | Daemon loop: poll schedule, run due jobs. |
+| `python ppg_scheduler.py --list` | Print jobs, next run times, last finish, locks. |
+| `python ppg_scheduler.py --once JOB_ID` | Run one job immediately (same locks/state as the daemon). |
+
+The Web UI **Run now** button calls the API, which starts `ppg_scheduler.py --once <job_id>` in the background.
+
+### State, logs, and statistics
+
+| Path | Purpose |
+| --- | --- |
+| `ppg_schedule.json` | Job definitions (override path with `PPG_SCHEDULE_FILE` in `.env`). |
+| `webui/data/ppg_scheduler_state.json` | Per-job `last_started`, `last_finished`, `last_exit_code` for next-run calculation and UI status. |
+| `webui/data/ppg_schedule_lock_<id>.lock` | Prevents overlapping runs of the same job (stale locks expire after 6 hours). |
+| `ppg_scheduler.log` | Scheduler daemon messages (start/finish/reload). |
+| `webui/data/scheduler_runs/<job_id>.log` | Mirrored stdout/stderr from each scheduled run (tail from the Scheduler tab). |
+
+Finished runs also append to the same **`log.txt`** / **`webui/data/ppg_events.jsonl`** pipeline as manual and Web UI runs, so **Statistics** and Telegram summaries behave the same. Cron/Task Scheduler runs that do **not** go through `ppg_scheduler.py` still work; they simply will not show live output on the Scheduler tab.
+
+### Environment variables (`example.env`)
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `PPG_SCHEDULE_FILE` | `ppg_schedule.json` (repo root) | Path to the schedule JSON. |
+| `PPG_SCHEDULER_POLL_SECONDS` | `30` | How often the daemon checks for due jobs and file changes. |
+| `PPG_SCHEDULER_HEARTBEAT_SECONDS` | `300` | Interval for “still alive” lines in `ppg_scheduler.log`. |
+| `PPG_SCHEDULER_JOB_LOG` | on (`1`) | Mirror each job’s output to `webui/data/scheduler_runs/<id>.log`. Set `0` to disable. |
+
+Telegram and track-filter settings come from `.env` like any other CLI run; per-job `env` in the schedule can override or add keys for that job only.
+
+### Web UI Scheduler tab
+
+- **Daemon status** — whether `ppg-scheduler.service` (systemd user unit) or a `ppg_scheduler.py` process is running.
+- **Form / Raw JSON** — edit jobs, intervals, and cron expressions; **Save** validates then writes `ppg_schedule.json`.
+- **Run now** — triggers `--once` for that job (disabled while the job is already running).
+- **Live log** — expand a job card to tail `scheduler_runs/<id>.log` while it runs.
+
+If you still use **cron** for some scripts and the scheduler for others, that is fine; avoid scheduling the **same** script at the same time in both places.
 
 ## Telegram notifications
 
@@ -304,6 +427,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 ### 23.04.2026:
 
+- **Scheduler:** `ppg_scheduler.py` + `ppg_schedule.json` for timed generator runs; Web UI **Scheduler** tab (edit, save, run now, per-job logs); optional `systemd/ppg-scheduler.service`; state in `webui/data/ppg_scheduler_state.json`.
 - **Web UI:** Scripts, Errors, Group JSON, Configs, Playlists (multi-select delete + confirm dialog, regenerate), Statistics; **full-width**, **mobile-oriented** layout (safe areas, sticky tabs on smaller viewports, horizontal tab strip with overflow only when needed, touch-friendly controls, in-page dialogs, `dvh`-aware panes).
 - **Run recovery:** server-side job buffers, SSE reconnect, `GET /api/job/<id>/info`, and polling so finished runs report exit state even if the tab was closed or the stream dropped.
 - **Chronic failures:** `webui/data/playlist_chronic_failures.json`, Statistics section **Playlists needing attention**, `PPG_CHRONIC_FAILURE_THRESHOLD`.
@@ -371,7 +495,7 @@ Make sure to remove the "/user/bin/xterm -hold -e" if you do not want your termi
 
 - I've created this script using a database of 300k+ songs. This left me with over 4000 unique genres and 300 moods which should cover quite a broad spectrum of songs.
 
-- If you run the script through cronjobs, use full paths to the jsons and log files!
+- If you run the script through cronjobs or the scheduler, use full paths to the jsons and log files in `.env` and in cron entries!
 
 - If you add genre pools, named genre mixes, or mood_groups, make each top-level key unique (it identifies the pool or the `{name} Mix` playlist).
 
