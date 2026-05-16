@@ -2703,6 +2703,13 @@
           <span id="ui-accent-value" class="ui-accent-value">#6C9EF8</span>
         </div>
       </div>
+      <div class="ui-theme-field">
+        <label for="ui-time-24h">Time format</label>
+        <div class="ui-theme-row">
+          <p class="ui-theme-hint">Scheduler times and run labels in this browser.</p>
+          <button type="button" id="ui-time-24h" class="ui-settings-toggle" aria-pressed="true">24-hour time: On</button>
+        </div>
+      </div>
       <h3 class="ui-options-section-heading">Telegram</h3>
       <div class="ui-telegram-field">
         <label class="ui-telegram-check-label" for="ui-telegram-master-toggle">
@@ -2858,6 +2865,7 @@
       initThemeToggle();
 
       const UI_SCALE_KEY = "ppg_ui_scale";
+      const UI_TIME_24H_KEY = "ppg_time_24h";
       const uiSettingsDialog = document.getElementById("ui-settings-dialog");
       const uiScaleSlider = document.getElementById("ui-scale-slider");
       const uiScaleValue = document.getElementById("ui-scale-value");
@@ -2866,6 +2874,7 @@
       const uiSettingsOpen = document.getElementById("ui-settings-open");
       const uiSettingsDone = document.getElementById("ui-settings-done");
       const uiSettingsReset = document.getElementById("ui-settings-reset");
+      const uiTime24hBtn = document.getElementById("ui-time-24h");
       const uiRebuildEventsBtn = document.getElementById("ui-rebuild-events-btn");
       const uiTelegramMasterCb = document.getElementById("ui-telegram-master-toggle");
       const uiTelegramSuccessCb = document.getElementById("ui-telegram-success-toggle");
@@ -3042,6 +3051,69 @@
           } catch (e) {}
         }
       }
+      function readTime24h() {
+        try {
+          var v = localStorage.getItem(UI_TIME_24H_KEY);
+          if (v === "0" || v === "false") return false;
+          if (v === "1" || v === "true") return true;
+        } catch (e) {}
+        return true;
+      }
+      function persistTime24h(on) {
+        try {
+          localStorage.setItem(UI_TIME_24H_KEY, on ? "1" : "0");
+        } catch (e) {}
+      }
+      function applyTime24hBtn(on) {
+        if (!uiTime24hBtn) return;
+        uiTime24hBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        uiTime24hBtn.textContent = on ? "24-hour time: On" : "24-hour time: Off";
+        uiTime24hBtn.title = on
+          ? "Use 12-hour clock for times"
+          : "Use 24-hour clock for times";
+      }
+      function setTime24h(on, persist) {
+        applyTime24hBtn(!!on);
+        if (persist !== false) persistTime24h(!!on);
+        try {
+          window.dispatchEvent(new CustomEvent("ppg-time-format-change"));
+        } catch (e) {}
+      }
+      window.__ppgUse24hTime = readTime24h;
+      window.__ppgFormatScheduleTime = function (str) {
+        if (!str) return "";
+        var use24 = readTime24h();
+        var t = String(str).indexOf("T") >= 0 ? String(str) : String(str).trim().replace(" ", "T");
+        var d = new Date(t);
+        if (isNaN(d.getTime())) return String(str);
+        if (use24) {
+          var pad = function (n) {
+            return String(n).padStart(2, "0");
+          };
+          var out =
+            d.getFullYear() +
+            "-" +
+            pad(d.getMonth() + 1) +
+            "-" +
+            pad(d.getDate()) +
+            " " +
+            pad(d.getHours()) +
+            ":" +
+            pad(d.getMinutes());
+          if (/:\d{2}:\d{2}/.test(String(str))) out += ":" + pad(d.getSeconds());
+          return out;
+        }
+        var opts = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        };
+        if (/:\d{2}:\d{2}/.test(String(str))) opts.second = "2-digit";
+        return d.toLocaleString(undefined, opts);
+      };
       function readUiZoom() {
         var raw = getComputedStyle(document.documentElement).getPropertyValue("--ui-zoom").trim();
         var n = parseFloat(raw);
@@ -3067,6 +3139,7 @@
         if (!uiScaleSlider || !uiSettingsDialog) return;
         setUiZoom(readUiZoom(), false);
         applyAccentColor(readStoredAccent(), false);
+        applyTime24hBtn(readTime24h());
         telegramPrefs = readTelegramPrefsFromLocalStorage();
         applyTelegramPrefsToUI();
         void fetchTelegramPrefsFromServer();
@@ -3078,10 +3151,17 @@
             applyAccentColor(uiAccentColor.value, true);
           });
         }
+        if (uiTime24hBtn) {
+          uiTime24hBtn.addEventListener("click", function () {
+            setTime24h(!readTime24h(), true);
+            refreshAllLastRunLabels();
+          });
+        }
         if (uiSettingsOpen) {
           uiSettingsOpen.addEventListener("click", function () {
             setUiZoom(readUiZoom(), false);
             applyAccentColor(readStoredAccent(), false);
+            applyTime24hBtn(readTime24h());
             void fetchTelegramPrefsFromServer();
             if (uiSettingsDialog.showModal) uiSettingsDialog.showModal();
           });
@@ -3097,6 +3177,8 @@
             persistDarkVariant("dark");
             persistAndApplyThemeMode("dark");
             applyAccentColor(DEFAULT_ACCENT, true);
+            setTime24h(true, true);
+            refreshAllLastRunLabels();
             void setTelegramPrefsPatch({
               enabled: true,
               notify_run_success: true,
@@ -3182,7 +3264,13 @@
           const d = new Date(iso);
           if (isNaN(d.getTime())) return "";
           const now = new Date();
-          const opts = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+          const opts = {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: !readTime24h(),
+          };
           if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";
           return "Last run " + d.toLocaleString(undefined, opts);
         } catch (e) {
