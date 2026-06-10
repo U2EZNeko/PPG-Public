@@ -71,6 +71,7 @@ The .json files can easily be extended, you can find a list of genres and moods 
 ## Web UI
 
 The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generator scripts you would start from the CLI, watch **live stdout**, edit **genre / mood / pool JSON**, browse and save **`.env`**, manage **Plex playlists** linked to PPG, and inspect **run statistics** from `log.txt` without leaving the browser.
+<img width="2360" height="629" alt="image" src="https://github.com/user-attachments/assets/4945ece3-9d67-4851-8830-6e8115a8b8ab" />
 
 ### Tabs
 
@@ -94,6 +95,7 @@ The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generat
 ### Mobile-compatible UI
 
 The Web UI is built to work on **phones and tablets**, not only desktop:
+<img width="703" height="1088" alt="image" src="https://github.com/user-attachments/assets/f5c5ea6f-6539-4190-a867-55d50a25d5fb" />
 
 - **Viewport:** `viewport-fit=cover` so notched devices respect **safe-area** insets; padding on `.wrap` uses `env(safe-area-inset-*)` so content stays clear of the status bar and home indicator.
 - **Full width:** The main column uses the **whole screen width** (no narrow max-width column), with comfortable side padding that tightens slightly on very small screens.
@@ -119,6 +121,24 @@ Use a normal mobile browser (or responsive mode in devtools) for the best match;
 When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** polling is **not** printed for every request. Other requests are summarized in a **rolling “last 10”** panel in the **lower half** of the terminal (upper half stays as the normal Flask banner). This keeps logs readable while you develop.
 
 ### Web UI screenshots
+
+Group Editor:
+<img width="1461" height="1074" alt="image" src="https://github.com/user-attachments/assets/f645e6b4-278d-49ef-878b-b821bb6819f7" />
+
+
+Playlist Manager:
+<img width="1461" height="830" alt="image" src="https://github.com/user-attachments/assets/dadd940b-f167-466d-b5fc-090fc0d5fdb2" />
+
+Statistics:
+<img width="1461" height="1092" alt="image" src="https://github.com/user-attachments/assets/0f55acef-2c3a-460c-972f-50315f9cb956" />
+
+Website options:
+<img width="418" height="913" alt="image" src="https://github.com/user-attachments/assets/c461cc85-94f8-4ede-9348-95130c02a730" />
+
+
+
+
+
 
 ## Scheduler
 
