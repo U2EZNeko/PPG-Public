@@ -120,23 +120,6 @@ When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** 
 
 ### Web UI screenshots
 
-Drop images under `docs/screenshots/` (create the folder if needed) or paste GitHub **user-attachments** URLs. Suggested filenames:
-
-| Suggested file | What to show |
-| --- | --- |
-| `docs/screenshots/webui-scripts.png` | **Scripts** — grid of generators + live log / progress |
-| `docs/screenshots/webui-playlists.png` | **Playlists** — list, search, selection, delete/regenerate |
-| `docs/screenshots/webui-statistics.png` | **Statistics** — slowest builds, failures, **Playlists needing attention** |
-| `docs/screenshots/webui-json.png` | **Group JSON** editor (optional) |
-| `docs/screenshots/webui-mobile.png` | Narrow viewport / tab strip (optional) |
-
-Example markdown once files exist:
-
-```markdown
-![PPG Web UI — Scripts](docs/screenshots/webui-scripts.png)
-![PPG Web UI — Playlists](docs/screenshots/webui-playlists.png)
-```
-
 ## Scheduler
 
 **`ppg_scheduler.py`** is an optional long-lived process that runs the same generator scripts as the CLI/Web UI on a timetable defined in **`ppg_schedule.json`**. It is a convenient alternative to wiring each script into **cron** or **Windows Task Scheduler** yourself: one config file, per-job locks so a slow run does not overlap, and a **Scheduler** tab in the Web UI to edit the file and trigger ad-hoc runs.
