@@ -95,7 +95,7 @@ The **PPG Web UI** (`webui/app.py`) is a local Flask app to run the same generat
 ### Mobile-compatible UI
 
 The Web UI is built to work on **phones and tablets**, not only desktop:
-<img width="703" height="1088" alt="image" src="https://github.com/user-attachments/assets/f5c5ea6f-6539-4190-a867-55d50a25d5fb" />
+<img width="503" height="788" alt="image" src="https://github.com/user-attachments/assets/f5c5ea6f-6539-4190-a867-55d50a25d5fb" />
 
 - **Viewport:** `viewport-fit=cover` so notched devices respect **safe-area** insets; padding on `.wrap` uses `env(safe-area-inset-*)` so content stays clear of the status bar and home indicator.
 - **Full width:** The main column uses the **whole screen width** (no narrow max-width column), with comfortable side padding that tightens slightly on very small screens.
@@ -133,6 +133,7 @@ Statistics:
 <img width="1461" height="1092" alt="image" src="https://github.com/user-attachments/assets/0f55acef-2c3a-460c-972f-50315f9cb956" />
 
 Website options:
+
 <img width="418" height="913" alt="image" src="https://github.com/user-attachments/assets/c461cc85-94f8-4ede-9348-95130c02a730" />
 
 
