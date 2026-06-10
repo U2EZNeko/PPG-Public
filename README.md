@@ -123,6 +123,7 @@ When you run `webui/app.py` in a terminal, high-frequency **`GET /api/status`** 
 ## Scheduler
 
 **`ppg_scheduler.py`** is an optional long-lived process that runs the same generator scripts as the CLI/Web UI on a timetable defined in **`ppg_schedule.json`**. It is a convenient alternative to wiring each script into **cron** or **Windows Task Scheduler** yourself: one config file, per-job locks so a slow run does not overlap, and a **Scheduler** tab in the Web UI to edit the file and trigger ad-hoc runs.
+<img width="2359" height="714" alt="image" src="https://github.com/user-attachments/assets/caecc8d0-ddf8-4445-bbad-454eacc04e37" />
 
 ### Quick start
 
